@@ -4,25 +4,26 @@
        IMAGEN DE RELLENO para las tarjetas de "Studies & Work".
        Reemplazar poniendo el enlace de la foto real en el panel
        admin -> Posts -> Cover image link.
+       Version clara, a juego con el tema del sitio.
        ============================================================ -->
   <defs>
     <linearGradient id="p1" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#2dd4bf" stop-opacity="0.85"/>
-      <stop offset="100%" stop-color="#4d8fd6" stop-opacity="0.55"/>
+      <stop offset="0%" stop-color="#12a594" stop-opacity="0.30"/>
+      <stop offset="100%" stop-color="#3b7fc4" stop-opacity="0.18"/>
     </linearGradient>
   </defs>
 
-  <rect width="800" height="420" fill="#12283c"/>
-  <rect width="800" height="420" fill="url(#p1)" opacity="0.35"/>
+  <rect width="800" height="420" fill="#eef2f5"/>
+  <rect width="800" height="420" fill="url(#p1)"/>
 
   <!-- Icono de imagen -->
-  <g opacity="0.65" fill="none" stroke="#eaf2f6" stroke-width="8" stroke-linejoin="round">
+  <g opacity="0.55" fill="none" stroke="#0d7a6d" stroke-width="8" stroke-linejoin="round">
     <rect x="290" y="140" width="220" height="150" rx="14"/>
     <circle cx="342" cy="184" r="16"/>
     <path d="M300 262 L368 206 L420 250 L462 224 L500 258"/>
   </g>
 
-  <text x="400" y="336" text-anchor="middle" fill="#eaf2f6" opacity="0.8"
+  <text x="400" y="336" text-anchor="middle" fill="#5b6d7c" opacity="0.9"
         font-family="Arial, Helvetica, sans-serif" font-size="22" letter-spacing="3">
     PLACEHOLDER IMAGE
   </text>

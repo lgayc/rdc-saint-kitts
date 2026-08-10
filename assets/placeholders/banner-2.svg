@@ -4,42 +4,43 @@
        IMAGEN DE RELLENO. Reemplazar con una foto real de la sala
        de MRI o CT (horizontal, ~1600x900).
        Se cambia desde el panel admin -> Banner Photos.
+       Version clara, a juego con el tema del sitio.
        ============================================================ -->
   <defs>
     <radialGradient id="b2" cx="50%" cy="45%" r="75%">
-      <stop offset="0%" stop-color="#16324a"/>
-      <stop offset="100%" stop-color="#0a1420"/>
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#e1e9ef"/>
     </radialGradient>
   </defs>
 
   <rect width="1600" height="900" fill="url(#b2)"/>
 
   <!-- Equipo tipo MRI de frente -->
-  <g opacity="0.55">
-    <rect x="500" y="230" width="600" height="400" rx="70" fill="none" stroke="#4d8fd6" stroke-width="6"/>
-    <circle cx="800" cy="430" r="150" fill="none" stroke="#4d8fd6" stroke-width="6"/>
-    <circle cx="800" cy="430" r="96" fill="none" stroke="#2dd4bf" stroke-width="5"/>
+  <g opacity="0.6">
+    <rect x="500" y="230" width="600" height="400" rx="70" fill="none" stroke="#3b7fc4" stroke-width="6"/>
+    <circle cx="800" cy="430" r="150" fill="none" stroke="#3b7fc4" stroke-width="6"/>
+    <circle cx="800" cy="430" r="96" fill="none" stroke="#12a594" stroke-width="5"/>
   </g>
 
   <!-- Camilla -->
-  <g opacity="0.45">
-    <rect x="640" y="640" width="480" height="26" rx="13" fill="#2dd4bf"/>
-    <rect x="700" y="666" width="26" height="60" rx="8" fill="#9db2c2"/>
-    <rect x="1030" y="666" width="26" height="60" rx="8" fill="#9db2c2"/>
+  <g opacity="0.5">
+    <rect x="640" y="640" width="480" height="26" rx="13" fill="#12a594"/>
+    <rect x="700" y="666" width="26" height="60" rx="8" fill="#5b6d7c"/>
+    <rect x="1030" y="666" width="26" height="60" rx="8" fill="#5b6d7c"/>
   </g>
 
   <!-- Luces de techo -->
-  <g opacity="0.2" stroke="#9db2c2" stroke-width="6" stroke-linecap="round">
+  <g opacity="0.28" stroke="#5b6d7c" stroke-width="6" stroke-linecap="round">
     <line x1="380" y1="120" x2="620" y2="120"/>
     <line x1="980" y1="120" x2="1220" y2="120"/>
   </g>
 
   <!-- Etiqueta -->
-  <text x="800" y="790" text-anchor="middle" fill="#9db2c2" opacity="0.75"
+  <text x="800" y="790" text-anchor="middle" fill="#5b6d7c" opacity="0.85"
         font-family="Arial, Helvetica, sans-serif" font-size="34" letter-spacing="4">
     PLACEHOLDER - REPLACE WITH REAL PHOTO
   </text>
-  <text x="800" y="838" text-anchor="middle" fill="#2dd4bf" opacity="0.6"
+  <text x="800" y="838" text-anchor="middle" fill="#0d7a6d" opacity="0.75"
         font-family="Arial, Helvetica, sans-serif" font-size="26" letter-spacing="2">
     Imaging suite / Equipment room
   </text>
