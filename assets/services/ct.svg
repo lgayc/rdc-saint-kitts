@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="CT Scan">
+  <!-- ============================================================
+       CT SCAN
+       Vista frontal del equipo: el anillo (gantry) con su tunel,
+       la camilla entrando, y las marcas del giro del tubo.
+       ============================================================ -->
+  <rect width="400" height="300" fill="#eef2f5"/>
+
+  <!-- Cuerpo del gantry -->
+  <rect x="96" y="46" width="208" height="180" rx="26" fill="#0a1420" opacity="0.07"/>
+  <rect x="96" y="46" width="208" height="180" rx="26" fill="none" stroke="#0a1420" stroke-width="4"/>
+
+  <!-- Anillo exterior -->
+  <circle cx="200" cy="136" r="74" fill="none" stroke="#0a1420" stroke-width="4"/>
+
+  <!-- Tunel interior -->
+  <circle cx="200" cy="136" r="44" fill="#eef2f5" stroke="#0a1420" stroke-width="4"/>
+
+  <!-- Recorrido del tubo de rayos X -->
+  <g stroke="#2dd4bf" stroke-width="5" stroke-linecap="round" fill="none">
+    <path d="M200 76 A 60 60 0 0 1 252 106"/>
+  </g>
+  <circle cx="200" cy="76" r="9" fill="#2dd4bf"/>
+
+  <!-- Marcas de rotacion -->
+  <g stroke="#4d8fd6" stroke-width="3" stroke-linecap="round" opacity="0.55">
+    <line x1="200" y1="52" x2="200" y2="62"/>
+    <line x1="284" y1="136" x2="274" y2="136"/>
+    <line x1="200" y1="220" x2="200" y2="210"/>
+    <line x1="116" y1="136" x2="126" y2="136"/>
+  </g>
+
+  <!-- Camilla -->
+  <rect x="128" y="232" width="200" height="14" rx="7" fill="#0a1420"/>
+  <rect x="150" y="246" width="16" height="26" rx="5" fill="#0a1420" opacity="0.5"/>
+  <rect x="292" y="246" width="16" height="26" rx="5" fill="#0a1420" opacity="0.5"/>
+  <!-- Colchoneta -->
+  <rect x="140" y="222" width="150" height="12" rx="6" fill="#4d8fd6" opacity="0.45"/>
+</svg>
