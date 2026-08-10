@@ -102,14 +102,21 @@ function populateContent() {
   }
 
   // --- Tarjetas de servicios ----------------------------------
+  // Cada tarjeta: ilustracion arriba, con el iconito encima, y
+  // el texto abajo. La ilustracion sale de modalities[].image.
   const track = document.getElementById("modalitiesTrack");
   if (track) {
     track.innerHTML = cfg.modalities
       .map(m => `
         <article class="modality-card reveal" role="listitem">
-          <div class="icon">${ICONS[m.icon] || ""}</div>
-          <h3>${m.name}</h3>
-          <p>${m.description}</p>
+          <div class="modality-media">
+            ${m.image ? `<img src="${m.image}" alt="${m.name}" loading="lazy">` : ""}
+            <span class="modality-badge">${ICONS[m.icon] || ""}</span>
+          </div>
+          <div class="modality-body">
+            <h3>${m.name}</h3>
+            <p>${m.description}</p>
+          </div>
         </article>
       `)
       .join("");
