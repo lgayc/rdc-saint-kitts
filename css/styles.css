@@ -61,7 +61,7 @@
 html { scroll-behavior: smooth; }
 
 body {
-  background: var(--bg-deep);
+  background: var(--bg-panel--light);
   color: var(--ink);
   font-family: var(--font-body);
   line-height: 1.6;
