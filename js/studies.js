@@ -1,36 +1,40 @@
 /**
  * ============================================================
- *  STUDIES.JS — "Studies & Work" feed
+ *  STUDIES.JS - Seccion "Studies & Work"
  * ============================================================
- * Goal: let non-technical staff post updates without touching
- * any code. The trick — the site's "editor" is just a Google
- * Sheet (a spreadsheet). Staff add a new post by adding a new
- * row. No login to this codebase required.
+ *  De donde saca las publicaciones, en orden de prioridad:
  *
- * SHEET COLUMNS (first row = headers, exactly these names):
- *   title | date | excerpt | color | link
+ *    1. Del panel admin (si el backend esta conectado).
+ *       Es la forma recomendada: el personal las agrega desde
+ *       admin.html sin tocar codigo.
  *
- *   - title   : post headline
- *   - date    : e.g. 2026-08-07
- *   - excerpt : 1-2 sentence summary
- *   - color   : hex color for the card accent, e.g. #2dd4bf (optional)
- *   - link    : URL to the full post/PDF/photo (optional)
+ *    2. De un Google Sheet publicado como CSV, si se configuro
+ *       SITE_CONFIG.studies.sheetCsvUrl. Alternativa por si se
+ *       prefiere trabajar en una hoja de calculo.
  *
- * SETUP (one-time, see README.md "Studies & posts" for details):
- *   1. Duplicate the provided Google Sheet template.
- *   2. File -> Share -> Publish to web -> select "Comma-separated
- *      values (.csv)" -> Publish -> copy the link.
- *   3. Paste that link into SITE_CONFIG.studies.sheetCsvUrl
- *      (js/config.js).
- *
- * Until that's set up, the site shows the sample posts bundled
- * in data/sample-studies.json so the section never looks empty.
+ *    3. De data/sample-studies.json, como respaldo, para que la
+ *       seccion nunca se vea vacia.
  * ============================================================
  */
 
-document.addEventListener("DOMContentLoaded", loadStudies);
+/**
+ * main.js dispara "rdc:content-loaded" SIEMPRE (haya backend o no,
+ * funcione o falle). Aqui solo esperamos ese aviso y decidimos:
+ * si el admin tiene publicaciones las usamos, si no, respaldo.
+ */
+document.addEventListener("rdc:content-loaded", () => {
+  const fromAdmin = window.__RDC_STUDIES__;
 
-async function loadStudies() {
+  if (fromAdmin && fromAdmin.length) {
+    renderStudies(document.getElementById("studiesGrid"), fromAdmin);
+  } else {
+    loadFallbackStudies();
+  }
+});
+
+
+/** Cadena de respaldo: Google Sheet -> archivo local */
+async function loadFallbackStudies() {
   const grid = document.getElementById("studiesGrid");
   if (!grid) return;
 
@@ -43,11 +47,9 @@ async function loadStudies() {
 
     renderStudies(grid, posts);
   } catch (err) {
-    console.error("Could not load studies feed:", err);
-    // Fall back to local sample data so the section still shows something
+    console.warn("No se pudieron cargar las publicaciones:", err);
     try {
-      const posts = await fetchFromLocalFile();
-      renderStudies(grid, posts);
+      renderStudies(grid, await fetchFromLocalFile());
     } catch {
       grid.innerHTML = `<p class="studies-empty">Check back soon for updates from our team.</p>`;
     }
@@ -56,23 +58,24 @@ async function loadStudies() {
 
 async function fetchFromLocalFile() {
   const res = await fetch("data/sample-studies.json");
-  if (!res.ok) throw new Error("Sample studies file not found");
+  if (!res.ok) throw new Error("No se encontro el archivo de respaldo");
   return res.json();
 }
 
 async function fetchFromGoogleSheet(csvUrl) {
   const res = await fetch(csvUrl);
-  if (!res.ok) throw new Error(`Sheet fetch failed with ${res.status}`);
-  const csvText = await res.text();
-  return parseCsvToPosts(csvText);
+  if (!res.ok) throw new Error(`La hoja respondio ${res.status}`);
+  return parseCsvToPosts(await res.text());
 }
 
-/**
- * Minimal CSV parser (handles quoted fields containing commas).
- * Google Sheets' "publish to web as CSV" output is well-formed,
- * so this stays intentionally small rather than pulling in a
- * full CSV-parsing library for one use case.
- */
+
+/* ----------------------------------------------------------------
+   LECTOR DE CSV
+   Pequeno a proposito: la salida de "publicar en la web" de Google
+   Sheets es predecible, no hace falta una libreria completa.
+   Igual maneja comas dentro de comillas.
+   ---------------------------------------------------------------- */
+
 function parseCsvToPosts(csvText) {
   const rows = csvText.trim().split(/\r?\n/).map(parseCsvLine);
   const headers = rows[0].map(h => h.trim().toLowerCase());
@@ -84,8 +87,7 @@ function parseCsvToPosts(csvText) {
       headers.forEach((header, i) => { post[header] = (row[i] || "").trim(); });
       return post;
     })
-    // Newest first
-    .sort((a, b) => new Date(b.date) - new Date(a.date));
+    .sort((a, b) => new Date(b.date) - new Date(a.date)); // mas nuevas primero
 }
 
 function parseCsvLine(line) {
@@ -108,21 +110,48 @@ function parseCsvLine(line) {
   return cells;
 }
 
+
+/* ----------------------------------------------------------------
+   DIBUJAR LAS TARJETAS
+   ---------------------------------------------------------------- */
+
 function renderStudies(grid, posts) {
+  if (!grid) return;
+
   if (!posts || !posts.length) {
     grid.innerHTML = `<p class="studies-empty">Check back soon for updates from our team.</p>`;
     return;
   }
 
   grid.innerHTML = posts.map(postToCardHtml).join("");
+
+  // Enganchar las tarjetas nuevas a la animacion de aparicion.
+  // Las tarjetas nacen con opacity:0 (clase .reveal), asi que si
+  // por lo que sea no hay observador, hay que mostrarlas a mano.
+  // De lo contrario quedarian invisibles para siempre.
+  const observer = window.__RDC_OBSERVER__;
+  const cards = grid.querySelectorAll(".reveal");
+
+  if (observer) {
+    cards.forEach(el => observer.observe(el));
+  } else {
+    cards.forEach(el => el.classList.add("in-view"));
+  }
 }
 
 function postToCardHtml(post) {
   const color = post.color || "#2dd4bf";
   const dateLabel = formatDate(post.date);
+
+  // Si la publicacion trae imagen se usa como portada;
+  // si no, un degradado con el color elegido.
+  const media = post.image
+    ? `<div class="study-card-media" style="background-image:url('${escapeAttr(post.image)}')"></div>`
+    : `<div class="study-card-media" style="background:linear-gradient(135deg, ${escapeAttr(color)}, transparent)"></div>`;
+
   const card = `
     <article class="study-card reveal">
-      <div class="study-card-media" style="background: linear-gradient(135deg, ${color}, transparent)"></div>
+      ${media}
       <div class="study-card-body">
         <p class="study-card-date">${dateLabel}</p>
         <h3>${escapeHtml(post.title || "Untitled Post")}</h3>
@@ -132,7 +161,7 @@ function postToCardHtml(post) {
   `;
 
   return post.link
-    ? `<a href="${post.link}" target="_blank" rel="noopener" style="display:block">${card}</a>`
+    ? `<a href="${escapeAttr(post.link)}" target="_blank" rel="noopener" class="study-link">${card}</a>`
     : card;
 }
 
@@ -142,8 +171,14 @@ function formatDate(dateStr) {
   return d.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
 }
 
+/** Evita que texto del admin se interprete como HTML */
 function escapeHtml(str) {
   const div = document.createElement("div");
-  div.textContent = str;
+  div.textContent = str == null ? "" : str;
   return div.innerHTML;
+}
+
+/** Igual, pero para valores que van dentro de un atributo */
+function escapeAttr(str) {
+  return String(str == null ? "" : str).replace(/"/g, "&quot;");
 }

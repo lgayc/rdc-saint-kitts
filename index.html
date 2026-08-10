@@ -8,17 +8,20 @@
 
 <!--
   =============================================================
-  FILE MAP (read this if you're new to the project)
+  MAPA DE ARCHIVOS (leer si eres nuevo en el proyecto)
   =============================================================
-  index.html        <- you are here. Page structure/content only.
-  css/styles.css     <- all visual styling + animations.
-  js/config.js        <- EDIT THIS FIRST for text/contact/services.
-  js/icons.js          <- inline SVG icons used around the site.
-  js/main.js            <- navigation + scroll/3D animation logic.
-  js/booking.js          <- appointment form + notification hookup.
-  js/studies.js            <- "Studies & Work" feed logic.
-  data/sample-studies.json  <- fallback content for Studies section.
-  README.md                  <- full setup + editing guide.
+  index.html          <- estas aqui. Solo estructura de la pagina.
+  admin.html           <- panel de administracion (reservas y contenido).
+  css/styles.css        <- estilos y animaciones del sitio publico.
+  css/admin.css          <- estilos del panel admin.
+  js/config.js            <- EDITAR ESTO PRIMERO: textos, contacto, servicios.
+  js/icons.js              <- iconos SVG.
+  js/main.js                <- navegacion, carrusel, animaciones.
+  js/booking.js              <- formulario de reservas y validacion.
+  js/studies.js               <- seccion de publicaciones.
+  js/admin.js                  <- logica del panel admin.
+  backend/Codigo.gs             <- backend (va en Google Apps Script).
+  GUIA-RAPIDA.md                 <- pasos de instalacion, en espanol.
   =============================================================
 -->
 
@@ -26,17 +29,26 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
+<link rel="icon" href="assets/logo.jpg">
 <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 
 <!-- ============================================================
-     NAVIGATION
+     BARRA DE PROMOCION
+     Se muestra sola si el admin escribio un texto de promocion.
+     Si esta vacia, queda oculta.
+     ============================================================ -->
+<div class="promo-bar" id="promoBar" hidden></div>
+
+<!-- ============================================================
+     NAVEGACION
      ============================================================ -->
 <header class="navbar" id="navbar">
   <div class="navbar-inner">
     <a href="#hero" class="brand">
-      <span class="brand-mark" aria-hidden="true"></span>
+      <!-- Logo del cliente. Si el archivo falta, se muestra el nombre. -->
+      <img id="brandLogo" class="brand-logo" src="assets/logo.jpg" alt="RDC Saint Kitts">
       <span class="brand-name" id="brandName">RDC Saint Kitts</span>
     </a>
 
@@ -56,15 +68,23 @@
 <main>
 
   <!-- ==========================================================
-       HERO
+       BANNER (hero) con carrusel de imagenes
+       Las imagenes se cargan desde el panel admin. Mientras no
+       haya ninguna, se ve el fondo degradado con los circulos.
        ========================================================== -->
   <section class="section hero" id="hero">
+
+    <!-- Capa 1: fotos rotando -->
+    <div class="hero-slides" id="heroSlides" aria-hidden="true"></div>
+
+    <!-- Capa 2: circulos borrosos con parallax -->
     <div class="hero-layers" aria-hidden="true">
       <div class="hero-layer layer-1"></div>
       <div class="hero-layer layer-2"></div>
       <div class="hero-layer layer-3"></div>
     </div>
 
+    <!-- Capa 3: texto -->
     <div class="hero-content">
       <p class="eyebrow">Diagnostic Imaging · St. Kitts &amp; Nevis</p>
       <h1 id="heroTitle">Advanced Imaging.<br>Compassionate Care.</h1>
@@ -76,6 +96,9 @@
       </div>
     </div>
 
+    <!-- Puntos para cambiar de imagen manualmente -->
+    <div class="hero-dots" id="heroDots"></div>
+
     <div class="scroll-hint" aria-hidden="true">
       <span>Scroll</span>
       <div class="scroll-hint-line"></div>
@@ -83,8 +106,8 @@
   </section>
 
   <!-- ==========================================================
-       MODALITIES — horizontal-scrolling carousel
-       Cards are generated from js/config.js -> SITE_CONFIG.modalities
+       SERVICIOS - carrusel horizontal
+       Las tarjetas se generan desde SITE_CONFIG.modalities
        ========================================================== -->
   <section class="section modalities" id="modalities">
     <div class="section-heading">
@@ -95,13 +118,13 @@
 
     <div class="modalities-pin" id="modalitiesPin">
       <div class="modalities-track" id="modalitiesTrack" role="list">
-        <!-- JS injects one .modality-card per item in SITE_CONFIG.modalities -->
+        <!-- generado por js/main.js -->
       </div>
     </div>
   </section>
 
   <!-- ==========================================================
-       QUICK STATS / ABOUT STRIP
+       ESTADISTICAS
        ========================================================== -->
   <section class="section about-strip">
     <div class="about-strip-inner">
@@ -121,7 +144,9 @@
   </section>
 
   <!-- ==========================================================
-       BOOKING — appointment form
+       RESERVA DE CITAS
+       Telefono y correo son OBLIGATORIOS: sin ellos el formulario
+       no se envia (ver js/booking.js).
        ========================================================== -->
   <section class="section booking" id="booking">
     <div class="booking-inner">
@@ -143,41 +168,43 @@
         </div>
       </div>
 
+      <!-- novalidate: apagamos la validacion del navegador para
+           usar la nuestra, que da mensajes mas claros -->
       <form class="booking-form" id="bookingForm" novalidate>
         <div class="form-row">
-          <label for="fullName">Full Name</label>
-          <input type="text" id="fullName" name="fullName" required autocomplete="name">
+          <label for="fullName">Full Name <span class="required">*</span></label>
+          <input type="text" id="fullName" name="fullName" autocomplete="name">
         </div>
 
         <div class="form-row two-col">
           <div>
-            <label for="phone">Phone Number</label>
-            <input type="tel" id="phone" name="phone" required autocomplete="tel">
+            <label for="phone">Phone Number <span class="required">*</span></label>
+            <input type="tel" id="phone" name="phone" autocomplete="tel" placeholder="e.g. 869 765 4321">
           </div>
           <div>
-            <label for="email">Email</label>
-            <input type="email" id="email" name="email" required autocomplete="email">
+            <label for="email">Email <span class="required">*</span></label>
+            <input type="email" id="email" name="email" autocomplete="email" placeholder="you@example.com">
           </div>
         </div>
 
         <div class="form-row">
-          <label for="modality">Imaging Needed</label>
-          <select id="modality" name="modality" required>
-            <option value="" disabled selected>Select a modality</option>
-            <!-- JS fills options from SITE_CONFIG.modalities -->
+          <label for="modality">Imaging Needed <span class="required">*</span></label>
+          <select id="modality" name="modality">
+            <option value="">Select a modality</option>
+            <!-- opciones generadas desde SITE_CONFIG.modalities -->
           </select>
         </div>
 
         <div class="form-row two-col">
           <div>
-            <label for="preferredDate">Preferred Date</label>
-            <input type="date" id="preferredDate" name="preferredDate" required>
+            <label for="preferredDate">Preferred Date <span class="required">*</span></label>
+            <input type="date" id="preferredDate" name="preferredDate">
           </div>
           <div>
-            <label for="preferredTime">Preferred Time</label>
-            <select id="preferredTime" name="preferredTime" required>
-              <option value="" disabled selected>Select a time</option>
-              <!-- JS fills options from SITE_CONFIG.booking.timeSlots -->
+            <label for="preferredTime">Preferred Time <span class="required">*</span></label>
+            <select id="preferredTime" name="preferredTime">
+              <option value="">Select a time</option>
+              <!-- opciones generadas desde SITE_CONFIG.booking.timeSlots -->
             </select>
           </div>
         </div>
@@ -186,6 +213,8 @@
           <label for="notes">Notes (optional)</label>
           <textarea id="notes" name="notes" rows="3" placeholder="Referral info, questions, or anything we should know."></textarea>
         </div>
+
+        <p class="form-note"><span class="required">*</span> Required. We need your phone and email to confirm your appointment.</p>
 
         <button type="submit" class="btn btn-primary btn-block" id="bookingSubmit">
           Request Appointment
@@ -197,9 +226,8 @@
   </section>
 
   <!-- ==========================================================
-       STUDIES & WORK TO SHARE
-       Content is loaded by js/studies.js from a Google Sheet
-       (if configured) or data/sample-studies.json as a fallback.
+       PUBLICACIONES / TRABAJOS
+       Se administran desde admin.html
        ========================================================== -->
   <section class="section studies" id="studies">
     <div class="section-heading">
@@ -209,12 +237,12 @@
     </div>
 
     <div class="studies-grid" id="studiesGrid">
-      <!-- JS injects .study-card items here -->
+      <!-- generado por js/studies.js -->
     </div>
   </section>
 
   <!-- ==========================================================
-       CONTACT / FOOTER
+       CONTACTO
        ========================================================== -->
   <section class="section contact" id="contact">
     <div class="contact-inner">
@@ -229,11 +257,11 @@
         </ul>
 
         <ul class="hours-list" id="hoursList">
-          <!-- JS fills from SITE_CONFIG.contact.hours -->
+          <!-- generado desde SITE_CONFIG.contact.hours -->
         </ul>
 
         <div class="social-links" id="socialLinks">
-          <!-- JS fills from SITE_CONFIG.social -->
+          <!-- generado desde SITE_CONFIG.social -->
         </div>
       </div>
     </div>
@@ -243,9 +271,11 @@
 
 <footer class="site-footer">
   <p>&copy; <span id="year"></span> <span id="footerName">RDC Saint Kitts</span>. All rights reserved.</p>
+  <!-- Acceso discreto al panel. Solo entra quien tenga la contrasena. -->
+  <p><a href="admin.html" class="admin-link">Staff Login</a></p>
 </footer>
 
-<!-- Scripts load in order: config/icons first (data), then behavior -->
+<!-- El orden importa: primero los datos, luego el comportamiento -->
 <script src="js/config.js"></script>
 <script src="js/icons.js"></script>
 <script src="js/main.js"></script>
