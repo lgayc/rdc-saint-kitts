@@ -1,56 +1,78 @@
 /**
  * ============================================================
- *  RDC SAINT KITTS — SITE CONFIGURATION
+ *  RDC SAINT KITTS - SITE CONFIGURATION / CONFIGURACION
  * ============================================================
- * This is the ONLY file most future edits should need.
- * Change clinic info, modalities, socials, and integration
- * IDs here — the rest of the site reads from this object.
+ * Este es el UNICO archivo que necesitas editar para cambios
+ * normales: datos de contacto, servicios, redes sociales y las
+ * conexiones (correo / WhatsApp / panel admin).
  *
- * Everything marked PLACEHOLDER was not confirmed from a real
- * source and should be replaced with the clinic's real info.
+ * Lo marcado como PLACEHOLDER hay que reemplazarlo con los
+ * datos reales de la clinica antes de entregar.
  * ============================================================
  */
 
 const SITE_CONFIG = {
   // ---------------------------------------------------------
-  // 1. CLINIC IDENTITY
+  // 1. IDENTIDAD DE LA CLINICA
   // ---------------------------------------------------------
   clinicName: "RDC Saint Kitts",
-  clinicFullName: "Radiology Diagnostic Center — St. Kitts",
+  clinicFullName: "Radiology Diagnostic Center",
   tagline: "Advanced Imaging. Compassionate Care.",
   subTagline: "Serving St. Kitts & Nevis with modern diagnostic radiology.",
 
+  // Logo del cliente. Para cambiarlo, reemplaza el archivo en
+  // assets/logo.jpg (manteniendo el mismo nombre) o cambia la ruta.
+  logo: "assets/logo.jpg",
+
   // ---------------------------------------------------------
-  // 2. CONTACT INFO
-  // Phone + email below were found via public web search of the
-  // clinic's Facebook page. Confirm these are correct before launch.
+  // 2. CONTACTO
+  // Telefono y correo verificados de la pagina publica de Facebook.
+  // Confirmar antes de publicar.
   // ---------------------------------------------------------
   contact: {
     phone: "+1 869-665-7171",
     phoneDisplay: "(869) 665-7171",
     email: "rad.dg.center@gmail.com",
-    address: "Basseterre, St. Kitts & Nevis", // PLACEHOLDER — add exact street address
+    address: "Basseterre, St. Kitts & Nevis", // PLACEHOLDER - falta direccion exacta
     hours: [
-      { days: "Monday – Friday", time: "8:00 AM – 5:00 PM" }, // PLACEHOLDER — confirm real hours
-      { days: "Saturday", time: "9:00 AM – 1:00 PM" },        // PLACEHOLDER
+      { days: "Monday - Friday", time: "8:00 AM - 5:00 PM" }, // PLACEHOLDER - confirmar horario
+      { days: "Saturday", time: "9:00 AM - 1:00 PM" },        // PLACEHOLDER
       { days: "Sunday", time: "Closed" }
     ]
   },
 
   // ---------------------------------------------------------
-  // 3. SOCIAL LINKS
+  // 3. REDES SOCIALES
   // ---------------------------------------------------------
   social: {
     facebook: "https://www.facebook.com/p/Radiology-Diagnostic-Center-SKN-100078177635682/",
     instagram: "https://instagram.com/rdcsaintkitts", // PLACEHOLDER
-    whatsapp: "https://wa.me/18696657171" // uses phone number above, edit digits if number changes
+    whatsapp: "https://wa.me/18696657171" // usa el telefono de arriba
   },
 
   // ---------------------------------------------------------
-  // 4. MODALITIES (services offered)
-  // Edit, add, or remove entries here — the modalities carousel
-  // on the homepage is generated automatically from this list.
-  // "icon" is one of the built-in icon keys in js/icons.js
+  // 4. CARRUSEL DEL BANNER (hero)
+  // ---------------------------------------------------------
+  // Estas son las imagenes de fondo que rotan en el banner.
+  // Puedes editarlas AQUI, o mejor: desde el panel admin
+  // (admin.html), que las guarda sin tocar codigo.
+  //
+  // Si el admin tiene imagenes guardadas, esas mandan y esta
+  // lista solo sirve de respaldo.
+  hero: {
+    slides: [
+      // Ejemplo: { image: "assets/banner1.jpg", caption: "Nuestro equipo" }
+      // Vacio por ahora - se llena con las fotos del cliente.
+    ],
+    slideDurationMs: 5000, // tiempo de cada imagen antes de cambiar
+    enableAutoplay: true
+  },
+
+  // ---------------------------------------------------------
+  // 5. MODALIDADES (servicios)
+  // El carrusel de servicios y el desplegable del formulario se
+  // generan solos desde esta lista. Editar aqui es suficiente.
+  // "icon" debe ser una de las llaves en js/icons.js
   // ---------------------------------------------------------
   modalities: [
     {
@@ -83,41 +105,58 @@ const SITE_CONFIG = {
       icon: "bone",
       description: "Precise bone density scanning for osteoporosis screening."
     }
-  ], // PLACEHOLDER LIST — confirm the clinic's real modality lineup and edit above
+  ], // PLACEHOLDER - confirmar la lista real de servicios
 
   // ---------------------------------------------------------
-  // 5. BOOKING FORM (appointment notifications)
+  // 6. BACKEND / CONEXIONES
   // ---------------------------------------------------------
-  booking: {
-    // Formspree is a free form-backend service — no server needed.
-    // 1. Create a free account at https://formspree.io
-    // 2. Create a new form, copy its endpoint URL
-    // 3. Paste it below, replacing the placeholder
-    // See README.md "Booking notifications" section for full steps,
-    // including optional Google Calendar + WhatsApp notifications via Zapier.
-    formEndpoint: "https://formspree.io/f/REPLACE_WITH_YOUR_FORM_ID",
+  // Todo el sitio (reservas, correo, WhatsApp y el panel admin)
+  // se conecta a UNA sola direccion: un Google Apps Script.
+  // Es gratis y no necesita servidor propio.
+  //
+  // Como obtener esta URL: ver GUIA-RAPIDA.md, seccion 1.
+  // Se ve asi: https://script.google.com/macros/s/AKfy..../exec
+  api: {
+    url: "", // PLACEHOLDER - pegar aqui la URL del Apps Script
 
-    // Used only while testing, so submissions have somewhere to go
-    // before the real Formspree account is connected.
-    testNotificationEmail: "869thesignstudio@gmail.com",
-
-    // Time slots offered in the appointment dropdown
-    timeSlots: [
-      "8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM",
-      "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM"
-    ]
+    // Mientras esto este vacio, el sitio funciona en "modo prueba":
+    // el formulario valida todo normalmente y muestra los datos,
+    // pero abre un correo prellenado en vez de enviarlo solo.
+    // Asi puedes probar el sitio antes de conectar el backend.
   },
 
   // ---------------------------------------------------------
-  // 6. STUDIES / WORK TO SHARE
-  // Non-technical content editor: staff add posts as ROWS in a
-  // Google Sheet (like a spreadsheet). The site fetches that sheet
-  // automatically. Full setup guide: README.md "Studies & posts".
-  //
-  // Leave sheetCsvUrl empty ("") to use the sample posts bundled
-  // in data/sample-studies.json instead.
+  // 7. NOTIFICACIONES DE RESERVAS
   // ---------------------------------------------------------
+  // OJO: estos son los datos DE PRUEBA. Antes de entregar el
+  // sitio al cliente, cambiar por el correo y WhatsApp reales
+  // de la clinica (aqui y tambien en el Apps Script).
+  notifications: {
+    email: "869thesignstudio@gmail.com",   // PRUEBA - cambiar al entregar
+    whatsappNumber: "18697629440",          // PRUEBA - cambiar al entregar
+    // Formato del numero: codigo de pais + numero, sin +, sin espacios.
+    // Ejemplo St. Kitts: 1869XXXXXXX
+  },
+
+  // ---------------------------------------------------------
+  // 8. HORARIOS DISPONIBLES PARA RESERVAR
+  // ---------------------------------------------------------
+  booking: {
+    timeSlots: [
+      "8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM",
+      "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM"
+    ],
+    // No permitir reservar con menos de X horas de anticipacion
+    minHoursAhead: 24
+  },
+
+  // ---------------------------------------------------------
+  // 9. ESTUDIOS / PUBLICACIONES
+  // ---------------------------------------------------------
+  // Si el backend (api.url) esta conectado, las publicaciones se
+  // manejan desde el panel admin y esto se ignora.
+  // Si no, el sitio usa data/sample-studies.json como respaldo.
   studies: {
-    sheetCsvUrl: "" // PLACEHOLDER — paste the "publish to web" CSV link here once ready
+    sheetCsvUrl: "" // Opcional - alternativa via Google Sheets publicado
   }
 };
