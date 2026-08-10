@@ -2,39 +2,67 @@
  * ============================================================
  *  MAIN.JS
  * ============================================================
- * Handles everything that isn't the booking form or the studies
- * feed (those live in booking.js and studies.js):
+ *  Maneja todo lo que no es el formulario ni las publicaciones
+ *  (esos estan en booking.js y studies.js):
  *
- *   1. Populate page text/links from SITE_CONFIG (js/config.js)
- *   2. Navbar scroll state + mobile menu toggle
- *   3. Reveal-on-scroll animations
- *   4. Hero parallax ("3D" floating layers)
- *   5. Horizontal scroll-driven modalities carousel
- *   6. Animated stat counters
+ *    1. Llenar el sitio con los datos de SITE_CONFIG
+ *    2. Traer el contenido editable del panel admin
+ *    3. Carrusel/slideshow del banner
+ *    4. Barra de promocion
+ *    5. Menu de navegacion (scroll + movil)
+ *    6. Animaciones al hacer scroll
+ *    7. Parallax "3D" del banner
+ *    8. Carrusel horizontal de servicios
+ *    9. Contadores animados
  *
- * Everything here reads from SITE_CONFIG / ICONS (defined in
- * config.js / icons.js, loaded before this file) — it does not
- * hardcode clinic content.
+ *  Nada de aqui tiene texto de la clinica escrito a mano: todo
+ *  sale de js/config.js o del panel admin.
  * ============================================================
  */
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   populateContent();
   setupNavbar();
-  setupRevealAnimations();
   setupHeroParallax();
   setupModalitiesCarousel();
   setupStatCounters();
+
+  // El observador de animaciones se crea ANTES de pedir el
+  // contenido, porque studies.js dibuja sus tarjetas apenas llega
+  // la respuesta y necesita engancharlas a el.
+  setupRevealAnimations();
+
+  // El contenido del admin (imagenes, promo, textos) se pide al
+  // servidor. Si falla o no esta conectado, el sitio sigue
+  // funcionando con lo que hay en js/config.js.
+  await loadEditableContent();
+
   document.getElementById("year").textContent = new Date().getFullYear();
 });
 
+
 /* ----------------------------------------------------------------
-   1. POPULATE CONTENT FROM CONFIG
+   1. LLENAR EL SITIO DESDE LA CONFIGURACION
    ---------------------------------------------------------------- */
+
 function populateContent() {
   const cfg = SITE_CONFIG;
 
-  // Text
+  // --- Logo ---------------------------------------------------
+  // Se usa en la barra de navegacion. Si el archivo no existe,
+  // se cae de vuelta al nombre en texto (ver onerror abajo).
+  const logoImg = document.getElementById("brandLogo");
+  if (logoImg && cfg.logo) {
+    logoImg.src = cfg.logo;
+    logoImg.alt = cfg.clinicFullName || cfg.clinicName;
+    logoImg.onerror = () => {
+      logoImg.style.display = "none";
+      const fallback = document.getElementById("brandName");
+      if (fallback) fallback.style.display = "inline";
+    };
+  }
+
+  // --- Textos -------------------------------------------------
   setText("brandName", cfg.clinicName);
   setText("footerName", cfg.clinicName);
   setText("heroSub", cfg.subTagline);
@@ -42,21 +70,17 @@ function populateContent() {
   setText("contactPhone", cfg.contact.phoneDisplay);
   setText("contactEmail", cfg.contact.email);
 
-  const contactPhoneEl = document.getElementById("contactPhone");
-  if (contactPhoneEl) contactPhoneEl.href = `tel:${cfg.contact.phone.replace(/\s/g, "")}`;
-  const contactEmailEl = document.getElementById("contactEmail");
-  if (contactEmailEl) contactEmailEl.href = `mailto:${cfg.contact.email}`;
-  const callLink = document.getElementById("callLink");
-  if (callLink) callLink.href = `tel:${cfg.contact.phone.replace(/\s/g, "")}`;
-  const whatsappLink = document.getElementById("whatsappLink");
-  if (whatsappLink) whatsappLink.href = cfg.social.whatsapp;
-
-  // Hero title supports <br> so keep innerHTML, but content itself
-  // still comes from config (avoids hardcoding marketing copy twice)
   const heroTitle = document.getElementById("heroTitle");
   if (heroTitle) heroTitle.innerHTML = cfg.tagline.replace(". ", ".<br>");
 
-  // Hours
+  // --- Enlaces ------------------------------------------------
+  const telHref = `tel:${cfg.contact.phone.replace(/\s/g, "")}`;
+  setHref("contactPhone", telHref);
+  setHref("callLink", telHref);
+  setHref("contactEmail", `mailto:${cfg.contact.email}`);
+  setHref("whatsappLink", cfg.social.whatsapp);
+
+  // --- Horarios -----------------------------------------------
   const hoursList = document.getElementById("hoursList");
   if (hoursList) {
     hoursList.innerHTML = cfg.contact.hours
@@ -64,21 +88,20 @@ function populateContent() {
       .join("");
   }
 
-  // Social links
+  // --- Redes sociales -----------------------------------------
   const socialLinks = document.getElementById("socialLinks");
   if (socialLinks) {
-    const entries = [
+    socialLinks.innerHTML = [
       { key: "facebook", url: cfg.social.facebook },
       { key: "instagram", url: cfg.social.instagram },
       { key: "whatsapp", url: cfg.social.whatsapp }
-    ].filter(s => s.url);
-
-    socialLinks.innerHTML = entries
+    ]
+      .filter(s => s.url)
       .map(s => `<a href="${s.url}" target="_blank" rel="noopener" aria-label="${s.key}">${ICONS[s.key] || ""}</a>`)
       .join("");
   }
 
-  // Modality cards (horizontal carousel)
+  // --- Tarjetas de servicios ----------------------------------
   const track = document.getElementById("modalitiesTrack");
   if (track) {
     track.innerHTML = cfg.modalities
@@ -92,26 +115,18 @@ function populateContent() {
       .join("");
   }
 
-  // Booking form: modality options + time slots
-  const modalitySelect = document.getElementById("modality");
-  if (modalitySelect) {
-    cfg.modalities.forEach(m => {
-      const opt = document.createElement("option");
-      opt.value = m.name;
-      opt.textContent = m.name;
-      modalitySelect.appendChild(opt);
-    });
-  }
+  // --- Opciones del formulario --------------------------------
+  fillSelect("modality", cfg.modalities.map(m => m.name));
+  fillSelect("preferredTime", cfg.booking.timeSlots);
 
-  const timeSelect = document.getElementById("preferredTime");
-  if (timeSelect) {
-    cfg.booking.timeSlots.forEach(t => {
-      const opt = document.createElement("option");
-      opt.value = t;
-      opt.textContent = t;
-      timeSelect.appendChild(opt);
-    });
-  }
+  // --- Iconos sueltos -----------------------------------------
+  // En el HTML hay marcadores tipo <span class="icon" data-icon="phone">.
+  // Aqui se rellenan con el SVG correspondiente de js/icons.js.
+  // Asi el HTML queda limpio y los iconos viven en un solo lugar.
+  document.querySelectorAll("[data-icon]").forEach(el => {
+    const svg = ICONS[el.dataset.icon];
+    if (svg) el.innerHTML = svg;
+  });
 }
 
 function setText(id, value) {
@@ -119,9 +134,193 @@ function setText(id, value) {
   if (el && value) el.textContent = value;
 }
 
+function setHref(id, value) {
+  const el = document.getElementById(id);
+  if (el && value) el.href = value;
+}
+
+function fillSelect(id, options) {
+  const select = document.getElementById(id);
+  if (!select) return;
+
+  options.forEach(value => {
+    const opt = document.createElement("option");
+    opt.value = value;
+    opt.textContent = value;
+    select.appendChild(opt);
+  });
+}
+
+
 /* ----------------------------------------------------------------
-   2. NAVBAR: scrolled state + mobile toggle
+   2. CONTENIDO EDITABLE DESDE EL PANEL ADMIN
+   ----------------------------------------------------------------
+   Trae del backend lo que el administrador haya cambiado:
+   imagenes del banner, texto de promocion y titulos.
+
+   Si no hay backend conectado, usa lo de js/config.js. El sitio
+   nunca se rompe por esto.
    ---------------------------------------------------------------- */
+
+async function loadEditableContent() {
+  const apiUrl = SITE_CONFIG.api.url;
+
+  // Sin backend: usar las imagenes que esten en config.js
+  if (!apiUrl || !apiUrl.trim()) {
+    startHeroSlideshow(SITE_CONFIG.hero.slides);
+    announceContentReady(null);
+    return;
+  }
+
+  try {
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ action: "getContent" })
+    });
+
+    const result = await response.json();
+    if (!result.ok) throw new Error(result.error);
+
+    applyEditableContent(result.content);
+  } catch (err) {
+    console.warn("No se pudo cargar el contenido del admin, usando el de config.js:", err);
+    startHeroSlideshow(SITE_CONFIG.hero.slides);
+
+    // IMPORTANTE: avisar igual aunque haya fallado. Si no,
+    // studies.js se queda esperando para siempre y la seccion
+    // de publicaciones nunca aparece.
+    announceContentReady(null);
+  }
+}
+
+/**
+ * Le avisa a studies.js que ya hay (o no hay) contenido.
+ * Se llama SIEMPRE, tanto si la carga salio bien como si fallo.
+ */
+function announceContentReady(studies) {
+  window.__RDC_STUDIES__ = studies;
+  document.dispatchEvent(new CustomEvent("rdc:content-loaded"));
+}
+
+function applyEditableContent(content) {
+  if (!content) content = {};
+
+  // Titulos del banner (si el admin los dejo vacios, se mantiene config.js)
+  if (content.heroTitle) {
+    const el = document.getElementById("heroTitle");
+    if (el) el.innerHTML = escapeHtmlKeepBreaks(content.heroTitle);
+  }
+  if (content.heroSubtitle) setText("heroSub", content.heroSubtitle);
+
+  // Barra de promocion
+  renderPromoBar(content.promoText);
+
+  // Imagenes del carrusel: manda el admin; si no hay, usa config.js
+  const slides = (content.slides && content.slides.length)
+    ? content.slides
+    : SITE_CONFIG.hero.slides;
+
+  startHeroSlideshow(slides);
+
+  // Las publicaciones las consume studies.js
+  announceContentReady(content.studies || null);
+}
+
+function renderPromoBar(text) {
+  const bar = document.getElementById("promoBar");
+  if (!bar) return;
+
+  if (text && text.trim()) {
+    bar.textContent = text;
+    bar.hidden = false;
+    document.body.classList.add("has-promo");
+  } else {
+    bar.hidden = true;
+    document.body.classList.remove("has-promo");
+  }
+}
+
+
+/* ----------------------------------------------------------------
+   3. CARRUSEL DEL BANNER (slideshow)
+   ----------------------------------------------------------------
+   Las imagenes se apilan una encima de otra y se van cruzando con
+   un fundido. Se agrega un leve zoom (efecto Ken Burns) para que
+   no se sienta estatico.
+
+   Para cambiar la velocidad: SITE_CONFIG.hero.slideDurationMs
+   Para agregar imagenes: usar el panel admin (recomendado) o
+   SITE_CONFIG.hero.slides.
+   ---------------------------------------------------------------- */
+
+let heroSlideTimer = null;
+
+function startHeroSlideshow(slides) {
+  const container = document.getElementById("heroSlides");
+  const dotsContainer = document.getElementById("heroDots");
+  if (!container) return;
+
+  // Siempre empezar limpio (por si se recarga el contenido)
+  clearInterval(heroSlideTimer);
+  container.innerHTML = "";
+  if (dotsContainer) dotsContainer.innerHTML = "";
+
+  // Sin imagenes: se queda el fondo degradado por defecto. El
+  // banner se ve bien igual, solo sin fotos.
+  if (!slides || !slides.length) {
+    container.classList.remove("has-images");
+    return;
+  }
+
+  container.classList.add("has-images");
+
+  // Crear una capa por imagen
+  slides.forEach((slide, index) => {
+    const el = document.createElement("div");
+    el.className = "hero-slide" + (index === 0 ? " active" : "");
+    el.style.backgroundImage = `url("${slide.image}")`;
+    if (slide.caption) el.setAttribute("aria-label", slide.caption);
+    container.appendChild(el);
+
+    // Puntos de navegacion (solo si hay mas de una imagen)
+    if (dotsContainer && slides.length > 1) {
+      const dot = document.createElement("button");
+      dot.className = "hero-dot" + (index === 0 ? " active" : "");
+      dot.type = "button";
+      dot.setAttribute("aria-label", `Slide ${index + 1}`);
+      dot.addEventListener("click", () => goToSlide(index));
+      dotsContainer.appendChild(dot);
+    }
+  });
+
+  if (slides.length > 1 && SITE_CONFIG.hero.enableAutoplay) {
+    const duration = SITE_CONFIG.hero.slideDurationMs || 5000;
+    heroSlideTimer = setInterval(nextSlide, duration);
+  }
+}
+
+function nextSlide() {
+  const slides = document.querySelectorAll(".hero-slide");
+  if (slides.length < 2) return;
+
+  const currentIndex = [...slides].findIndex(s => s.classList.contains("active"));
+  goToSlide((currentIndex + 1) % slides.length);
+}
+
+function goToSlide(index) {
+  const slides = document.querySelectorAll(".hero-slide");
+  const dots = document.querySelectorAll(".hero-dot");
+
+  slides.forEach((s, i) => s.classList.toggle("active", i === index));
+  dots.forEach((d, i) => d.classList.toggle("active", i === index));
+}
+
+
+/* ----------------------------------------------------------------
+   4. NAVEGACION
+   ---------------------------------------------------------------- */
+
 function setupNavbar() {
   const navbar = document.getElementById("navbar");
   const toggle = document.getElementById("navToggle");
@@ -136,7 +335,6 @@ function setupNavbar() {
     toggle.setAttribute("aria-expanded", String(isOpen));
   });
 
-  // Close mobile menu after tapping a link
   links.querySelectorAll("a").forEach(a => {
     a.addEventListener("click", () => {
       links.classList.remove("open");
@@ -145,15 +343,15 @@ function setupNavbar() {
   });
 }
 
+
 /* ----------------------------------------------------------------
-   3. REVEAL-ON-SCROLL
-   Any element with class="reveal" fades/slides in the first time
-   it enters the viewport. Modality cards get this class when they
-   are generated above; add class="reveal" to any other element
-   you want the same treatment.
+   5. ANIMACIONES AL HACER SCROLL
+   Cualquier elemento con class="reveal" aparece con un fundido
+   la primera vez que entra en pantalla.
    ---------------------------------------------------------------- */
+
 function setupRevealAnimations() {
-  const observer = new IntersectionObserver((entries) => {
+  const observer = new IntersectionObserver(entries => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         entry.target.classList.add("in-view");
@@ -162,26 +360,27 @@ function setupRevealAnimations() {
     });
   }, { threshold: 0.15 });
 
-  // Re-query periodically isn't needed since modality cards exist
-  // by the time DOMContentLoaded fires (populateContent runs first).
+  document.querySelectorAll(".section-heading, .study-card, .about-strip-inner")
+    .forEach(el => el.classList.add("reveal"));
+
   document.querySelectorAll(".reveal").forEach(el => observer.observe(el));
 
-  // Also auto-tag section headings / studies grid for a subtle reveal
-  document.querySelectorAll(".section-heading, .study-card, .about-strip-inner")
-    .forEach(el => {
-      el.classList.add("reveal");
-      observer.observe(el);
-    });
+  // Guardado para que studies.js pueda animar las tarjetas que
+  // se crean despues de cargar.
+  window.__RDC_OBSERVER__ = observer;
 }
 
+
 /* ----------------------------------------------------------------
-   4. HERO PARALLAX
-   The three blurred circles in .hero-layers drift at different
-   speeds as the page scrolls, giving a subtle depth/3D feel.
+   6. PARALLAX DEL BANNER
+   Los circulos borrosos del fondo se mueven a distinta velocidad
+   al hacer scroll, lo que da sensacion de profundidad.
    ---------------------------------------------------------------- */
+
 function setupHeroParallax() {
   const layers = document.querySelectorAll(".hero-layer");
-  if (!layers.length) return;
+  const hero = document.getElementById("hero");
+  if (!layers.length || !hero) return;
 
   const speeds = [0.25, 0.4, 0.15];
 
@@ -192,39 +391,40 @@ function setupHeroParallax() {
     });
   }, { passive: true });
 
-  // Gentle mouse-tilt on the hero for extra "3D" feel on desktop
-  const hero = document.getElementById("hero");
-  hero.addEventListener("mousemove", (e) => {
-    const { innerWidth: w, innerHeight: h } = window;
-    const x = (e.clientX / w - 0.5) * 12;
-    const y = (e.clientY / h - 0.5) * 12;
-    hero.querySelector(".hero-content").style.transform =
-      `rotateY(${x * 0.3}deg) rotateX(${-y * 0.3}deg)`;
+  // Inclinacion suave siguiendo el mouse (solo escritorio)
+  const content = hero.querySelector(".hero-content");
+  if (!content) return;
+
+  hero.addEventListener("mousemove", e => {
+    const x = (e.clientX / window.innerWidth - 0.5) * 12;
+    const y = (e.clientY / window.innerHeight - 0.5) * 12;
+    content.style.transform = `rotateY(${x * 0.3}deg) rotateX(${-y * 0.3}deg)`;
   });
+
   hero.addEventListener("mouseleave", () => {
-    hero.querySelector(".hero-content").style.transform = "rotateY(0) rotateX(0)";
+    content.style.transform = "rotateY(0) rotateX(0)";
   });
 }
 
-/* ----------------------------------------------------------------
-   5. HORIZONTAL SCROLL-DRIVEN MODALITIES CAROUSEL
-   ----------------------------------------------------------------
-   How it works:
-   - .modalities-pin is `position: sticky`, so it stays fixed in
-     the viewport while its tall parent (.modalities section)
-     scrolls underneath it.
-   - On every scroll event we work out how far the user has
-     scrolled through that tall parent (0 = just entered,
-     1 = about to leave) and translate .modalities-track
-     horizontally by that same proportion.
-   - Net effect: normal vertical scrolling drives the modality
-     cards sideways, which reads as a dynamic "3D" transition
-     without needing scroll-jacking libraries.
 
-   To change how far it scrolls: adjust `min-height: 220vh` on
-   .modalities in css/styles.css (taller section = slower/longer
-   horizontal scroll).
+/* ----------------------------------------------------------------
+   7. CARRUSEL HORIZONTAL DE SERVICIOS
+   ----------------------------------------------------------------
+   Como funciona:
+   - La seccion de servicios es muy alta (min-height: 220vh).
+   - Adentro, .modalities-pin usa position:sticky, o sea que se
+     queda fija en pantalla mientras la seccion alta pasa por
+     detras.
+   - Aqui medimos cuanto llevas recorrido de esa seccion (de 0 a 1)
+     y movemos las tarjetas hacia el lado en esa misma proporcion.
+
+   Resultado: haces scroll normal hacia abajo y las tarjetas se
+   desplazan horizontalmente.
+
+   Para que dure mas o menos: cambia min-height en .modalities
+   dentro de css/styles.css.
    ---------------------------------------------------------------- */
+
 function setupModalitiesCarousel() {
   const section = document.getElementById("modalities");
   const track = document.getElementById("modalitiesTrack");
@@ -232,13 +432,12 @@ function setupModalitiesCarousel() {
 
   function update() {
     const rect = section.getBoundingClientRect();
-    const sectionHeight = section.offsetHeight - window.innerHeight;
-    if (sectionHeight <= 0) return;
+    const scrollableHeight = section.offsetHeight - window.innerHeight;
+    if (scrollableHeight <= 0) return;
 
-    // progress: 0 when section top hits top of viewport, 1 when section bottom does
-    const progress = Math.min(Math.max(-rect.top / sectionHeight, 0), 1);
-
+    const progress = Math.min(Math.max(-rect.top / scrollableHeight, 0), 1);
     const maxScroll = track.scrollWidth - track.parentElement.offsetWidth;
+
     track.style.transform = `translate3d(${-progress * maxScroll}px, 0, 0)`;
   }
 
@@ -247,14 +446,16 @@ function setupModalitiesCarousel() {
   update();
 }
 
+
 /* ----------------------------------------------------------------
-   6. ANIMATED STAT COUNTERS
+   8. CONTADORES ANIMADOS
    ---------------------------------------------------------------- */
+
 function setupStatCounters() {
   const counters = document.querySelectorAll(".stat-number");
   if (!counters.length) return;
 
-  const observer = new IntersectionObserver((entries) => {
+  const observer = new IntersectionObserver(entries => {
     entries.forEach(entry => {
       if (!entry.isIntersecting) return;
       animateCount(entry.target);
@@ -278,4 +479,20 @@ function animateCount(el) {
     if (progress < 1) requestAnimationFrame(tick);
   }
   requestAnimationFrame(tick);
+}
+
+
+/* ----------------------------------------------------------------
+   9. UTILIDAD
+   ---------------------------------------------------------------- */
+
+/**
+ * Escapa HTML pero deja pasar los saltos de linea como <br>.
+ * Se usa en el titulo del banner para que el admin pueda partir
+ * el texto en dos lineas sin poder inyectar codigo.
+ */
+function escapeHtmlKeepBreaks(str) {
+  const div = document.createElement("div");
+  div.textContent = str;
+  return div.innerHTML.replace(/\n/g, "<br>");
 }
