@@ -1,5 +1,5 @@
 /* ================================================================
-   RDC SAINT KITTS — STYLES
+   RDC SAINT KITTS — STYLES  (TEMA CLARO)
    ================================================================
    Indice (busca estos titulos para saltar de seccion):
      1. Design tokens (colores, fuentes, medidas)
@@ -7,8 +7,8 @@
      3. Helpers / botones / titulos de seccion
      4. Barra de promocion
      5. Navbar + logo
-     6. Hero (carrusel + capas parallax)
-     7. Modalities (fondo claro + carrusel horizontal)
+     6. Hero (carrusel + capas de color)
+     7. Modalities (carrusel horizontal)
      8. About strip / stats
      9. Booking form (incluye estilos de error)
     10. Studies grid
@@ -19,29 +19,40 @@
 
 /* ---------------------------------------------------------------
    1. DESIGN TOKENS
-   Change these variables to re-theme the entire site.
+   ---------------------------------------------------------------
+   TODO el tema del sitio sale de aqui. Si algun dia quieres
+   volver al tema oscuro, basta con cambiar estos valores; el
+   resto del archivo no usa colores fijos.
+
+   Los acentos (teal/azul) son mas oscuros que los tipicos porque
+   ahora van sobre fondo claro y tienen que contrastar bien.
    --------------------------------------------------------------- */
 :root {
-  /* Clinical-modern palette */
-  --bg-deep: #0a1420;
-  --bg-panel: #0f1e2e;
-  --bg-panel-light: #142838;
-  --ink: #eaf2f6;
-  --ink-dim: #9db2c2;
-  --teal: #2dd4bf;
-  --teal-dim: #1a8f81;
-  --blue: #4d8fd6;
-  --amber: #d9a441;
-  --danger: #e07a7a;
-  --border: rgba(234, 242, 246, 0.1);
+  /* Superficies */
+  --bg-deep: #f7f9fa;        /* fondo general de la pagina */
+  --bg-panel: #ffffff;       /* tarjetas, formulario */
+  --bg-panel-light: #ffffff;
+  --surface-tint: #eef2f5;   /* franjas con leve contraste */
 
-  /* Superficie clara - se usa en la seccion de servicios, que va
-     en fondo claro a proposito para cortar con el resto oscuro */
-  --surface-light: #f4f6f8;
-  --surface-card: #ffffff;
-  --ink-on-light: #0a1420;
-  --ink-on-light-dim: #5b6d7c;
-  --border-on-light: rgba(10, 20, 32, 0.09);
+  /* Texto */
+  --ink: #0e1c28;            /* texto principal */
+  --ink-dim: #5b6d7c;        /* texto secundario */
+
+  /* Acentos */
+  --teal: #12a594;
+  --teal-dim: #0d7a6d;
+  --blue: #3b7fc4;
+  --amber: #c08829;
+  --danger: #c94f4f;
+
+  /* Bordes y sombras */
+  --border: rgba(14, 28, 40, 0.10);
+  --border-strong: rgba(14, 28, 40, 0.18);
+  --shadow-card: 0 1px 2px rgba(14, 28, 40, 0.05);
+  --shadow-lift: 0 18px 40px -18px rgba(14, 28, 40, 0.25);
+
+  /* Color del texto que va ENCIMA de los acentos */
+  --on-accent: #ffffff;
 
   --font-head: 'Space Grotesk', 'Poppins', Arial, sans-serif;
   --font-body: 'Inter', Georgia, sans-serif;
@@ -61,11 +72,12 @@
 html { scroll-behavior: smooth; }
 
 body {
-  background: var(--bg-panel--light);
+  background: var(--bg-deep);
   color: var(--ink);
   font-family: var(--font-body);
   line-height: 1.6;
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
 }
 
 h1, h2, h3, h4 {
@@ -91,7 +103,7 @@ button { font: inherit; cursor: pointer; }
    3. LAYOUT HELPERS / BUTTONS / SECTION HEADING
    --------------------------------------------------------------- */
 .eyebrow {
-  color: var(--teal);
+  color: var(--teal-dim);
   font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 0.12em;
@@ -117,17 +129,17 @@ button { font: inherit; cursor: pointer; }
 
 .btn-primary {
   background: linear-gradient(135deg, var(--teal), var(--blue));
-  color: #06141d;
-  box-shadow: 0 10px 30px -10px rgba(45, 212, 191, 0.5);
+  color: var(--on-accent);
+  box-shadow: 0 8px 22px -10px rgba(18, 165, 148, 0.7);
 }
-.btn-primary:hover { box-shadow: 0 14px 34px -8px rgba(45, 212, 191, 0.65); }
+.btn-primary:hover { box-shadow: 0 14px 30px -10px rgba(18, 165, 148, 0.8); }
 
 .btn-ghost {
   background: transparent;
-  border-color: var(--border);
+  border-color: var(--border-strong);
   color: var(--ink);
 }
-.btn-ghost:hover { border-color: var(--teal); color: var(--teal); }
+.btn-ghost:hover { border-color: var(--teal-dim); color: var(--teal-dim); }
 
 .btn-block { width: 100%; justify-content: center; }
 
@@ -143,7 +155,7 @@ button { font: inherit; cursor: pointer; }
   top: 0; left: 0; right: 0;
   z-index: 110;
   background: linear-gradient(90deg, var(--teal), var(--blue));
-  color: #06141d;
+  color: var(--on-accent);
   text-align: center;
   font-size: 0.87rem;
   font-weight: 600;
@@ -161,14 +173,14 @@ body.has-promo .navbar { top: 38px; }
   position: fixed;
   top: 0; left: 0; right: 0;
   z-index: 100;
-  backdrop-filter: blur(10px);
-  background: rgba(10, 20, 32, 0.55);
+  backdrop-filter: blur(12px);
+  background: rgba(247, 249, 250, 0.72);
   border-bottom: 1px solid transparent;
   transition: border-color 0.3s, background 0.3s;
 }
 .navbar.scrolled {
   border-color: var(--border);
-  background: rgba(10, 20, 32, 0.85);
+  background: rgba(247, 249, 250, 0.94);
 }
 
 .navbar-inner {
@@ -208,8 +220,8 @@ body.has-promo .navbar { top: 38px; }
 .nav-cta {
   padding: 0.55rem 1.2rem;
   border-radius: 999px;
-  background: var(--teal);
-  color: #06141d !important;
+  background: var(--teal-dim);
+  color: var(--on-accent) !important;
   font-weight: 600;
 }
 
@@ -223,12 +235,15 @@ body.has-promo .navbar { top: 38px; }
 .nav-toggle span { width: 22px; height: 2px; background: var(--ink); transition: transform 0.25s, opacity 0.25s; }
 
 /* ---------------------------------------------------------------
-   6. HERO - carrusel de fotos + capas parallax
+   6. HERO - carrusel de fotos + capas de color
    ---------------------------------------------------------------
    El banner tiene 3 capas apiladas:
      1. .hero-slides  -> fotos que rotan (z-index 0)
-     2. .hero-layers  -> circulos borrosos con parallax (z-index 1)
+     2. .hero-layers  -> manchas de color suaves (z-index 1)
      3. .hero-content -> el texto (z-index 2)
+
+   Como el sitio es claro, encima de las fotos va un velo BLANCO
+   (no negro) para que el texto oscuro siga leyendose.
    --------------------------------------------------------------- */
 .hero {
   min-height: 100svh;
@@ -260,17 +275,17 @@ body.has-promo .navbar { top: 38px; }
   transform: scale(1);
 }
 
-/* Capa oscura encima de las fotos para que el texto siempre se
-   lea, sin importar que tan clara sea la imagen. */
+/* Velo claro encima de las fotos: garantiza que el texto oscuro
+   se lea sin importar que tan oscura sea la foto que suban. */
 .hero-slides.has-images::after {
   content: "";
   position: absolute;
   inset: 0;
   background: linear-gradient(
     180deg,
-    rgba(10, 20, 32, 0.82) 0%,
-    rgba(10, 20, 32, 0.68) 50%,
-    rgba(10, 20, 32, 0.92) 100%
+    rgba(247, 249, 250, 0.90) 0%,
+    rgba(247, 249, 250, 0.78) 45%,
+    rgba(247, 249, 250, 0.96) 100%
   );
   z-index: 1;
 }
@@ -290,23 +305,23 @@ body.has-promo .navbar { top: 38px; }
   padding: 0;
   border-radius: 50%;
   border: none;
-  background: rgba(234, 242, 246, 0.35);
+  background: rgba(14, 28, 40, 0.22);
   transition: background 0.3s, width 0.3s;
 }
-.hero-dot.active { background: var(--teal); width: 26px; border-radius: 999px; }
+.hero-dot.active { background: var(--teal-dim); width: 26px; border-radius: 999px; }
 
-/* --- Capa 2: circulos borrosos --- */
+/* --- Capa 2: manchas de color difusas --- */
 .hero-layers { position: absolute; inset: 0; z-index: 1; }
 .hero-layer {
   position: absolute;
   border-radius: 50%;
-  filter: blur(60px);
-  opacity: 0.35;
+  filter: blur(70px);
+  opacity: 0.22;
   will-change: transform;
 }
 .layer-1 { width: 520px; height: 520px; background: var(--teal); top: -120px; left: -120px; }
 .layer-2 { width: 420px; height: 420px; background: var(--blue); bottom: -140px; right: -100px; }
-.layer-3 { width: 300px; height: 300px; background: var(--amber); top: 40%; right: 15%; opacity: 0.18; }
+.layer-3 { width: 300px; height: 300px; background: var(--amber); top: 40%; right: 15%; opacity: 0.12; }
 
 /* --- Capa 3: el texto --- */
 .hero-content { position: relative; z-index: 2; max-width: 780px; }
@@ -331,7 +346,7 @@ body.has-promo .navbar { top: 38px; }
 }
 .scroll-hint-line {
   width: 1px; height: 34px;
-  background: linear-gradient(var(--teal), transparent);
+  background: linear-gradient(var(--teal-dim), transparent);
   animation: scrollHint 1.8s ease-in-out infinite;
 }
 @keyframes scrollHint {
@@ -342,9 +357,12 @@ body.has-promo .navbar { top: 38px; }
 }
 
 /* ---------------------------------------------------------------
-   7. MODALITIES — fondo claro + el scroll vertical mueve las
-      tarjetas de lado
+   7. MODALITIES — el scroll vertical mueve las tarjetas de lado
    ---------------------------------------------------------------
+   Esta seccion lleva un fondo con un tono apenas mas gris que el
+   resto de la pagina, para separarla visualmente sin romper el
+   tema claro.
+
    Como funciona el carrusel: .modalities-pin usa position:sticky,
    asi que se queda fijo en pantalla mientras la seccion (que es
    muy alta) pasa por detras. js/main.js mide cuanto llevas
@@ -356,10 +374,10 @@ body.has-promo .navbar { top: 38px; }
   min-height: 220vh;
 }
 
-/* --- Fondo claro a todo el ancho -----------------------------
-   .section esta limitado a 1180px, asi que para que el fondo
-   claro llegue de borde a borde usamos una capa detras que mide
-   100vw y se centra sola. El truco del "left:50% + translateX".
+/* --- Franja de fondo a todo el ancho -------------------------
+   .section esta limitado a 1180px, asi que para que la franja
+   llegue de borde a borde usamos una capa detras que mide 100vw
+   y se centra sola. El truco del "left:50% + translateX".
    ------------------------------------------------------------- */
 .modalities::before {
   content: "";
@@ -369,14 +387,9 @@ body.has-promo .navbar { top: 38px; }
   left: 50%;
   width: 100vw;
   transform: translateX(-50%);
-  background: var(--surface-light);
+  background: var(--surface-tint);
   z-index: -1;
 }
-
-/* Sobre fondo claro hay que invertir los colores del texto */
-.modalities .eyebrow { color: var(--teal-dim); }
-.modalities h2 { color: var(--ink-on-light); }
-.modalities .section-sub { color: var(--ink-on-light-dim); }
 
 .modalities-pin {
   position: sticky;
@@ -402,17 +415,17 @@ body.has-promo .navbar { top: 38px; }
   flex: 0 0 clamp(260px, 32vw, 380px);
   height: 100%;
   border-radius: var(--radius);
-  background: var(--surface-card);
-  border: 1px solid var(--border-on-light);
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: 0 1px 2px rgba(10, 20, 32, 0.04);
+  box-shadow: var(--shadow-card);
   transition: transform 0.4s var(--ease), box-shadow 0.4s;
 }
 .modality-card:hover {
   transform: translateY(-8px);
-  box-shadow: 0 18px 40px -18px rgba(10, 20, 32, 0.28);
+  box-shadow: var(--shadow-lift);
 }
 
 /* Zona de la ilustracion */
@@ -420,7 +433,7 @@ body.has-promo .navbar { top: 38px; }
   position: relative;
   flex: 1 1 auto;
   min-height: 0;          /* deja que la imagen se encoja bien */
-  background: #eef2f5;
+  background: var(--surface-tint);
 }
 .modality-media img {
   width: 100%;
@@ -436,12 +449,12 @@ body.has-promo .navbar { top: 38px; }
   width: 38px;
   height: 38px;
   border-radius: 11px;
-  background: var(--surface-card);
+  background: var(--bg-panel);
   color: var(--teal-dim);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(10, 20, 32, 0.12);
+  box-shadow: 0 2px 8px rgba(14, 28, 40, 0.12);
 }
 .modality-badge svg { width: 21px; height: 21px; }
 
@@ -452,11 +465,10 @@ body.has-promo .navbar { top: 38px; }
 }
 .modality-body h3 {
   font-size: 1.2rem;
-  color: var(--ink-on-light);
   margin-bottom: 0.45rem;
 }
 .modality-body p {
-  color: var(--ink-on-light-dim);
+  color: var(--ink-dim);
   font-size: 0.92rem;
   line-height: 1.55;
 }
@@ -474,6 +486,7 @@ body.has-promo .navbar { top: 38px; }
   border-radius: var(--radius);
   background: var(--bg-panel);
   border: 1px solid var(--border);
+  box-shadow: var(--shadow-card);
 }
 .stat { text-align: center; }
 .stat-number {
@@ -481,7 +494,7 @@ body.has-promo .navbar { top: 38px; }
   font-family: var(--font-head);
   font-size: 2.6rem;
   font-weight: 700;
-  color: var(--teal);
+  color: var(--teal-dim);
 }
 .stat-label { color: var(--ink-dim); font-size: 0.9rem; }
 
@@ -502,12 +515,12 @@ body.has-promo .navbar { top: 38px; }
   gap: 0.5rem;
   padding: 0.6rem 1.1rem;
   border-radius: 999px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-strong);
   font-size: 0.88rem;
   color: var(--ink-dim);
   transition: border-color 0.2s, color 0.2s;
 }
-.contact-pill:hover { border-color: var(--teal); color: var(--ink); }
+.contact-pill:hover { border-color: var(--teal-dim); color: var(--ink); }
 
 .booking-form {
   background: var(--bg-panel);
@@ -517,6 +530,7 @@ body.has-promo .navbar { top: 38px; }
   display: flex;
   flex-direction: column;
   gap: 1.3rem;
+  box-shadow: var(--shadow-card);
 }
 
 .form-row { display: flex; flex-direction: column; gap: 0.5rem; }
@@ -524,19 +538,24 @@ body.has-promo .navbar { top: 38px; }
 
 label { font-size: 0.85rem; color: var(--ink-dim); }
 
+/* Los campos van un tono mas gris que la tarjeta blanca, para
+   que se distingan sin necesidad de bordes fuertes. */
 input, select, textarea {
   background: var(--bg-deep);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-sm);
   padding: 0.75rem 0.9rem;
   color: var(--ink);
   font-family: var(--font-body);
   font-size: 0.95rem;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
+input::placeholder, textarea::placeholder { color: #9aa8b3; }
+
 input:focus, select:focus, textarea:focus {
   outline: none;
-  border-color: var(--teal);
+  border-color: var(--teal-dim);
+  box-shadow: 0 0 0 3px rgba(18, 165, 148, 0.15);
 }
 
 /* --- Campos obligatorios y errores --------------------------- */
@@ -549,7 +568,7 @@ input.has-error,
 select.has-error,
 textarea.has-error {
   border-color: var(--danger);
-  background: rgba(224, 122, 122, 0.06);
+  background: rgba(201, 79, 79, 0.05);
 }
 
 /* Mensaje de error debajo del campo */
@@ -571,7 +590,7 @@ textarea.has-error {
   min-height: 1.2em;
   font-size: 0.88rem;
 }
-.form-status.success { color: var(--teal); }
+.form-status.success { color: var(--teal-dim); }
 .form-status.error { color: var(--danger); }
 
 /* ---------------------------------------------------------------
@@ -588,9 +607,10 @@ textarea.has-error {
   background: var(--bg-panel);
   border: 1px solid var(--border);
   overflow: hidden;
-  transition: transform 0.3s var(--ease), border-color 0.3s;
+  box-shadow: var(--shadow-card);
+  transition: transform 0.3s var(--ease), box-shadow 0.3s;
 }
-.study-card:hover { transform: translateY(-6px); border-color: var(--teal-dim); }
+.study-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lift); }
 
 .study-link { display: block; }
 
@@ -598,6 +618,7 @@ textarea.has-error {
   height: 140px;
   background-size: cover;
   background-position: center;
+  background-color: var(--surface-tint);
 }
 .study-card-body { padding: 1.6rem; }
 .study-card-date { color: var(--ink-dim); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; }
@@ -613,7 +634,8 @@ textarea.has-error {
 .contact-block { max-width: 560px; }
 .contact-list { display: flex; flex-direction: column; gap: 0.9rem; margin: 1.5rem 0; }
 .contact-list li { display: flex; align-items: center; gap: 0.7rem; color: var(--ink-dim); }
-.contact-list .icon { color: var(--teal); }
+.contact-list .icon { color: var(--teal-dim); }
+.contact-list a:hover { color: var(--teal-dim); }
 
 .hours-list { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1.75rem; font-size: 0.92rem; }
 .hours-list li { display: flex; justify-content: space-between; max-width: 320px; color: var(--ink-dim); }
@@ -624,12 +646,12 @@ textarea.has-error {
   width: 42px; height: 42px;
   display: flex; align-items: center; justify-content: center;
   border-radius: 50%;
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-strong);
   color: var(--ink-dim);
   transition: border-color 0.2s, color 0.2s, transform 0.2s;
 }
 .social-links a svg { width: 18px; height: 18px; }
-.social-links a:hover { border-color: var(--teal); color: var(--teal); transform: translateY(-3px); }
+.social-links a:hover { border-color: var(--teal-dim); color: var(--teal-dim); transform: translateY(-3px); }
 
 .site-footer {
   text-align: center;
@@ -637,6 +659,7 @@ textarea.has-error {
   color: var(--ink-dim);
   font-size: 0.85rem;
   border-top: 1px solid var(--border);
+  background: var(--surface-tint);
 }
 
 /* Enlace al panel de personal: discreto a proposito */
@@ -644,10 +667,10 @@ textarea.has-error {
   display: inline-block;
   margin-top: 0.6rem;
   font-size: 0.78rem;
-  opacity: 0.45;
+  opacity: 0.6;
   transition: opacity 0.2s, color 0.2s;
 }
-.admin-link:hover { opacity: 1; color: var(--teal); }
+.admin-link:hover { opacity: 1; color: var(--teal-dim); }
 
 /* ---------------------------------------------------------------
    12. REVEAL-ON-SCROLL
@@ -676,7 +699,7 @@ textarea.has-error {
   .nav-links {
     position: fixed;
     top: 68px; left: 0; right: 0;
-    background: rgba(10, 20, 32, 0.97);
+    background: rgba(247, 249, 250, 0.98);
     flex-direction: column;
     align-items: flex-start;
     padding: 1.5rem;
