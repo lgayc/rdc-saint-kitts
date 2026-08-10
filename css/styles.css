@@ -1,19 +1,20 @@
 /* ================================================================
    RDC SAINT KITTS — STYLES
    ================================================================
-   Table of contents (search for these headers to jump around):
-     1. Design tokens (colors, fonts, spacing)
+   Indice (busca estos titulos para saltar de seccion):
+     1. Design tokens (colores, fuentes, medidas)
      2. Reset & base
-     3. Layout helpers / buttons / section heading
-     4. Navbar
-     5. Hero (parallax 3D layers)
-     6. Modalities (horizontal-scroll carousel)
-     7. About strip / stats
-     8. Booking form
-     9. Studies grid
-    10. Contact / footer
-    11. Reveal-on-scroll animation classes
-    12. Responsive (mobile)
+     3. Helpers / botones / titulos de seccion
+     4. Barra de promocion
+     5. Navbar + logo
+     6. Hero (carrusel + capas parallax)
+     7. Modalities (carrusel horizontal)
+     8. About strip / stats
+     9. Booking form (incluye estilos de error)
+    10. Studies grid
+    11. Contact / footer
+    12. Reveal-on-scroll
+    13. Responsive (movil)
    ================================================================ */
 
 /* ---------------------------------------------------------------
@@ -31,6 +32,7 @@
   --teal-dim: #1a8f81;
   --blue: #4d8fd6;
   --amber: #d9a441;
+  --danger: #e07a7a;
   --border: rgba(234, 242, 246, 0.1);
 
   --font-head: 'Space Grotesk', 'Poppins', Arial, sans-serif;
@@ -124,7 +126,28 @@ button { font: inherit; cursor: pointer; }
 .icon svg { width: 1.1em; height: 1.1em; display: block; }
 
 /* ---------------------------------------------------------------
-   4. NAVBAR
+   4. BARRA DE PROMOCION
+   Solo aparece si el admin escribio un texto de promocion.
+   Empuja la navbar hacia abajo para no taparla.
+   --------------------------------------------------------------- */
+.promo-bar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 110;
+  background: linear-gradient(90deg, var(--teal), var(--blue));
+  color: #06141d;
+  text-align: center;
+  font-size: 0.87rem;
+  font-weight: 600;
+  padding: 0.55rem 1rem;
+}
+.promo-bar[hidden] { display: none; }
+
+/* Cuando hay promo, todo baja 38px */
+body.has-promo .navbar { top: 38px; }
+
+/* ---------------------------------------------------------------
+   5. NAVBAR + LOGO
    --------------------------------------------------------------- */
 .navbar {
   position: fixed;
@@ -149,14 +172,27 @@ button { font: inherit; cursor: pointer; }
   justify-content: space-between;
 }
 
-.brand { display: flex; align-items: center; gap: 0.6rem; }
-.brand-mark {
-  width: 12px; height: 12px;
-  border-radius: 3px;
-  background: linear-gradient(135deg, var(--teal), var(--blue));
-  transform: rotate(45deg);
+.brand { display: flex; align-items: center; gap: 0.7rem; }
+
+/* Logo del cliente. El logo real tiene fondo oscuro con borde
+   azul, asi que se le da forma ovalada para que combine. */
+.brand-logo {
+  height: 44px;
+  width: auto;
+  border-radius: 50% / 40%;
+  object-fit: cover;
+  display: block;
 }
-.brand-name { font-family: var(--font-head); font-weight: 700; letter-spacing: -0.02em; font-size: 1.1rem; }
+
+/* El nombre en texto solo se muestra si el logo no carga
+   (js/main.js lo activa en ese caso). */
+.brand-name {
+  display: none;
+  font-family: var(--font-head);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-size: 1.1rem;
+}
 
 .nav-links { display: flex; align-items: center; gap: 2rem; }
 .nav-links a { font-size: 0.92rem; color: var(--ink-dim); transition: color 0.2s; }
@@ -179,7 +215,12 @@ button { font: inherit; cursor: pointer; }
 .nav-toggle span { width: 22px; height: 2px; background: var(--ink); transition: transform 0.25s, opacity 0.25s; }
 
 /* ---------------------------------------------------------------
-   5. HERO — parallax "3D" layers
+   6. HERO - carrusel de fotos + capas parallax
+   ---------------------------------------------------------------
+   El banner tiene 3 capas apiladas:
+     1. .hero-slides  -> fotos que rotan (z-index 0)
+     2. .hero-layers  -> circulos borrosos con parallax (z-index 1)
+     3. .hero-content -> el texto (z-index 2)
    --------------------------------------------------------------- */
 .hero {
   min-height: 100svh;
@@ -193,7 +234,61 @@ button { font: inherit; cursor: pointer; }
   padding-top: 6rem;
 }
 
-.hero-layers { position: absolute; inset: 0; z-index: 0; }
+/* --- Capa 1: carrusel de fotos --- */
+.hero-slides { position: absolute; inset: 0; z-index: 0; }
+
+.hero-slide {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  /* Fundido lento + zoom suave (efecto Ken Burns) */
+  transition: opacity 1.4s ease-in-out, transform 8s linear;
+  transform: scale(1.06);
+}
+.hero-slide.active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Capa oscura encima de las fotos para que el texto siempre se
+   lea, sin importar que tan clara sea la imagen. */
+.hero-slides.has-images::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(10, 20, 32, 0.82) 0%,
+    rgba(10, 20, 32, 0.68) 50%,
+    rgba(10, 20, 32, 0.92) 100%
+  );
+  z-index: 1;
+}
+
+/* Puntos para cambiar de foto a mano */
+.hero-dots {
+  position: absolute;
+  bottom: 6.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.5rem;
+  z-index: 3;
+}
+.hero-dot {
+  width: 9px; height: 9px;
+  padding: 0;
+  border-radius: 50%;
+  border: none;
+  background: rgba(234, 242, 246, 0.35);
+  transition: background 0.3s, width 0.3s;
+}
+.hero-dot.active { background: var(--teal); width: 26px; border-radius: 999px; }
+
+/* --- Capa 2: circulos borrosos --- */
+.hero-layers { position: absolute; inset: 0; z-index: 1; }
 .hero-layer {
   position: absolute;
   border-radius: 50%;
@@ -205,13 +300,15 @@ button { font: inherit; cursor: pointer; }
 .layer-2 { width: 420px; height: 420px; background: var(--blue); bottom: -140px; right: -100px; }
 .layer-3 { width: 300px; height: 300px; background: var(--amber); top: 40%; right: 15%; opacity: 0.18; }
 
-.hero-content { position: relative; z-index: 1; max-width: 780px; }
+/* --- Capa 3: el texto --- */
+.hero-content { position: relative; z-index: 2; max-width: 780px; }
 .hero-content h1 { font-size: clamp(2.4rem, 6vw, 4.2rem); }
 .hero-sub { color: var(--ink-dim); font-size: 1.15rem; margin: 1.25rem auto 2.25rem; max-width: 520px; }
 .hero-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
 
 .scroll-hint {
   position: absolute;
+  z-index: 3;
   bottom: 2.5rem;
   left: 50%;
   transform: translateX(-50%);
@@ -237,7 +334,7 @@ button { font: inherit; cursor: pointer; }
 }
 
 /* ---------------------------------------------------------------
-   6. MODALITIES — vertical scroll drives horizontal movement
+   7. MODALITIES — el scroll vertical mueve las tarjetas de lado
    How it works: .modalities-pin becomes `position: sticky` and
    stays in view while its parent .section is tall. js/main.js
    measures scroll progress through that section and translates
@@ -295,7 +392,7 @@ button { font: inherit; cursor: pointer; }
 .modality-card p { color: var(--ink-dim); font-size: 0.95rem; }
 
 /* ---------------------------------------------------------------
-   7. ABOUT STRIP / STATS
+   8. ABOUT STRIP / STATS
    --------------------------------------------------------------- */
 .about-strip { padding: 3rem 1.5rem; }
 .about-strip-inner {
@@ -319,7 +416,7 @@ button { font: inherit; cursor: pointer; }
 .stat-label { color: var(--ink-dim); font-size: 0.9rem; }
 
 /* ---------------------------------------------------------------
-   8. BOOKING FORM
+   9. BOOKING FORM
    --------------------------------------------------------------- */
 .booking-inner {
   display: grid;
@@ -372,15 +469,43 @@ input:focus, select:focus, textarea:focus {
   border-color: var(--teal);
 }
 
+/* --- Campos obligatorios y errores --------------------------- */
+
+/* El asterisco rojo al lado de la etiqueta */
+.required { color: var(--danger); font-weight: 700; }
+
+/* Campo con problema: borde rojo + leve fondo */
+input.has-error,
+select.has-error,
+textarea.has-error {
+  border-color: var(--danger);
+  background: rgba(224, 122, 122, 0.06);
+}
+
+/* Mensaje de error debajo del campo */
+.field-error {
+  display: none;
+  color: var(--danger);
+  font-size: 0.8rem;
+  margin-top: 0.35rem;
+  line-height: 1.4;
+}
+
+.form-note {
+  font-size: 0.8rem;
+  color: var(--ink-dim);
+  margin-top: -0.3rem;
+}
+
 .form-status {
   min-height: 1.2em;
   font-size: 0.88rem;
 }
 .form-status.success { color: var(--teal); }
-.form-status.error { color: #e07a7a; }
+.form-status.error { color: var(--danger); }
 
 /* ---------------------------------------------------------------
-   9. STUDIES GRID
+   10. STUDIES GRID
    --------------------------------------------------------------- */
 .studies-grid {
   display: grid;
@@ -397,7 +522,13 @@ input:focus, select:focus, textarea:focus {
 }
 .study-card:hover { transform: translateY(-6px); border-color: var(--teal-dim); }
 
-.study-card-media { height: 140px; }
+.study-link { display: block; }
+
+.study-card-media {
+  height: 140px;
+  background-size: cover;
+  background-position: center;
+}
 .study-card-body { padding: 1.6rem; }
 .study-card-date { color: var(--ink-dim); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; }
 .study-card h3 { font-size: 1.15rem; margin: 0.5rem 0 0.6rem; }
@@ -406,7 +537,7 @@ input:focus, select:focus, textarea:focus {
 .studies-empty { color: var(--ink-dim); font-size: 0.95rem; }
 
 /* ---------------------------------------------------------------
-   10. CONTACT / FOOTER
+   11. CONTACT / FOOTER
    --------------------------------------------------------------- */
 .contact { padding-bottom: 4rem; }
 .contact-block { max-width: 560px; }
@@ -438,8 +569,18 @@ input:focus, select:focus, textarea:focus {
   border-top: 1px solid var(--border);
 }
 
+/* Enlace al panel de personal: discreto a proposito */
+.admin-link {
+  display: inline-block;
+  margin-top: 0.6rem;
+  font-size: 0.78rem;
+  opacity: 0.45;
+  transition: opacity 0.2s, color 0.2s;
+}
+.admin-link:hover { opacity: 1; color: var(--teal); }
+
 /* ---------------------------------------------------------------
-   11. REVEAL-ON-SCROLL
+   12. REVEAL-ON-SCROLL
    Elements with class="reveal" fade/slide in once they enter the
    viewport. Toggled by js/main.js via IntersectionObserver.
    --------------------------------------------------------------- */
@@ -451,13 +592,17 @@ input:focus, select:focus, textarea:focus {
 .reveal.in-view { opacity: 1; transform: translateY(0); }
 
 /* ---------------------------------------------------------------
-   12. RESPONSIVE
+   13. RESPONSIVE
    --------------------------------------------------------------- */
 @media (max-width: 900px) {
   .booking-inner { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 720px) {
+  .brand-logo { height: 36px; }
+  .hero-dots { bottom: 5.5rem; }
+  .promo-bar { font-size: 0.78rem; padding: 0.45rem 0.8rem; }
+
   .nav-links {
     position: fixed;
     top: 68px; left: 0; right: 0;
