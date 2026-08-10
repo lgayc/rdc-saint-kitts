@@ -8,7 +8,7 @@
      4. Barra de promocion
      5. Navbar + logo
      6. Hero (carrusel + capas parallax)
-     7. Modalities (carrusel horizontal)
+     7. Modalities (fondo claro + carrusel horizontal)
      8. About strip / stats
      9. Booking form (incluye estilos de error)
     10. Studies grid
@@ -34,6 +34,14 @@
   --amber: #d9a441;
   --danger: #e07a7a;
   --border: rgba(234, 242, 246, 0.1);
+
+  /* Superficie clara - se usa en la seccion de servicios, que va
+     en fondo claro a proposito para cortar con el resto oscuro */
+  --surface-light: #f4f6f8;
+  --surface-card: #ffffff;
+  --ink-on-light: #0a1420;
+  --ink-on-light-dim: #5b6d7c;
+  --border-on-light: rgba(10, 20, 32, 0.09);
 
   --font-head: 'Space Grotesk', 'Poppins', Arial, sans-serif;
   --font-body: 'Inter', Georgia, sans-serif;
@@ -334,18 +342,41 @@ body.has-promo .navbar { top: 38px; }
 }
 
 /* ---------------------------------------------------------------
-   7. MODALITIES — el scroll vertical mueve las tarjetas de lado
-   How it works: .modalities-pin becomes `position: sticky` and
-   stays in view while its parent .section is tall. js/main.js
-   measures scroll progress through that section and translates
-   .modalities-track left/right accordingly. See main.js
-   "Horizontal scroll-driven carousel" section.
+   7. MODALITIES — fondo claro + el scroll vertical mueve las
+      tarjetas de lado
+   ---------------------------------------------------------------
+   Como funciona el carrusel: .modalities-pin usa position:sticky,
+   asi que se queda fijo en pantalla mientras la seccion (que es
+   muy alta) pasa por detras. js/main.js mide cuanto llevas
+   recorrido y desplaza .modalities-track en esa proporcion.
    --------------------------------------------------------------- */
 .modalities {
-  padding-top: 4rem;
+  padding-top: 6rem;
   /* extra height gives scroll distance for the horizontal effect */
   min-height: 220vh;
 }
+
+/* --- Fondo claro a todo el ancho -----------------------------
+   .section esta limitado a 1180px, asi que para que el fondo
+   claro llegue de borde a borde usamos una capa detras que mide
+   100vw y se centra sola. El truco del "left:50% + translateX".
+   ------------------------------------------------------------- */
+.modalities::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 100vw;
+  transform: translateX(-50%);
+  background: var(--surface-light);
+  z-index: -1;
+}
+
+/* Sobre fondo claro hay que invertir los colores del texto */
+.modalities .eyebrow { color: var(--teal-dim); }
+.modalities h2 { color: var(--ink-on-light); }
+.modalities .section-sub { color: var(--ink-on-light-dim); }
 
 .modalities-pin {
   position: sticky;
@@ -363,33 +394,72 @@ body.has-promo .navbar { top: 38px; }
   padding-right: 2rem;
 }
 
+/* --- Tarjeta de servicio -------------------------------------
+   Estructura: ilustracion arriba (.modality-media) y texto abajo
+   (.modality-body). Blanca, borde suave, sin adornos.
+   ------------------------------------------------------------- */
 .modality-card {
   flex: 0 0 clamp(260px, 32vw, 380px);
   height: 100%;
   border-radius: var(--radius);
-  background: linear-gradient(160deg, var(--bg-panel-light), var(--bg-panel));
-  border: 1px solid var(--border);
-  padding: 2.5rem 2rem;
+  background: var(--surface-card);
+  border: 1px solid var(--border-on-light);
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
-  gap: 1rem;
-  transform-style: preserve-3d;
-  transition: transform 0.4s var(--ease), border-color 0.4s;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(10, 20, 32, 0.04);
+  transition: transform 0.4s var(--ease), box-shadow 0.4s;
 }
 .modality-card:hover {
-  transform: translateY(-8px) rotateX(2deg);
-  border-color: var(--teal-dim);
+  transform: translateY(-8px);
+  box-shadow: 0 18px 40px -18px rgba(10, 20, 32, 0.28);
 }
 
-.modality-card .icon {
-  width: 56px; height: 56px;
-  color: var(--teal);
-  margin-bottom: auto;
+/* Zona de la ilustracion */
+.modality-media {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;          /* deja que la imagen se encoja bien */
+  background: #eef2f5;
 }
-.modality-card .icon svg { width: 100%; height: 100%; }
-.modality-card h3 { font-size: 1.3rem; }
-.modality-card p { color: var(--ink-dim); font-size: 0.95rem; }
+.modality-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Iconito flotando sobre la ilustracion */
+.modality-badge {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  background: var(--surface-card);
+  color: var(--teal-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(10, 20, 32, 0.12);
+}
+.modality-badge svg { width: 21px; height: 21px; }
+
+/* Texto de la tarjeta */
+.modality-body {
+  padding: 1.4rem 1.5rem 1.7rem;
+  flex: 0 0 auto;
+}
+.modality-body h3 {
+  font-size: 1.2rem;
+  color: var(--ink-on-light);
+  margin-bottom: 0.45rem;
+}
+.modality-body p {
+  color: var(--ink-on-light-dim);
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
 
 /* ---------------------------------------------------------------
    8. ABOUT STRIP / STATS
@@ -619,8 +689,10 @@ textarea.has-error {
   .nav-toggle { display: flex; }
 
   .section { padding: 4.5rem 1.25rem; }
-  .modalities-pin { height: 60vh; }
-  .modality-card { flex-basis: 78vw; padding: 2rem 1.5rem; }
+  .modalities { padding-top: 4.5rem; }
+  .modalities-pin { height: 62vh; }
+  .modality-card { flex-basis: 80vw; }
+  .modality-body { padding: 1.2rem 1.25rem 1.4rem; }
   .form-row.two-col { grid-template-columns: 1fr; }
   .about-strip-inner { justify-content: center; }
 }
