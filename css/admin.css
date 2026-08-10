@@ -1,0 +1,401 @@
+/* ================================================================
+   PANEL DE ADMINISTRACION - ESTILOS
+   ================================================================
+   Este archivo se carga DESPUES de css/styles.css, asi que
+   reutiliza las mismas variables de color (--teal, --ink, etc.)
+   y solo agrega lo propio del panel.
+
+   Indice:
+     1. Base del panel
+     2. Pantalla de login
+     3. Encabezado y pestanas
+     4. Paneles y titulos
+     5. Tarjetas de reservas
+     6. Editores (fotos y publicaciones)
+     7. Mensajes de estado
+     8. Responsive
+   ================================================================ */
+
+
+/* ---------------------------------------------------------------
+   1. BASE
+   --------------------------------------------------------------- */
+.admin-body {
+  background: var(--bg-deep);
+  min-height: 100vh;
+}
+
+.admin-body .form-row { margin-bottom: 1.1rem; }
+.admin-body .form-row.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.admin-body input,
+.admin-body select,
+.admin-body textarea { width: 100%; }
+
+.admin-body input[type="color"] {
+  height: 42px;
+  padding: 0.25rem;
+  cursor: pointer;
+}
+
+.field-hint {
+  font-size: 0.78rem;
+  color: var(--ink-dim);
+  margin-top: 0.35rem;
+}
+
+.btn-sm { padding: 0.6rem 1.2rem; font-size: 0.87rem; }
+
+/* Boton que parece enlace (para acciones secundarias) */
+.btn-text {
+  background: none;
+  border: none;
+  color: var(--ink-dim);
+  font-size: 0.88rem;
+  cursor: pointer;
+  padding: 0.4rem 0.6rem;
+  transition: color 0.2s;
+}
+.btn-text:hover { color: var(--teal); }
+
+
+/* ---------------------------------------------------------------
+   2. PANTALLA DE LOGIN
+   --------------------------------------------------------------- */
+.login-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+.login-screen[hidden] { display: none; }
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 2.5rem;
+  text-align: center;
+}
+
+.login-logo {
+  width: 90px;
+  border-radius: 50% / 40%;
+  margin: 0 auto 1.5rem;
+}
+
+.login-card h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+.login-sub { color: var(--ink-dim); font-size: 0.9rem; margin-bottom: 1.75rem; }
+.login-card .form-row { text-align: left; }
+.login-card code {
+  background: var(--bg-deep);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+
+
+/* ---------------------------------------------------------------
+   3. ENCABEZADO Y PESTANAS
+   --------------------------------------------------------------- */
+.admin-shell[hidden] { display: none; }
+
+.admin-header {
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-panel);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.admin-header-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.admin-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-family: var(--font-head);
+  font-weight: 600;
+}
+.admin-logo { height: 34px; border-radius: 50% / 40%; }
+
+.admin-header-actions { display: flex; gap: 0.5rem; align-items: center; }
+
+/* Pestanas */
+.admin-tabs {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  display: flex;
+  gap: 0.4rem;
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+}
+
+.admin-tab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--ink-dim);
+  padding: 1rem 0.9rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: color 0.2s, border-color 0.2s;
+}
+.admin-tab:hover { color: var(--ink); }
+.admin-tab.active { color: var(--teal); border-bottom-color: var(--teal); }
+
+/* Contador de reservas pendientes */
+.tab-badge {
+  display: inline-block;
+  min-width: 20px;
+  padding: 0.1rem 0.4rem;
+  margin-left: 0.35rem;
+  border-radius: 999px;
+  background: var(--teal);
+  color: #06141d;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+
+/* ---------------------------------------------------------------
+   4. PANELES
+   --------------------------------------------------------------- */
+.admin-main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 5rem;
+}
+
+.admin-panel { display: none; }
+.admin-panel.active { display: block; }
+
+.panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+}
+.panel-head h2 { font-size: 1.35rem; }
+.panel-sub { color: var(--ink-dim); font-size: 0.9rem; margin-top: 0.3rem; max-width: 55ch; }
+
+/* Caja de ayuda con fondo suave */
+.help-box {
+  background: rgba(45, 212, 191, 0.07);
+  border: 1px solid rgba(45, 212, 191, 0.25);
+  border-radius: var(--radius-sm);
+  padding: 0.9rem 1.1rem;
+  font-size: 0.86rem;
+  color: var(--ink-dim);
+  margin-bottom: 1.5rem;
+}
+.help-box strong { color: var(--teal); }
+
+/* Filtros */
+.filter-row { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+.filter-chip {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--ink-dim);
+  padding: 0.45rem 1rem;
+  font-size: 0.84rem;
+  transition: all 0.2s;
+}
+.filter-chip:hover { border-color: var(--teal); color: var(--ink); }
+.filter-chip.active { background: var(--teal); border-color: var(--teal); color: #06141d; font-weight: 600; }
+
+
+/* ---------------------------------------------------------------
+   5. TARJETAS DE RESERVAS
+   --------------------------------------------------------------- */
+.bookings-list { display: flex; flex-direction: column; gap: 1rem; }
+
+.booking-card {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: space-between;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--mid-gray, #b0aea5);
+  border-radius: var(--radius);
+  padding: 1.4rem 1.6rem;
+}
+/* Barra de color a la izquierda segun el estado */
+.booking-card.pending   { border-left-color: var(--amber); }
+.booking-card.confirmed { border-left-color: var(--teal); }
+.booking-card.cancelled { border-left-color: var(--danger); opacity: 0.6; }
+
+.booking-main { flex: 1; min-width: 0; }
+
+.booking-top {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.3rem;
+}
+.booking-top h3 { font-size: 1.1rem; }
+
+.status-pill {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+}
+.status-pill.pending   { background: rgba(217, 164, 65, 0.18); color: var(--amber); }
+.status-pill.confirmed { background: rgba(45, 212, 191, 0.18); color: var(--teal); }
+.status-pill.cancelled { background: rgba(224, 122, 122, 0.18); color: var(--danger); }
+
+.booking-service { color: var(--teal); font-size: 0.9rem; font-weight: 500; }
+.booking-when { font-size: 0.95rem; margin: 0.4rem 0 0.7rem; }
+
+.booking-contact { display: flex; gap: 1rem; flex-wrap: wrap; font-size: 0.85rem; }
+.booking-contact a { color: var(--ink-dim); text-decoration: underline; text-underline-offset: 3px; }
+.booking-contact a:hover { color: var(--teal); }
+
+.booking-notes {
+  margin-top: 0.7rem;
+  font-size: 0.87rem;
+  color: var(--ink-dim);
+  font-style: italic;
+}
+.booking-id { margin-top: 0.6rem; font-size: 0.72rem; color: var(--ink-dim); opacity: 0.6; }
+
+.booking-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.btn-mini {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--ink-dim);
+  padding: 0.45rem 0.9rem;
+  font-size: 0.82rem;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+.btn-mini:hover { border-color: var(--ink-dim); color: var(--ink); }
+.btn-mini.confirm:hover { border-color: var(--teal); color: var(--teal); }
+.btn-mini.cancel:hover { border-color: var(--danger); color: var(--danger); }
+
+
+/* ---------------------------------------------------------------
+   6. EDITORES (fotos del banner y publicaciones)
+   --------------------------------------------------------------- */
+.editor-list { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.25rem; }
+
+.editor-item {
+  position: relative;
+  display: flex;
+  gap: 1.25rem;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.4rem;
+}
+
+/* Miniatura de la foto */
+.editor-preview {
+  flex: 0 0 130px;
+  height: 90px;
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-deep);
+  background-size: cover;
+  background-position: center;
+  border: 1px solid var(--border);
+}
+
+.editor-fields { flex: 1; min-width: 0; }
+.editor-fields .form-row:last-child { margin-bottom: 0; }
+
+/* Boton de quitar (la X de la esquina) */
+.btn-remove {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--bg-deep);
+  color: var(--ink-dim);
+  font-size: 1.1rem;
+  line-height: 1;
+  transition: all 0.2s;
+}
+.btn-remove:hover { border-color: var(--danger); color: var(--danger); }
+
+.post-item { padding-right: 3rem; }
+
+
+/* ---------------------------------------------------------------
+   7. MENSAJES DE ESTADO
+   --------------------------------------------------------------- */
+.save-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.save-status { font-size: 0.86rem; }
+.save-status.success { color: var(--teal); }
+.save-status.error { color: var(--danger); }
+
+.loading, .empty-box {
+  color: var(--ink-dim);
+  font-size: 0.92rem;
+  text-align: center;
+  padding: 2.5rem 1rem;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+}
+
+.error-box {
+  color: var(--danger);
+  font-size: 0.9rem;
+  padding: 1.25rem;
+  border: 1px solid rgba(224, 122, 122, 0.3);
+  background: rgba(224, 122, 122, 0.06);
+  border-radius: var(--radius);
+}
+
+
+/* ---------------------------------------------------------------
+   8. RESPONSIVE
+   --------------------------------------------------------------- */
+@media (max-width: 720px) {
+  .admin-main { padding: 1.75rem 1rem 4rem; }
+
+  /* Las tarjetas de reserva pasan a una sola columna */
+  .booking-card { flex-direction: column; gap: 1rem; }
+  .booking-actions { flex-direction: row; flex-wrap: wrap; }
+
+  /* Los editores tambien */
+  .editor-item { flex-direction: column; }
+  .editor-preview { flex: none; width: 100%; height: 120px; }
+
+  .admin-body .form-row.two-col { grid-template-columns: 1fr; }
+  .panel-head { flex-direction: column; }
+}
