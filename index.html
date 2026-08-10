@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RDC Saint Kitts — Radiology Diagnostic Center</title>
+<meta name="description" content="RDC Saint Kitts — advanced diagnostic imaging including X-Ray, Ultrasound, CT, MRI and Mammography. Book your appointment online.">
+
+<!--
+  =============================================================
+  FILE MAP (read this if you're new to the project)
+  =============================================================
+  index.html        <- you are here. Page structure/content only.
+  css/styles.css     <- all visual styling + animations.
+  js/config.js        <- EDIT THIS FIRST for text/contact/services.
+  js/icons.js          <- inline SVG icons used around the site.
+  js/main.js            <- navigation + scroll/3D animation logic.
+  js/booking.js          <- appointment form + notification hookup.
+  js/studies.js            <- "Studies & Work" feed logic.
+  data/sample-studies.json  <- fallback content for Studies section.
+  README.md                  <- full setup + editing guide.
+  =============================================================
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<!-- ============================================================
+     NAVIGATION
+     ============================================================ -->
+<header class="navbar" id="navbar">
+  <div class="navbar-inner">
+    <a href="#hero" class="brand">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-name" id="brandName">RDC Saint Kitts</span>
+    </a>
+
+    <nav class="nav-links" id="navLinks" aria-label="Primary">
+      <a href="#modalities">Modalities</a>
+      <a href="#studies">Studies &amp; Work</a>
+      <a href="#contact">Contact</a>
+      <a href="#booking" class="nav-cta">Book Appointment</a>
+    </nav>
+
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<main>
+
+  <!-- ==========================================================
+       HERO
+       ========================================================== -->
+  <section class="section hero" id="hero">
+    <div class="hero-layers" aria-hidden="true">
+      <div class="hero-layer layer-1"></div>
+      <div class="hero-layer layer-2"></div>
+      <div class="hero-layer layer-3"></div>
+    </div>
+
+    <div class="hero-content">
+      <p class="eyebrow">Diagnostic Imaging · St. Kitts &amp; Nevis</p>
+      <h1 id="heroTitle">Advanced Imaging.<br>Compassionate Care.</h1>
+      <p class="hero-sub" id="heroSub">Serving St. Kitts &amp; Nevis with modern diagnostic radiology.</p>
+
+      <div class="hero-actions">
+        <a href="#booking" class="btn btn-primary">Book an Appointment</a>
+        <a href="#modalities" class="btn btn-ghost">See Our Services</a>
+      </div>
+    </div>
+
+    <div class="scroll-hint" aria-hidden="true">
+      <span>Scroll</span>
+      <div class="scroll-hint-line"></div>
+    </div>
+  </section>
+
+  <!-- ==========================================================
+       MODALITIES — horizontal-scrolling carousel
+       Cards are generated from js/config.js -> SITE_CONFIG.modalities
+       ========================================================== -->
+  <section class="section modalities" id="modalities">
+    <div class="section-heading">
+      <p class="eyebrow">What We Offer</p>
+      <h2>Our Modalities</h2>
+      <p class="section-sub">Scroll down to move through our full range of imaging services.</p>
+    </div>
+
+    <div class="modalities-pin" id="modalitiesPin">
+      <div class="modalities-track" id="modalitiesTrack" role="list">
+        <!-- JS injects one .modality-card per item in SITE_CONFIG.modalities -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================
+       QUICK STATS / ABOUT STRIP
+       ========================================================== -->
+  <section class="section about-strip">
+    <div class="about-strip-inner">
+      <div class="stat">
+        <span class="stat-number" data-count="6">0</span>
+        <span class="stat-label">Imaging Modalities</span>
+      </div>
+      <div class="stat">
+        <span class="stat-number" data-count="7">0</span>
+        <span class="stat-label">Days a Week Support</span>
+      </div>
+      <div class="stat">
+        <span class="stat-number" data-count="100" data-suffix="%">0</span>
+        <span class="stat-label">Locally Focused Care</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================
+       BOOKING — appointment form
+       ========================================================== -->
+  <section class="section booking" id="booking">
+    <div class="booking-inner">
+      <div class="booking-intro">
+        <p class="eyebrow">Book an Appointment</p>
+        <h2>Let's find you a time.</h2>
+        <p class="section-sub">
+          Fill out the form and our team will confirm your appointment.
+          Prefer to talk? Call or WhatsApp us directly.
+        </p>
+
+        <div class="booking-contact-links">
+          <a id="callLink" href="tel:+18696657171" class="contact-pill">
+            <span class="icon" data-icon="phone"></span> Call the Center
+          </a>
+          <a id="whatsappLink" href="#" target="_blank" rel="noopener" class="contact-pill">
+            <span class="icon" data-icon="whatsapp"></span> WhatsApp Us
+          </a>
+        </div>
+      </div>
+
+      <form class="booking-form" id="bookingForm" novalidate>
+        <div class="form-row">
+          <label for="fullName">Full Name</label>
+          <input type="text" id="fullName" name="fullName" required autocomplete="name">
+        </div>
+
+        <div class="form-row two-col">
+          <div>
+            <label for="phone">Phone Number</label>
+            <input type="tel" id="phone" name="phone" required autocomplete="tel">
+          </div>
+          <div>
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required autocomplete="email">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <label for="modality">Imaging Needed</label>
+          <select id="modality" name="modality" required>
+            <option value="" disabled selected>Select a modality</option>
+            <!-- JS fills options from SITE_CONFIG.modalities -->
+          </select>
+        </div>
+
+        <div class="form-row two-col">
+          <div>
+            <label for="preferredDate">Preferred Date</label>
+            <input type="date" id="preferredDate" name="preferredDate" required>
+          </div>
+          <div>
+            <label for="preferredTime">Preferred Time</label>
+            <select id="preferredTime" name="preferredTime" required>
+              <option value="" disabled selected>Select a time</option>
+              <!-- JS fills options from SITE_CONFIG.booking.timeSlots -->
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <label for="notes">Notes (optional)</label>
+          <textarea id="notes" name="notes" rows="3" placeholder="Referral info, questions, or anything we should know."></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" id="bookingSubmit">
+          Request Appointment
+        </button>
+
+        <p class="form-status" id="formStatus" role="status" aria-live="polite"></p>
+      </form>
+    </div>
+  </section>
+
+  <!-- ==========================================================
+       STUDIES & WORK TO SHARE
+       Content is loaded by js/studies.js from a Google Sheet
+       (if configured) or data/sample-studies.json as a fallback.
+       ========================================================== -->
+  <section class="section studies" id="studies">
+    <div class="section-heading">
+      <p class="eyebrow">From the Center</p>
+      <h2>Studies &amp; Work We're Sharing</h2>
+      <p class="section-sub">Updates, news, and imaging highlights from our team.</p>
+    </div>
+
+    <div class="studies-grid" id="studiesGrid">
+      <!-- JS injects .study-card items here -->
+    </div>
+  </section>
+
+  <!-- ==========================================================
+       CONTACT / FOOTER
+       ========================================================== -->
+  <section class="section contact" id="contact">
+    <div class="contact-inner">
+      <div class="contact-block">
+        <p class="eyebrow">Visit or Reach Us</p>
+        <h2 id="contactHeading">Get in Touch</h2>
+
+        <ul class="contact-list">
+          <li><span class="icon" data-icon="pin"></span> <span id="contactAddress">Basseterre, St. Kitts &amp; Nevis</span></li>
+          <li><span class="icon" data-icon="phone"></span> <a id="contactPhone" href="tel:+18696657171">(869) 665-7171</a></li>
+          <li><span class="icon" data-icon="mail"></span> <a id="contactEmail" href="mailto:rad.dg.center@gmail.com">rad.dg.center@gmail.com</a></li>
+        </ul>
+
+        <ul class="hours-list" id="hoursList">
+          <!-- JS fills from SITE_CONFIG.contact.hours -->
+        </ul>
+
+        <div class="social-links" id="socialLinks">
+          <!-- JS fills from SITE_CONFIG.social -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <p>&copy; <span id="year"></span> <span id="footerName">RDC Saint Kitts</span>. All rights reserved.</p>
+</footer>
+
+<!-- Scripts load in order: config/icons first (data), then behavior -->
+<script src="js/config.js"></script>
+<script src="js/icons.js"></script>
+<script src="js/main.js"></script>
+<script src="js/booking.js"></script>
+<script src="js/studies.js"></script>
+</body>
+</html>
