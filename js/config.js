@@ -61,8 +61,12 @@ const SITE_CONFIG = {
   // lista solo sirve de respaldo.
   hero: {
     slides: [
-      // Ejemplo: { image: "assets/banner1.jpg", caption: "Nuestro equipo" }
-      // Vacio por ahora - se llena con las fotos del cliente.
+      // IMAGENES DE RELLENO - reemplazar con fotos reales.
+      // La forma facil: panel admin -> Banner Photos.
+      // La otra: pon las fotos en assets/ y cambia las rutas aqui.
+      { image: "assets/placeholders/banner-1.svg", caption: "Reception" },
+      { image: "assets/placeholders/banner-2.svg", caption: "Imaging suite" },
+      { image: "assets/placeholders/banner-3.svg", caption: "Our team" }
     ],
     slideDurationMs: 5000, // tiempo de cada imagen antes de cambiar
     enableAutoplay: true
@@ -72,37 +76,52 @@ const SITE_CONFIG = {
   // 5. MODALIDADES (servicios)
   // El carrusel de servicios y el desplegable del formulario se
   // generan solos desde esta lista. Editar aqui es suficiente.
-  // "icon" debe ser una de las llaves en js/icons.js
+  //
+  //   name        -> nombre que ve el paciente
+  //   icon        -> llave de js/icons.js (el iconito pequeno)
+  //   image       -> ilustracion grande de la tarjeta
+  //   description -> texto corto debajo del titulo
+  //
+  // Las ilustraciones estan en assets/services/ y son SVG, o sea
+  // que se ven nitidas en cualquier pantalla y pesan casi nada.
+  // Si prefieres fotos reales, cambia la ruta por tu .jpg y listo
+  // (recomendado horizontal, ~800x600).
   // ---------------------------------------------------------
   modalities: [
     {
       name: "Digital X-Ray",
       icon: "xray",
+      image: "assets/services/xray.svg",
       description: "Fast, low-dose digital radiography for bones, chest, and joint imaging."
     },
     {
       name: "Ultrasound (incl. 3D/4D)",
       icon: "ultrasound",
+      image: "assets/services/ultrasound.svg",
       description: "General, obstetric, and vascular ultrasound with high-resolution 3D/4D imaging."
     },
     {
       name: "CT Scan",
       icon: "ct",
+      image: "assets/services/ct.svg",
       description: "Detailed cross-sectional imaging for rapid, accurate diagnosis."
     },
     {
       name: "MRI",
       icon: "mri",
+      image: "assets/services/mri.svg",
       description: "High-field magnetic resonance imaging for soft tissue, brain, and spine studies."
     },
     {
       name: "Mammography",
       icon: "mammography",
+      image: "assets/services/mammography.svg",
       description: "Digital breast imaging for screening and diagnostic evaluation."
     },
     {
       name: "Bone Densitometry (DEXA)",
       icon: "bone",
+      image: "assets/services/bone.svg",
       description: "Precise bone density scanning for osteoporosis screening."
     }
   ], // PLACEHOLDER - confirmar la lista real de servicios
@@ -157,6 +176,10 @@ const SITE_CONFIG = {
   // manejan desde el panel admin y esto se ignora.
   // Si no, el sitio usa data/sample-studies.json como respaldo.
   studies: {
-    sheetCsvUrl: "" // Opcional - alternativa via Google Sheets publicado
+    sheetCsvUrl: "", // Opcional - alternativa via Google Sheets publicado
+
+    // Imagen que se usa cuando una publicacion no trae portada.
+    // Es de relleno: al poner el enlace real en el admin, se cambia.
+    defaultImage: "assets/placeholders/post.svg"
   }
 };

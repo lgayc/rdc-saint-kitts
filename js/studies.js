@@ -143,10 +143,13 @@ function postToCardHtml(post) {
   const color = post.color || "#2dd4bf";
   const dateLabel = formatDate(post.date);
 
-  // Si la publicacion trae imagen se usa como portada;
-  // si no, un degradado con el color elegido.
-  const media = post.image
-    ? `<div class="study-card-media" style="background-image:url('${escapeAttr(post.image)}')"></div>`
+  // Portada: la imagen de la publicacion si tiene; si no, la
+  // imagen de relleno configurada; y si tampoco hay, un degradado
+  // con el color elegido. Asi nunca queda un hueco vacio.
+  const cover = post.image || SITE_CONFIG.studies.defaultImage;
+
+  const media = cover
+    ? `<div class="study-card-media" style="background-image:url('${escapeAttr(cover)}')"></div>`
     : `<div class="study-card-media" style="background:linear-gradient(135deg, ${escapeAttr(color)}, transparent)"></div>`;
 
   const card = `
