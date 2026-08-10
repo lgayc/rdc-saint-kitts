@@ -1,0 +1,481 @@
+/* ================================================================
+   RDC SAINT KITTS — STYLES
+   ================================================================
+   Table of contents (search for these headers to jump around):
+     1. Design tokens (colors, fonts, spacing)
+     2. Reset & base
+     3. Layout helpers / buttons / section heading
+     4. Navbar
+     5. Hero (parallax 3D layers)
+     6. Modalities (horizontal-scroll carousel)
+     7. About strip / stats
+     8. Booking form
+     9. Studies grid
+    10. Contact / footer
+    11. Reveal-on-scroll animation classes
+    12. Responsive (mobile)
+   ================================================================ */
+
+/* ---------------------------------------------------------------
+   1. DESIGN TOKENS
+   Change these variables to re-theme the entire site.
+   --------------------------------------------------------------- */
+:root {
+  /* Clinical-modern palette */
+  --bg-deep: #0a1420;
+  --bg-panel: #0f1e2e;
+  --bg-panel-light: #142838;
+  --ink: #eaf2f6;
+  --ink-dim: #9db2c2;
+  --teal: #2dd4bf;
+  --teal-dim: #1a8f81;
+  --blue: #4d8fd6;
+  --amber: #d9a441;
+  --border: rgba(234, 242, 246, 0.1);
+
+  --font-head: 'Space Grotesk', 'Poppins', Arial, sans-serif;
+  --font-body: 'Inter', Georgia, sans-serif;
+
+  --radius: 14px;
+  --radius-sm: 8px;
+  --container: 1180px;
+
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ---------------------------------------------------------------
+   2. RESET & BASE
+   --------------------------------------------------------------- */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg-deep);
+  color: var(--ink);
+  font-family: var(--font-body);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-head);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+
+a { color: inherit; text-decoration: none; }
+img { max-width: 100%; display: block; }
+ul { list-style: none; }
+button { font: inherit; cursor: pointer; }
+
+.section {
+  position: relative;
+  padding: 7rem 1.5rem;
+  max-width: var(--container);
+  margin: 0 auto;
+}
+
+/* ---------------------------------------------------------------
+   3. LAYOUT HELPERS / BUTTONS / SECTION HEADING
+   --------------------------------------------------------------- */
+.eyebrow {
+  color: var(--teal);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+}
+
+.section-heading { max-width: 640px; margin-bottom: 3.5rem; }
+.section-sub { color: var(--ink-dim); margin-top: 0.75rem; font-size: 1.05rem; }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.9rem 1.8rem;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border: 1px solid transparent;
+  transition: transform 0.25s var(--ease), background 0.25s, box-shadow 0.25s;
+}
+.btn:hover { transform: translateY(-2px); }
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--teal), var(--blue));
+  color: #06141d;
+  box-shadow: 0 10px 30px -10px rgba(45, 212, 191, 0.5);
+}
+.btn-primary:hover { box-shadow: 0 14px 34px -8px rgba(45, 212, 191, 0.65); }
+
+.btn-ghost {
+  background: transparent;
+  border-color: var(--border);
+  color: var(--ink);
+}
+.btn-ghost:hover { border-color: var(--teal); color: var(--teal); }
+
+.btn-block { width: 100%; justify-content: center; }
+
+.icon svg { width: 1.1em; height: 1.1em; display: block; }
+
+/* ---------------------------------------------------------------
+   4. NAVBAR
+   --------------------------------------------------------------- */
+.navbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  backdrop-filter: blur(10px);
+  background: rgba(10, 20, 32, 0.55);
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.3s, background 0.3s;
+}
+.navbar.scrolled {
+  border-color: var(--border);
+  background: rgba(10, 20, 32, 0.85);
+}
+
+.navbar-inner {
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 1.1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand { display: flex; align-items: center; gap: 0.6rem; }
+.brand-mark {
+  width: 12px; height: 12px;
+  border-radius: 3px;
+  background: linear-gradient(135deg, var(--teal), var(--blue));
+  transform: rotate(45deg);
+}
+.brand-name { font-family: var(--font-head); font-weight: 700; letter-spacing: -0.02em; font-size: 1.1rem; }
+
+.nav-links { display: flex; align-items: center; gap: 2rem; }
+.nav-links a { font-size: 0.92rem; color: var(--ink-dim); transition: color 0.2s; }
+.nav-links a:hover { color: var(--ink); }
+.nav-cta {
+  padding: 0.55rem 1.2rem;
+  border-radius: 999px;
+  background: var(--teal);
+  color: #06141d !important;
+  font-weight: 600;
+}
+
+.nav-toggle {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+}
+.nav-toggle span { width: 22px; height: 2px; background: var(--ink); transition: transform 0.25s, opacity 0.25s; }
+
+/* ---------------------------------------------------------------
+   5. HERO — parallax "3D" layers
+   --------------------------------------------------------------- */
+.hero {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  perspective: 1000px;
+  overflow: hidden;
+  padding-top: 6rem;
+}
+
+.hero-layers { position: absolute; inset: 0; z-index: 0; }
+.hero-layer {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.35;
+  will-change: transform;
+}
+.layer-1 { width: 520px; height: 520px; background: var(--teal); top: -120px; left: -120px; }
+.layer-2 { width: 420px; height: 420px; background: var(--blue); bottom: -140px; right: -100px; }
+.layer-3 { width: 300px; height: 300px; background: var(--amber); top: 40%; right: 15%; opacity: 0.18; }
+
+.hero-content { position: relative; z-index: 1; max-width: 780px; }
+.hero-content h1 { font-size: clamp(2.4rem, 6vw, 4.2rem); }
+.hero-sub { color: var(--ink-dim); font-size: 1.15rem; margin: 1.25rem auto 2.25rem; max-width: 520px; }
+.hero-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+.scroll-hint {
+  position: absolute;
+  bottom: 2.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--ink-dim);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.scroll-hint-line {
+  width: 1px; height: 34px;
+  background: linear-gradient(var(--teal), transparent);
+  animation: scrollHint 1.8s ease-in-out infinite;
+}
+@keyframes scrollHint {
+  0% { transform: scaleY(0); transform-origin: top; opacity: 0; }
+  50% { transform: scaleY(1); transform-origin: top; opacity: 1; }
+  51% { transform-origin: bottom; }
+  100% { transform: scaleY(0); transform-origin: bottom; opacity: 0; }
+}
+
+/* ---------------------------------------------------------------
+   6. MODALITIES — vertical scroll drives horizontal movement
+   How it works: .modalities-pin becomes `position: sticky` and
+   stays in view while its parent .section is tall. js/main.js
+   measures scroll progress through that section and translates
+   .modalities-track left/right accordingly. See main.js
+   "Horizontal scroll-driven carousel" section.
+   --------------------------------------------------------------- */
+.modalities {
+  padding-top: 4rem;
+  /* extra height gives scroll distance for the horizontal effect */
+  min-height: 220vh;
+}
+
+.modalities-pin {
+  position: sticky;
+  top: 90px;
+  height: 66vh;
+  overflow: hidden;
+  border-radius: var(--radius);
+}
+
+.modalities-track {
+  display: flex;
+  gap: 1.5rem;
+  height: 100%;
+  will-change: transform;
+  padding-right: 2rem;
+}
+
+.modality-card {
+  flex: 0 0 clamp(260px, 32vw, 380px);
+  height: 100%;
+  border-radius: var(--radius);
+  background: linear-gradient(160deg, var(--bg-panel-light), var(--bg-panel));
+  border: 1px solid var(--border);
+  padding: 2.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 1rem;
+  transform-style: preserve-3d;
+  transition: transform 0.4s var(--ease), border-color 0.4s;
+}
+.modality-card:hover {
+  transform: translateY(-8px) rotateX(2deg);
+  border-color: var(--teal-dim);
+}
+
+.modality-card .icon {
+  width: 56px; height: 56px;
+  color: var(--teal);
+  margin-bottom: auto;
+}
+.modality-card .icon svg { width: 100%; height: 100%; }
+.modality-card h3 { font-size: 1.3rem; }
+.modality-card p { color: var(--ink-dim); font-size: 0.95rem; }
+
+/* ---------------------------------------------------------------
+   7. ABOUT STRIP / STATS
+   --------------------------------------------------------------- */
+.about-strip { padding: 3rem 1.5rem; }
+.about-strip-inner {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 2rem;
+  padding: 2.5rem;
+  border-radius: var(--radius);
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+}
+.stat { text-align: center; }
+.stat-number {
+  display: block;
+  font-family: var(--font-head);
+  font-size: 2.6rem;
+  font-weight: 700;
+  color: var(--teal);
+}
+.stat-label { color: var(--ink-dim); font-size: 0.9rem; }
+
+/* ---------------------------------------------------------------
+   8. BOOKING FORM
+   --------------------------------------------------------------- */
+.booking-inner {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 3.5rem;
+  align-items: start;
+}
+
+.booking-contact-links { display: flex; gap: 0.8rem; margin-top: 2rem; flex-wrap: wrap; }
+.contact-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.1rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  font-size: 0.88rem;
+  color: var(--ink-dim);
+  transition: border-color 0.2s, color 0.2s;
+}
+.contact-pill:hover { border-color: var(--teal); color: var(--ink); }
+
+.booking-form {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.3rem;
+}
+
+.form-row { display: flex; flex-direction: column; gap: 0.5rem; }
+.form-row.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.3rem; }
+
+label { font-size: 0.85rem; color: var(--ink-dim); }
+
+input, select, textarea {
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 0.9rem;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  transition: border-color 0.2s;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--teal);
+}
+
+.form-status {
+  min-height: 1.2em;
+  font-size: 0.88rem;
+}
+.form-status.success { color: var(--teal); }
+.form-status.error { color: #e07a7a; }
+
+/* ---------------------------------------------------------------
+   9. STUDIES GRID
+   --------------------------------------------------------------- */
+.studies-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.75rem;
+}
+
+.study-card {
+  border-radius: var(--radius);
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  transition: transform 0.3s var(--ease), border-color 0.3s;
+}
+.study-card:hover { transform: translateY(-6px); border-color: var(--teal-dim); }
+
+.study-card-media { height: 140px; }
+.study-card-body { padding: 1.6rem; }
+.study-card-date { color: var(--ink-dim); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; }
+.study-card h3 { font-size: 1.15rem; margin: 0.5rem 0 0.6rem; }
+.study-card p { color: var(--ink-dim); font-size: 0.92rem; }
+
+.studies-empty { color: var(--ink-dim); font-size: 0.95rem; }
+
+/* ---------------------------------------------------------------
+   10. CONTACT / FOOTER
+   --------------------------------------------------------------- */
+.contact { padding-bottom: 4rem; }
+.contact-block { max-width: 560px; }
+.contact-list { display: flex; flex-direction: column; gap: 0.9rem; margin: 1.5rem 0; }
+.contact-list li { display: flex; align-items: center; gap: 0.7rem; color: var(--ink-dim); }
+.contact-list .icon { color: var(--teal); }
+
+.hours-list { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1.75rem; font-size: 0.92rem; }
+.hours-list li { display: flex; justify-content: space-between; max-width: 320px; color: var(--ink-dim); }
+.hours-list li span:last-child { color: var(--ink); }
+
+.social-links { display: flex; gap: 0.8rem; }
+.social-links a {
+  width: 42px; height: 42px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  color: var(--ink-dim);
+  transition: border-color 0.2s, color 0.2s, transform 0.2s;
+}
+.social-links a svg { width: 18px; height: 18px; }
+.social-links a:hover { border-color: var(--teal); color: var(--teal); transform: translateY(-3px); }
+
+.site-footer {
+  text-align: center;
+  padding: 2rem 1.5rem 3rem;
+  color: var(--ink-dim);
+  font-size: 0.85rem;
+  border-top: 1px solid var(--border);
+}
+
+/* ---------------------------------------------------------------
+   11. REVEAL-ON-SCROLL
+   Elements with class="reveal" fade/slide in once they enter the
+   viewport. Toggled by js/main.js via IntersectionObserver.
+   --------------------------------------------------------------- */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+}
+.reveal.in-view { opacity: 1; transform: translateY(0); }
+
+/* ---------------------------------------------------------------
+   12. RESPONSIVE
+   --------------------------------------------------------------- */
+@media (max-width: 900px) {
+  .booking-inner { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 720px) {
+  .nav-links {
+    position: fixed;
+    top: 68px; left: 0; right: 0;
+    background: rgba(10, 20, 32, 0.97);
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1.5rem;
+    gap: 1.25rem;
+    border-bottom: 1px solid var(--border);
+    transform: translateY(-130%);
+    transition: transform 0.3s var(--ease);
+  }
+  .nav-links.open { transform: translateY(0); }
+  .nav-toggle { display: flex; }
+
+  .section { padding: 4.5rem 1.25rem; }
+  .modalities-pin { height: 60vh; }
+  .modality-card { flex-basis: 78vw; padding: 2rem 1.5rem; }
+  .form-row.two-col { grid-template-columns: 1fr; }
+  .about-strip-inner { justify-content: center; }
+}
