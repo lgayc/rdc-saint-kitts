@@ -324,23 +324,6 @@ body.has-promo .navbar { top: 38px; }
 .layer-3 { width: 300px; height: 300px; background: var(--amber); top: 40%; right: 15%; opacity: 0.12; }
 
 /* --- Capa 3: el texto --- */
-/* ------------------------------------------------------------
-   Entrada del titular: la primera línea llega desde la derecha
-   y la segunda desde la izquierda, apenas escalonadas.
-
-   Va en CSS puro y con fill-mode both a propósito: el estado
-   invisible existe sólo dentro del keyframe, así que si el
-   navegador no corre la animación el titular se ve igual de
-   entrada. Nunca puede quedar en blanco.
-   ------------------------------------------------------------ */
-@keyframes hero-in-right{
-  from{ opacity:0; transform:translateX(80%); }
-  to  { opacity:1; transform:translateX(0); }
-}
-@keyframes hero-in-left{
-  from{ opacity:0; transform:translateX(-80%); }
-  to  { opacity:1; transform:translateX(0); }
-}
 
 /* .hero-line, no :first-child: dentro del <h1> ahora hay un kicker antes
    (el que dice el servicio y el lugar) y la animación no va sobre él.
