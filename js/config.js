@@ -20,8 +20,6 @@ const SITE_CONFIG = {
   tagline: "Advanced Imaging. Compassionate Care.",
   subTagline: "Serving St. Kitts & Nevis with modern diagnostic radiology.",
 
-  // Logo del cliente. Para cambiarlo, reemplaza el archivo en
-  // assets/logo.jpg (manteniendo el mismo nombre) o cambia la ruta.
   logo: "assets/logo.jpg",
 
   // ---------------------------------------------------------
@@ -52,14 +50,18 @@ const SITE_CONFIG = {
   // 4. CARRUSEL DEL BANNER (hero)
   // ---------------------------------------------------------
   hero: {
+    // Fotos reales del cliente. La primera es la unidad movil con
+    // el logo RDC, que es lo mas propio de la clinica: por eso va
+    // de primera, es lo que ve todo el que entra.
+    //
+    // Para cambiarlas sin tocar codigo: panel admin -> Banner Photos.
     slides: [
-      // IMAGENES DE RELLENO - reemplazar con fotos reales.
-      // La forma facil: panel admin -> Banner Photos.
-      { image: "assets/placeholders/banner-1.svg", caption: "Reception" },
-      { image: "assets/placeholders/banner-2.svg", caption: "Imaging suite" },
-      { image: "assets/placeholders/banner-3.svg", caption: "Our team" }
+      { image: "assets/banners/mobile-unit.jpg",  caption: "Our mobile diagnostic unit" },
+      { image: "assets/banners/mri-suite.jpg",    caption: "MRI suite" },
+      { image: "assets/banners/control-room.jpg", caption: "Reading room" },
+      { image: "assets/banners/unit-sunset.jpg",  caption: "On the road across St. Kitts" }
     ],
-    slideDurationMs: 5000,
+    slideDurationMs: 5000, // tiempo de cada imagen antes de cambiar
     enableAutoplay: true
   },
 
@@ -73,11 +75,6 @@ const SITE_CONFIG = {
   //   image       -> ilustracion grande de la tarjeta
   //   description -> texto corto debajo del titulo
   //   details     -> lo que sale en la ventana al hacer clic
-  //
-  // Las ilustraciones estan en assets/services/ y son SVG, o sea
-  // que se ven nitidas en cualquier pantalla y pesan casi nada.
-  // Si prefieres fotos o iconos comprados, cambia la ruta por tu
-  // archivo y listo (recomendado horizontal, ~800x680).
   //
   // >>> IMPORTANTE SOBRE EL CONTENIDO CLINICO <<<
   // Los textos de "details" son descripciones generales, correctas
@@ -248,6 +245,8 @@ const SITE_CONFIG = {
   // ---------------------------------------------------------
   studies: {
     sheetCsvUrl: "",
-    defaultImage: "assets/placeholders/post.svg"
+
+    // Portada por defecto cuando una publicacion no trae imagen.
+    defaultImage: "assets/posts/ct-chest.jpg"
   }
 };
