@@ -1,23 +1,26 @@
 [
   {
-    "title": "New MRI Technology Now Available",
+    "title": "3D Cardiac Reconstruction",
+    "date": "2026-07-22",
+    "excerpt": "Volume rendering from a cardiac CT study, reconstructed in-house. This level of detail helps assess the coronary arteries without an invasive procedure.",
+    "image": "assets/posts/cardiac-3d.jpg",
+    "color": "#12a594",
+    "link": ""
+  },
+  {
+    "title": "Lower Limb CT Angiography",
     "date": "2026-06-15",
-    "excerpt": "We're proud to introduce faster, quieter MRI scans with improved patient comfort — shorter appointment times for most studies.",
-    "color": "#1fb6a6",
+    "excerpt": "CT angiography mapping the arteries of both legs in a single study. Useful for evaluating circulation and planning vascular treatment.",
+    "image": "assets/posts/cta-vascular.jpg",
+    "color": "#3b7fc4",
     "link": ""
   },
   {
-    "title": "Understanding Your Ultrasound Results",
+    "title": "High-Resolution Chest CT",
     "date": "2026-05-28",
-    "excerpt": "A short guide to what happens during an ultrasound and how to prepare, straight from our sonography team.",
-    "color": "#4d8fd6",
-    "link": ""
-  },
-  {
-    "title": "Free Community Screening Day",
-    "date": "2026-04-10",
-    "excerpt": "Thank you to everyone who joined our free bone density screening event in Basseterre this spring.",
-    "color": "#c98b3f",
+    "excerpt": "Axial chest imaging showing lung detail and surrounding structures. One of our most requested studies for respiratory assessment.",
+    "image": "assets/posts/ct-chest.jpg",
+    "color": "#c08829",
     "link": ""
   }
 ]
