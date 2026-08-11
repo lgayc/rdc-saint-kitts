@@ -70,8 +70,7 @@ function populateContent() {
   setText("contactPhone", cfg.contact.phoneDisplay);
   setText("contactEmail", cfg.contact.email);
 
-  const heroTitle = document.getElementById("heroTitle");
-  if (heroTitle) heroTitle.innerHTML = cfg.tagline.replace(". ", ".<br>");
+  renderHeroTitle(cfg.tagline);
 
   // --- Enlaces ------------------------------------------------
   const telHref = `tel:${cfg.contact.phone.replace(/\s/g, "")}`;
@@ -134,6 +133,44 @@ function populateContent() {
     const svg = ICONS[el.dataset.icon];
     if (svg) el.innerHTML = svg;
   });
+}
+
+/**
+ * TITULO DEL BANNER CON ENTRADA POR LADOS
+ * ---------------------------------------------------------------
+ * Parte el titulo en lineas y mete cada una en su propio <span>.
+ * Luego alterna la clase: la 1ra entra desde la IZQUIERDA, la 2da
+ * desde la DERECHA, la 3ra desde la izquierda otra vez, etc.
+ * La animacion en si esta en css/styles.css (.hero-line).
+ *
+ * Como se decide donde cortar la linea:
+ *   1. Si el texto trae saltos de linea (el admin puede escribirlos
+ *      en el panel), se respetan tal cual.
+ *   2. Si no, se corta despues de cada punto seguido.
+ *
+ * Ejemplo: "Advanced Imaging. Compassionate Care."
+ *   -> linea 1: "Advanced Imaging."     (entra por la izquierda)
+ *   -> linea 2: "Compassionate Care."   (entra por la derecha)
+ */
+function renderHeroTitle(text) {
+  const el = document.getElementById("heroTitle");
+  if (!el || !text) return;
+
+  const raw = String(text);
+
+  // Nota: se evita usar lookbehind en la expresion regular porque
+  // Safari viejo no lo soporta. Se marca el corte y luego se parte.
+  const lines = (raw.indexOf("\n") !== -1 ? raw : raw.replace(/\.\s+/g, ".\n"))
+    .split("\n")
+    .map(l => l.trim())
+    .filter(Boolean);
+
+  el.innerHTML = lines
+    .map((line, i) => {
+      const side = i % 2 === 0 ? "from-left" : "from-right";
+      return `<span class="hero-line ${side}">${escapeText(line)}</span>`;
+    })
+    .join("");
 }
 
 function setText(id, value) {
@@ -213,11 +250,9 @@ function announceContentReady(studies) {
 function applyEditableContent(content) {
   if (!content) content = {};
 
-  // Titulos del banner (si el admin los dejo vacios, se mantiene config.js)
-  if (content.heroTitle) {
-    const el = document.getElementById("heroTitle");
-    if (el) el.innerHTML = escapeHtmlKeepBreaks(content.heroTitle);
-  }
+  // Titulos del banner (si el admin los dejo vacios, se mantiene config.js).
+  // Se vuelve a dibujar con la misma animacion de entrada por lados.
+  if (content.heroTitle) renderHeroTitle(content.heroTitle);
   if (content.heroSubtitle) setText("heroSub", content.heroSubtitle);
 
   // Barra de promocion
@@ -494,12 +529,12 @@ function animateCount(el) {
    ---------------------------------------------------------------- */
 
 /**
- * Escapa HTML pero deja pasar los saltos de linea como <br>.
- * Se usa en el titulo del banner para que el admin pueda partir
- * el texto en dos lineas sin poder inyectar codigo.
+ * Convierte texto en HTML seguro.
+ * Se usa con lo que escribe el admin (titulo del banner) para que
+ * no pueda inyectar etiquetas por accidente ni a proposito.
  */
-function escapeHtmlKeepBreaks(str) {
+function escapeText(str) {
   const div = document.createElement("div");
-  div.textContent = str;
-  return div.innerHTML.replace(/\n/g, "<br>");
+  div.textContent = str == null ? "" : str;
+  return div.innerHTML;
 }
