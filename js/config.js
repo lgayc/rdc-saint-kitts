@@ -145,7 +145,28 @@ const SITE_CONFIG = {
   },
 
   // ---------------------------------------------------------
-  // 7. NOTIFICACIONES DE RESERVAS
+  // 7. PANEL DE ADMINISTRACION (admin.html)
+  // ---------------------------------------------------------
+  admin: {
+    // MODO DEMOSTRACION
+    // Sirve para entrar al panel y probarlo ANTES de conectar el
+    // backend. Usa reservas de ejemplo y NO guarda nada: al
+    // recargar la pagina todo vuelve a como estaba.
+    //
+    // En cuanto pongas la URL en api.url (arriba), este modo se
+    // apaga solo y el panel pasa a usar la contrasena de verdad,
+    // la que esta en backend/Codigo.gs -> ADMIN_PASSWORD.
+    demoMode: true,
+
+    // Contrasena SOLO del modo demostracion.
+    // Ojo: esta a la vista en el codigo, por eso solo funciona
+    // cuando no hay backend y no hay datos reales que proteger.
+    // La contrasena real NUNCA se escribe aqui.
+    demoPassword: "demo1234"
+  },
+
+  // ---------------------------------------------------------
+  // 8. NOTIFICACIONES DE RESERVAS
   // ---------------------------------------------------------
   // OJO: estos son los datos DE PRUEBA. Antes de entregar el
   // sitio al cliente, cambiar por el correo y WhatsApp reales
@@ -158,7 +179,7 @@ const SITE_CONFIG = {
   },
 
   // ---------------------------------------------------------
-  // 8. HORARIOS DISPONIBLES PARA RESERVAR
+  // 9. HORARIOS DISPONIBLES PARA RESERVAR
   // ---------------------------------------------------------
   booking: {
     timeSlots: [
@@ -170,7 +191,7 @@ const SITE_CONFIG = {
   },
 
   // ---------------------------------------------------------
-  // 9. ESTUDIOS / PUBLICACIONES
+  // 10. ESTUDIOS / PUBLICACIONES
   // ---------------------------------------------------------
   // Si el backend (api.url) esta conectado, las publicaciones se
   // manejan desde el panel admin y esto se ignora.
