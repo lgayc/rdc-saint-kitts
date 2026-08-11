@@ -386,6 +386,12 @@ body.has-promo .navbar { top: 38px; }
   100% { transform: scaleY(0); transform-origin: bottom; opacity: 0; }
 }
 
+.hero-content h1 {
+  font-family: 'Jost', Arial, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
 /* ---------------------------------------------------------------
    7. MODALITIES — el scroll vertical mueve las tarjetas de lado
    ---------------------------------------------------------------
