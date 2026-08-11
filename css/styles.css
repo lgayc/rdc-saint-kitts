@@ -323,8 +323,8 @@ body.has-promo .navbar { top: 38px; }
 .hero-line.from-right { animation-name: heroLineRight; }
 
 .hero-line:nth-child(2) { animation-delay: 0.32s; }
-.hero-line:nth-child(3) { animation-delay: 0.32s; }
-.hero-line:nth-child(4) { animation-delay: 0.32s; }
+.hero-line:nth-child(3) { animation-delay: 0.10s; }
+.hero-line:nth-child(4) { animation-delay: 0.10s; }
 
 @keyframes heroLineLeft {
   from { opacity: 0; transform: translateX(-600px); }
