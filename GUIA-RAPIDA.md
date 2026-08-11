@@ -89,7 +89,20 @@ Desde el teléfono con el número **+1 869 762 9440** (el de prueba):
 
 **Cómo entrar:** al final del sitio hay un enlace discreto que dice *"Staff Login"*, o directo a `tusitio.com/admin.html`.
 
-**Contraseña por defecto:** `rdc2026` — **cámbiala** en `backend/Codigo.gs` → `CONFIG.ADMIN_PASSWORD`.
+### Hay dos contraseñas, según el estado del sitio
+
+| Situación | Contraseña | Dónde se cambia |
+|---|---|---|
+| **Sin backend conectado** (ahora mismo) | `demo1234` | `js/config.js` → `admin.demoPassword` |
+| **Con backend conectado** (después del paso 1) | `rdc2026` | `backend/Codigo.gs` → `CONFIG.ADMIN_PASSWORD` |
+
+**Modo demostración:** mientras `api.url` esté vacío, el panel entra con `demo1234` y muestra reservas de ejemplo, para que puedas ver cómo funciona todo. La pantalla te recuerda la contraseña y sale una franja naranja arriba avisando que son datos de prueba. Nada se guarda: al recargar vuelve al inicio.
+
+En cuanto pegues la URL del Apps Script en `api.url`, el modo demo **se apaga solo** y el panel pasa a pedir la contraseña real y a manejar reservas de verdad.
+
+> ⚠️ La contraseña de demo está a la vista en `js/config.js` — por eso solo sirve cuando no hay backend ni datos reales que proteger. La contraseña real nunca se escribe en archivos del sitio web: vive en el Apps Script, del lado del servidor. Si quieres apagar el modo demo por completo, pon `demoMode: false` en `js/config.js`.
+
+**Cámbiala antes de entregar:** `rdc2026` es solo un valor inicial.
 
 Qué se puede hacer desde ahí, sin tocar código:
 
@@ -102,13 +115,13 @@ Qué se puede hacer desde ahí, sin tocar código:
 
 Después de guardar, hay que recargar el sitio público para ver los cambios.
 
-> **Sobre la seguridad:** la contraseña no está escrita en ningún archivo del sitio web. Se verifica en el servidor y este devuelve un permiso temporal que dura 8 horas. Aunque alguien vea el código fuente de la página, no encuentra la contraseña.
+> **Sobre el título del banner:** cada oración se convierte en una línea, y las líneas entran deslizando desde lados opuestos (la 1ª por la izquierda, la 2ª por la derecha). Si quieres forzar un corte en otro lado, dale Enter donde quieras la línea nueva.
 
 ---
 
 ## 4. Fotos del banner
 
-El carrusel del banner ya está construido y funcionando — solo le faltan las fotos.
+El carrusel del banner ya está construido y funcionando — solo le faltan las fotos reales.
 
 Las imágenes se cargan **por enlace (URL)**, no subiendo el archivo. La forma más fácil:
 
@@ -122,9 +135,7 @@ Las imágenes se cargan **por enlace (URL)**, no subiendo el archivo. La forma m
 - Que el centro de la foto no tenga elementos importantes — ahí va el texto encima
 - 3 a 5 fotos es un buen número; más se vuelve lento de cargar
 
-Si no pones ninguna foto, el banner se ve con el fondo degradado azul/verde, que también se ve bien.
-
-> Cuando me pases las fotos, yo las agrego directo al proyecto y quedan cargadas desde el inicio, sin depender de enlaces externos.
+Ahora mismo hay tres imágenes de relleno cargadas (dicen "PLACEHOLDER" encima) para que el banner no se vea vacío. Si borras todas, el banner se ve con el fondo degradado, que también queda bien.
 
 ---
 
@@ -140,6 +151,9 @@ Lista de verificación. Ahora mismo hay **datos de prueba** que hay que cambiar:
   - En `backend/Codigo.gs` → `CONFIG.WHATSAPP_NUMBER`
   - ⚠️ El número nuevo tiene que hacer el paso 2 (autorizar CallMeBot) con su propia API key
 - [ ] **Contraseña del admin:** cambiar `rdc2026` en `backend/Codigo.gs`
+- [ ] **Apagar el modo demo:** `demoMode: false` en `js/config.js` (o simplemente conectar el backend, que lo apaga solo)
+- [ ] **Logo:** poner el archivo real en `assets/logo.jpg`
+- [ ] **Fotos del banner:** reemplazar las tres de relleno
 - [ ] **Dirección exacta** de la clínica en `js/config.js` → `contact.address`
 - [ ] **Horarios reales** en `js/config.js` → `contact.hours`
 - [ ] **Lista de servicios:** confirmar cuáles ofrecen de verdad, en `js/config.js` → `modalities`
@@ -169,6 +183,9 @@ No hay que compilar nada ni instalar dependencias. Son archivos sueltos.
 
 **Cambié el Apps Script y no pasa nada**
 → Falta volver a implementar con **Nueva versión**. Es el error más frecuente.
+
+**El panel admin dice "Setup Required" y no me deja entrar**
+→ Significa que no hay backend Y el modo demo está apagado. Pon `demoMode: true` en `js/config.js` para entrar con `demo1234`, o conecta el backend (paso 1).
 
 **El panel admin no carga las reservas**
 → Revisa que en la implementación hayas puesto **"Quién tiene acceso: Cualquier usuario"**.
