@@ -1,57 +1,49 @@
 /* ================================================================
    RDC SAINT KITTS — STYLES  (TEMA CLARO)
    ================================================================
-   Indice (busca estos titulos para saltar de seccion):
+   Indice:
      1. Design tokens (colores, fuentes, medidas)
      2. Reset & base
-     3. Helpers / botones / titulos de seccion
+     3. Helpers / botones / titulos
      4. Barra de promocion
      5. Navbar + logo
-     6. Hero (carrusel + capas de color + entrada del titulo)
-     7. Modalities (carrusel horizontal)
+     6. Hero (carrusel + entrada del titulo)
+     7. Modalities (carrusel horizontal + tarjetas)
      8. About strip / stats
-     9. Booking form (incluye estilos de error)
+     9. Booking form
     10. Studies grid
     11. Contact / footer
+   11b. Ventana de detalle (modal)
     12. Reveal-on-scroll
-    13. Responsive (movil)
+    13. Responsive
    ================================================================ */
 
 /* ---------------------------------------------------------------
    1. DESIGN TOKENS
    ---------------------------------------------------------------
-   TODO el tema del sitio sale de aqui. Si algun dia quieres
-   volver al tema oscuro, basta con cambiar estos valores; el
-   resto del archivo no usa colores fijos.
-
-   Los acentos (teal/azul) son mas oscuros que los tipicos porque
-   ahora van sobre fondo claro y tienen que contrastar bien.
+   TODO el tema sale de aqui. Para volver al tema oscuro basta
+   cambiar estos valores; el resto del archivo no usa colores fijos.
    --------------------------------------------------------------- */
 :root {
-  /* Superficies */
-  --bg-deep: #f7f9fa;        /* fondo general de la pagina */
-  --bg-panel: #ffffff;       /* tarjetas, formulario */
+  --bg-deep: #f7f9fa;
+  --bg-panel: #ffffff;
   --bg-panel-light: #ffffff;
-  --surface-tint: #eef2f5;   /* franjas con leve contraste */
+  --surface-tint: #eef2f5;
 
-  /* Texto */
-  --ink: #0e1c28;            /* texto principal */
-  --ink-dim: #5b6d7c;        /* texto secundario */
+  --ink: #0e1c28;
+  --ink-dim: #5b6d7c;
 
-  /* Acentos */
   --teal: #12a594;
   --teal-dim: #0d7a6d;
   --blue: #3b7fc4;
   --amber: #c08829;
   --danger: #c94f4f;
 
-  /* Bordes y sombras */
   --border: rgba(14, 28, 40, 0.10);
   --border-strong: rgba(14, 28, 40, 0.18);
   --shadow-card: 0 1px 2px rgba(14, 28, 40, 0.05);
   --shadow-lift: 0 18px 40px -18px rgba(14, 28, 40, 0.25);
 
-  /* Color del texto que va ENCIMA de los acentos */
   --on-accent: #ffffff;
 
   --font-head: 'Space Grotesk', 'Poppins', Arial, sans-serif;
@@ -100,7 +92,7 @@ button { font: inherit; cursor: pointer; }
 }
 
 /* ---------------------------------------------------------------
-   3. LAYOUT HELPERS / BUTTONS / SECTION HEADING
+   3. HELPERS / BOTONES / TITULOS
    --------------------------------------------------------------- */
 .eyebrow {
   color: var(--teal-dim);
@@ -147,8 +139,6 @@ button { font: inherit; cursor: pointer; }
 
 /* ---------------------------------------------------------------
    4. BARRA DE PROMOCION
-   Solo aparece si el admin escribio un texto de promocion.
-   Empuja la navbar hacia abajo para no taparla.
    --------------------------------------------------------------- */
 .promo-bar {
   position: fixed;
@@ -162,8 +152,6 @@ button { font: inherit; cursor: pointer; }
   padding: 0.55rem 1rem;
 }
 .promo-bar[hidden] { display: none; }
-
-/* Cuando hay promo, todo baja 38px */
 body.has-promo .navbar { top: 38px; }
 
 /* ---------------------------------------------------------------
@@ -194,8 +182,6 @@ body.has-promo .navbar { top: 38px; }
 
 .brand { display: flex; align-items: center; gap: 0.7rem; }
 
-/* Logo del cliente. El logo real tiene fondo oscuro con borde
-   azul, asi que se le da forma ovalada para que combine. */
 .brand-logo {
   height: 44px;
   width: auto;
@@ -204,8 +190,7 @@ body.has-promo .navbar { top: 38px; }
   display: block;
 }
 
-/* El nombre en texto solo se muestra si el logo no carga
-   (js/main.js lo activa en ese caso). */
+/* Solo se muestra si el logo no carga (js/main.js lo activa) */
 .brand-name {
   display: none;
   font-family: var(--font-head);
@@ -235,15 +220,15 @@ body.has-promo .navbar { top: 38px; }
 .nav-toggle span { width: 22px; height: 2px; background: var(--ink); transition: transform 0.25s, opacity 0.25s; }
 
 /* ---------------------------------------------------------------
-   6. HERO - carrusel de fotos + capas de color
+   6. HERO
    ---------------------------------------------------------------
-   El banner tiene 3 capas apiladas:
+   Tres capas apiladas:
      1. .hero-slides  -> fotos que rotan (z-index 0)
      2. .hero-layers  -> manchas de color suaves (z-index 1)
      3. .hero-content -> el texto (z-index 2)
 
    Como el sitio es claro, encima de las fotos va un velo BLANCO
-   (no negro) para que el texto oscuro siga leyendose.
+   para que el texto oscuro siga leyendose.
    --------------------------------------------------------------- */
 .hero {
   min-height: 100svh;
@@ -257,7 +242,6 @@ body.has-promo .navbar { top: 38px; }
   padding-top: 6rem;
 }
 
-/* --- Capa 1: carrusel de fotos --- */
 .hero-slides { position: absolute; inset: 0; z-index: 0; }
 
 .hero-slide {
@@ -266,17 +250,11 @@ body.has-promo .navbar { top: 38px; }
   background-size: cover;
   background-position: center;
   opacity: 0;
-  /* Fundido lento + zoom suave (efecto Ken Burns) */
   transition: opacity 1.4s ease-in-out, transform 8s linear;
   transform: scale(1.06);
 }
-.hero-slide.active {
-  opacity: 1;
-  transform: scale(1);
-}
+.hero-slide.active { opacity: 1; transform: scale(1); }
 
-/* Velo claro encima de las fotos: garantiza que el texto oscuro
-   se lea sin importar que tan oscura sea la foto que suban. */
 .hero-slides.has-images::after {
   content: "";
   position: absolute;
@@ -290,7 +268,6 @@ body.has-promo .navbar { top: 38px; }
   z-index: 1;
 }
 
-/* Puntos para cambiar de foto a mano */
 .hero-dots {
   position: absolute;
   bottom: 6.5rem;
@@ -310,7 +287,6 @@ body.has-promo .navbar { top: 38px; }
 }
 .hero-dot.active { background: var(--teal-dim); width: 26px; border-radius: 999px; }
 
-/* --- Capa 2: manchas de color difusas --- */
 .hero-layers { position: absolute; inset: 0; z-index: 1; }
 .hero-layer {
   position: absolute;
@@ -323,7 +299,6 @@ body.has-promo .navbar { top: 38px; }
 .layer-2 { width: 420px; height: 420px; background: var(--blue); bottom: -140px; right: -100px; }
 .layer-3 { width: 300px; height: 300px; background: var(--amber); top: 40%; right: 15%; opacity: 0.12; }
 
-/* --- Capa 3: el texto --- */
 .hero-content { position: relative; z-index: 2; max-width: 780px; }
 .hero-content h1 { font-size: clamp(2.4rem, 6vw, 4.2rem); }
 .hero-sub { color: var(--ink-dim); font-size: 1.15rem; margin: 1.25rem auto 2.25rem; max-width: 520px; }
@@ -331,12 +306,10 @@ body.has-promo .navbar { top: 38px; }
 
 /* --- Entrada del titulo linea por linea ----------------------
    js/main.js parte el titulo y le pone a cada linea la clase
-   .from-left o .from-right, alternando. Aqui cada una se desliza
-   desde su lado al cargar la pagina.
+   .from-left o .from-right, alternando.
 
-   Para cambiar la distancia del deslizamiento: los 70px de abajo.
-   Para cambiar la velocidad: el 0.9s.
-   Para cambiar el desfase entre lineas: los 0.16s / 0.32s.
+   Distancia del deslizamiento: los 70px. Velocidad: 0.9s.
+   Desfase entre lineas: 0.16s / 0.32s.
    ------------------------------------------------------------- */
 .hero-line {
   display: block;
@@ -349,7 +322,6 @@ body.has-promo .navbar { top: 38px; }
 .hero-line.from-left  { animation-name: heroLineLeft; }
 .hero-line.from-right { animation-name: heroLineRight; }
 
-/* Cada linea arranca un poco despues que la anterior */
 .hero-line:nth-child(2) { animation-delay: 0.16s; }
 .hero-line:nth-child(3) { animation-delay: 0.32s; }
 .hero-line:nth-child(4) { animation-delay: 0.48s; }
@@ -363,8 +335,6 @@ body.has-promo .navbar { top: 38px; }
   to   { opacity: 1; transform: translateX(0); }
 }
 
-/* El subtitulo y los botones entran despues, con un fundido
-   hacia arriba, para que el conjunto se sienta encadenado. */
 .hero-sub,
 .hero-actions {
   opacity: 0;
@@ -378,8 +348,7 @@ body.has-promo .navbar { top: 38px; }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Accesibilidad: si el usuario pidio menos animacion en su
-   sistema, se muestra todo de una sin movimiento. */
+/* Si el usuario pidio menos animacion, se muestra todo de una */
 @media (prefers-reduced-motion: reduce) {
   .hero-line,
   .hero-sub,
@@ -420,26 +389,18 @@ body.has-promo .navbar { top: 38px; }
 /* ---------------------------------------------------------------
    7. MODALITIES — el scroll vertical mueve las tarjetas de lado
    ---------------------------------------------------------------
-   Esta seccion lleva un fondo con un tono apenas mas gris que el
-   resto de la pagina, para separarla visualmente sin romper el
-   tema claro.
-
-   Como funciona el carrusel: .modalities-pin usa position:sticky,
-   asi que se queda fijo en pantalla mientras la seccion (que es
-   muy alta) pasa por detras. js/main.js mide cuanto llevas
-   recorrido y desplaza .modalities-track en esa proporcion.
+   La seccion lleva un fondo apenas mas gris para separarla.
+   .modalities-pin usa position:sticky, asi que se queda fijo
+   mientras la seccion (muy alta) pasa por detras. js/main.js mide
+   el avance y desplaza .modalities-track en esa proporcion.
    --------------------------------------------------------------- */
 .modalities {
   padding-top: 6rem;
-  /* extra height gives scroll distance for the horizontal effect */
-  min-height: 220vh;
+  min-height: 220vh;   /* da distancia de scroll al efecto */
 }
 
-/* --- Franja de fondo a todo el ancho -------------------------
-   .section esta limitado a 1180px, asi que para que la franja
-   llegue de borde a borde usamos una capa detras que mide 100vw
-   y se centra sola. El truco del "left:50% + translateX".
-   ------------------------------------------------------------- */
+/* Franja de fondo a todo el ancho: .section esta limitado a
+   1180px, asi que se usa una capa detras de 100vw centrada. */
 .modalities::before {
   content: "";
   position: absolute;
@@ -469,8 +430,9 @@ body.has-promo .navbar { top: 38px; }
 }
 
 /* --- Tarjeta de servicio -------------------------------------
-   Estructura: ilustracion arriba (.modality-media) y texto abajo
-   (.modality-body). Blanca, borde suave, sin adornos.
+   Es un <button>, no un <div>: se puede activar con teclado y los
+   lectores de pantalla la anuncian como pulsable. Por eso hay que
+   quitarle los estilos que trae por defecto un boton.
    ------------------------------------------------------------- */
 .modality-card {
   flex: 0 0 clamp(260px, 32vw, 380px);
@@ -483,55 +445,82 @@ body.has-promo .navbar { top: 38px; }
   overflow: hidden;
   box-shadow: var(--shadow-card);
   transition: transform 0.4s var(--ease), box-shadow 0.4s;
+
+  /* Reset del boton */
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  appearance: none;
 }
 .modality-card:hover {
   transform: translateY(-8px);
   box-shadow: var(--shadow-lift);
 }
+.modality-card:focus-visible {
+  outline: none;
+  border-color: var(--teal-dim);
+  box-shadow: 0 0 0 3px rgba(18, 165, 148, 0.25), var(--shadow-lift);
+}
 
-/* Zona de la ilustracion */
+/* Zona de la ilustracion.
+   Las marcas son abstractas y centradas, asi que se usa "contain"
+   con aire alrededor: con "cover" se recortarian los bordes. */
 .modality-media {
-  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex: 1 1 auto;
-  min-height: 0;          /* deja que la imagen se encoja bien */
+  min-height: 0;
+  padding: 1.75rem;
   background: var(--surface-tint);
 }
 .modality-media img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
 }
 
-/* Iconito flotando sobre la ilustracion */
-.modality-badge {
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
-  width: 38px;
-  height: 38px;
-  border-radius: 11px;
-  background: var(--bg-panel);
-  color: var(--teal-dim);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 8px rgba(14, 28, 40, 0.12);
-}
-.modality-badge svg { width: 21px; height: 21px; }
-
-/* Texto de la tarjeta */
 .modality-body {
-  padding: 1.4rem 1.5rem 1.7rem;
+  display: block;
+  padding: 1.4rem 1.5rem 1.6rem;
   flex: 0 0 auto;
 }
-.modality-body h3 {
+.modality-title {
+  display: block;
+  font-family: var(--font-head);
+  font-weight: 600;
   font-size: 1.2rem;
+  letter-spacing: -0.01em;
   margin-bottom: 0.45rem;
 }
-.modality-body p {
+.modality-desc {
+  display: block;
   color: var(--ink-dim);
   font-size: 0.92rem;
   line-height: 1.55;
+}
+
+/* "Learn more": la flechita avanza al pasar el mouse */
+.modality-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--teal-dim);
+}
+.modality-more svg {
+  width: 15px;
+  height: 15px;
+  transition: transform 0.25s var(--ease);
+}
+.modality-card:hover .modality-more svg,
+.modality-card:focus-visible .modality-more svg {
+  transform: translateX(4px);
 }
 
 /* ---------------------------------------------------------------
@@ -599,8 +588,7 @@ body.has-promo .navbar { top: 38px; }
 
 label { font-size: 0.85rem; color: var(--ink-dim); }
 
-/* Los campos van un tono mas gris que la tarjeta blanca, para
-   que se distingan sin necesidad de bordes fuertes. */
+/* Los campos van un tono mas gris que la tarjeta blanca */
 input, select, textarea {
   background: var(--bg-deep);
   border: 1px solid var(--border-strong);
@@ -620,11 +608,8 @@ input:focus, select:focus, textarea:focus {
 }
 
 /* --- Campos obligatorios y errores --------------------------- */
-
-/* El asterisco rojo al lado de la etiqueta */
 .required { color: var(--danger); font-weight: 700; }
 
-/* Campo con problema: borde rojo + leve fondo */
 input.has-error,
 select.has-error,
 textarea.has-error {
@@ -632,7 +617,6 @@ textarea.has-error {
   background: rgba(201, 79, 79, 0.05);
 }
 
-/* Mensaje de error debajo del campo */
 .field-error {
   display: none;
   color: var(--danger);
@@ -647,10 +631,7 @@ textarea.has-error {
   margin-top: -0.3rem;
 }
 
-.form-status {
-  min-height: 1.2em;
-  font-size: 0.88rem;
-}
+.form-status { min-height: 1.2em; font-size: 0.88rem; }
 .form-status.success { color: var(--teal-dim); }
 .form-status.error { color: var(--danger); }
 
@@ -734,9 +715,157 @@ textarea.has-error {
 .admin-link:hover { opacity: 1; color: var(--teal-dim); }
 
 /* ---------------------------------------------------------------
+   11b. VENTANA DE DETALLE (modal de modalidades)
+   ---------------------------------------------------------------
+   Se abre al hacer clic en una tarjeta de servicio. Empieza con
+   el atributo [hidden] y js/main.js lo quita.
+   --------------------------------------------------------------- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(14, 28, 40, 0.55);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  animation: modalFade 0.25s var(--ease);
+}
+.modal-overlay[hidden] { display: none; }
+
+@keyframes modalFade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.modal-window {
+  position: relative;
+  width: 100%;
+  max-width: 880px;
+  max-height: 88vh;
+  overflow-y: auto;
+  background: var(--bg-panel);
+  border-radius: var(--radius);
+  box-shadow: 0 30px 80px -30px rgba(14, 28, 40, 0.5);
+  animation: modalRise 0.35s var(--ease);
+}
+
+@keyframes modalRise {
+  from { opacity: 0; transform: translateY(24px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 2;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--bg-panel);
+  color: var(--ink-dim);
+  font-size: 1.5rem;
+  line-height: 1;
+  transition: all 0.2s;
+}
+.modal-close:hover { color: var(--ink); border-color: var(--border-strong); }
+
+/* Dos columnas: ilustracion a la izquierda, texto a la derecha */
+.modal-body {
+  display: grid;
+  grid-template-columns: 0.85fr 1.15fr;
+}
+
+.modal-media {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem;
+  background: var(--surface-tint);
+}
+.modal-media img { width: 100%; height: auto; max-width: 300px; }
+
+.modal-text { padding: 2.75rem 2.5rem 2.5rem; }
+.modal-text h3 { font-size: 1.7rem; margin-bottom: 1rem; }
+.modal-text h4 {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-dim);
+  margin: 1.75rem 0 0.7rem;
+}
+
+.modal-summary {
+  color: var(--ink-dim);
+  font-size: 0.98rem;
+  line-height: 1.7;
+}
+
+.modal-list { display: flex; flex-direction: column; gap: 0.45rem; }
+.modal-list li {
+  position: relative;
+  padding-left: 1.4rem;
+  font-size: 0.94rem;
+  color: var(--ink-dim);
+}
+/* Punto de vinneta dibujado a mano para poder colorearlo */
+.modal-list li::before {
+  content: "";
+  position: absolute;
+  left: 0.3rem;
+  top: 0.62em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--teal);
+}
+
+/* Datos sueltos: duracion y preparacion */
+.modal-facts {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1.75rem;
+  padding: 1.25rem 1.4rem;
+  background: var(--bg-deep);
+  border-radius: var(--radius-sm);
+}
+.modal-fact-label {
+  display: block;
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--teal-dim);
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+}
+.modal-fact-value {
+  display: block;
+  font-size: 0.92rem;
+  color: var(--ink-dim);
+  line-height: 1.6;
+}
+
+.modal-note {
+  margin-top: 1.5rem;
+  font-size: 0.82rem;
+  color: var(--ink-dim);
+  opacity: 0.85;
+  font-style: italic;
+}
+
+.modal-cta { margin-top: 1.75rem; }
+
+/* Mientras la ventana esta abierta, el fondo no debe hacer scroll */
+body.modal-open { overflow: hidden; }
+
+/* ---------------------------------------------------------------
    12. REVEAL-ON-SCROLL
-   Elements with class="reveal" fade/slide in once they enter the
-   viewport. Toggled by js/main.js via IntersectionObserver.
+   Elementos con class="reveal" aparecen al entrar en pantalla.
+   Lo activa js/main.js con IntersectionObserver.
    --------------------------------------------------------------- */
 .reveal {
   opacity: 0;
@@ -776,7 +905,16 @@ textarea.has-error {
   .modalities { padding-top: 4.5rem; }
   .modalities-pin { height: 62vh; }
   .modality-card { flex-basis: 80vw; }
+  .modality-media { padding: 1.25rem; }
   .modality-body { padding: 1.2rem 1.25rem 1.4rem; }
   .form-row.two-col { grid-template-columns: 1fr; }
   .about-strip-inner { justify-content: center; }
+
+  /* El modal pasa a una sola columna, con la ilustracion arriba */
+  .modal-overlay { padding: 0.75rem; }
+  .modal-body { grid-template-columns: 1fr; }
+  .modal-media { padding: 2rem; }
+  .modal-media img { max-width: 200px; }
+  .modal-text { padding: 1.75rem 1.5rem 2rem; }
+  .modal-text h3 { font-size: 1.4rem; }
 }
