@@ -1,43 +1,23 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Ultrasound">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 340" role="img" aria-label="Ultrasound">
   <!-- ============================================================
-       ULTRASOUND (incl. 3D/4D)
-       Transductor apoyado arriba, cono de sonido abriendose hacia
-       abajo, y dentro las ondas del eco.
+       ULTRASOUND  ·  marca abstracta
+       ------------------------------------------------------------
+       Idea: ondas concentricas que se abren desde un punto y se
+       van desvaneciendo. Es la lectura mas directa de "sonido
+       que viaja y rebota", sin dibujar el aparato.
        ============================================================ -->
-  <defs>
-    <linearGradient id="usCone" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#4d8fd6" stop-opacity="0.28"/>
-      <stop offset="100%" stop-color="#4d8fd6" stop-opacity="0.02"/>
-    </linearGradient>
-    <clipPath id="usClip">
-      <path d="M186 78 L214 78 L322 246 L78 246 Z"/>
-    </clipPath>
-  </defs>
+  <rect width="400" height="340" fill="none"/>
 
-  <rect width="400" height="300" fill="#eef2f5"/>
-
-  <!-- Cono de exploracion -->
-  <path d="M186 78 L214 78 L322 246 L78 246 Z" fill="url(#usCone)"/>
-
-  <!-- Ondas del eco, recortadas al cono -->
-  <g clip-path="url(#usClip)" fill="none" stroke="#4d8fd6" stroke-width="2.6" opacity="0.75">
-    <path d="M60 128 A 145 145 0 0 0 340 128" transform="translate(0,-6)"/>
-    <path d="M40 168 A 175 175 0 0 0 360 168" transform="translate(0,-6)"/>
-    <path d="M20 208 A 205 205 0 0 0 380 208" transform="translate(0,-6)"/>
+  <!-- Ondas: mismo centro, radios crecientes, opacidad decreciente -->
+  <g fill="none" stroke="#3b7fc4" stroke-linecap="round">
+    <path d="M144 118 A 60 60 0 0 0 256 118"  stroke-width="9" opacity="0.95"/>
+    <path d="M124 152 A 92 92 0 0 0 276 152"  stroke-width="8" opacity="0.68"/>
+    <path d="M106 188 A 124 124 0 0 0 294 188" stroke-width="7" opacity="0.44"/>
+    <path d="M90 226 A 156 156 0 0 0 310 226"  stroke-width="6" opacity="0.26"/>
+    <path d="M76 264 A 188 188 0 0 0 324 264"  stroke-width="5" opacity="0.14"/>
   </g>
 
-  <!-- Punto de interes dentro del cono -->
-  <circle cx="200" cy="186" r="26" fill="none" stroke="#2dd4bf" stroke-width="3.5"/>
-  <circle cx="200" cy="186" r="7" fill="#2dd4bf"/>
-
-  <!-- Transductor -->
-  <g fill="#0a1420">
-    <rect x="178" y="30" width="44" height="46" rx="10"/>
-    <rect x="186" y="72" width="28" height="8" rx="4"/>
-  </g>
-  <!-- Cable -->
-  <path d="M200 30 C200 8 246 14 268 22" fill="none" stroke="#0a1420" stroke-width="4" stroke-linecap="round" opacity="0.5"/>
-
-  <!-- Linea de piel -->
-  <line x1="70" y1="80" x2="330" y2="80" stroke="#0a1420" stroke-width="3" stroke-linecap="round" opacity="0.28"/>
+  <!-- Origen de la onda -->
+  <circle cx="200" cy="96" r="15" fill="#12a594"/>
+  <circle cx="200" cy="96" r="27" fill="none" stroke="#12a594" stroke-width="3" opacity="0.35"/>
 </svg>

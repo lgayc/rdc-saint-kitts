@@ -1,47 +1,40 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="MRI">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 340" role="img" aria-label="MRI">
   <!-- ============================================================
-       MRI (Resonancia Magnetica)
-       Vista lateral: el iman cilindrico con su tunel, la camilla
-       deslizandose adentro, y las lineas del campo magnetico.
+       MRI  ·  marca abstracta
+       ------------------------------------------------------------
+       Idea: cortes horizontales atravesando una forma ovalada.
+       La resonancia entrega el cuerpo "en rebanadas"; se muestra
+       eso, con un corte resaltado en acento.
        ============================================================ -->
   <defs>
-    <linearGradient id="mriBore" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0%" stop-color="#0a1420" stop-opacity="0.16"/>
-      <stop offset="55%" stop-color="#4d8fd6" stop-opacity="0.10"/>
-      <stop offset="100%" stop-color="#0a1420" stop-opacity="0.16"/>
-    </linearGradient>
+    <clipPath id="mriShape">
+      <ellipse cx="200" cy="170" rx="112" ry="96"/>
+    </clipPath>
   </defs>
 
-  <rect width="400" height="300" fill="#eef2f5"/>
+  <rect width="400" height="340" fill="none"/>
 
-  <!-- Lineas del campo magnetico -->
-  <g fill="none" stroke="#4d8fd6" stroke-width="2.4" opacity="0.4">
-    <ellipse cx="200" cy="140" rx="130" ry="96"/>
-    <ellipse cx="200" cy="140" rx="150" ry="112"/>
+  <!-- Volumen -->
+  <ellipse cx="200" cy="170" rx="112" ry="96" fill="#0e1c28" opacity="0.06"/>
+
+  <!-- Cortes, recortados dentro del volumen -->
+  <g clip-path="url(#mriShape)" stroke="#0e1c28" stroke-width="8" stroke-linecap="round">
+    <line x1="70" y1="106" x2="330" y2="106" opacity="0.30"/>
+    <line x1="70" y1="138" x2="330" y2="138" opacity="0.55"/>
+    <line x1="70" y1="202" x2="330" y2="202" opacity="0.55"/>
+    <line x1="70" y1="234" x2="330" y2="234" opacity="0.30"/>
   </g>
 
-  <!-- Cuerpo del iman -->
-  <rect x="82" y="62" width="236" height="152" rx="34" fill="#0a1420" opacity="0.07"/>
-  <rect x="82" y="62" width="236" height="152" rx="34" fill="none" stroke="#0a1420" stroke-width="4"/>
+  <!-- Corte activo: se sale del volumen para marcar el foco -->
+  <line x1="66" y1="170" x2="334" y2="170"
+        stroke="#12a594" stroke-width="10" stroke-linecap="round"/>
 
-  <!-- Tunel (bore) -->
-  <ellipse cx="200" cy="138" rx="58" ry="52" fill="url(#mriBore)" stroke="#0a1420" stroke-width="4"/>
-  <ellipse cx="200" cy="138" rx="40" ry="36" fill="none" stroke="#2dd4bf" stroke-width="3" opacity="0.75"/>
+  <!-- Contorno -->
+  <ellipse cx="200" cy="170" rx="112" ry="96"
+           fill="none" stroke="#0e1c28" stroke-width="9"/>
 
-  <!-- Bobinas laterales -->
-  <g stroke="#0a1420" stroke-width="3.5" stroke-linecap="round" opacity="0.45">
-    <line x1="106" y1="98" x2="106" y2="178"/>
-    <line x1="124" y1="90" x2="124" y2="186"/>
-    <line x1="294" y1="98" x2="294" y2="178"/>
-    <line x1="276" y1="90" x2="276" y2="186"/>
+  <!-- Campo magnetico insinuado -->
+  <g fill="none" stroke="#3b7fc4" stroke-width="4" opacity="0.35">
+    <ellipse cx="200" cy="170" rx="140" ry="120"/>
   </g>
-
-  <!-- Camilla entrando -->
-  <rect x="140" y="222" width="212" height="14" rx="7" fill="#0a1420"/>
-  <rect x="152" y="212" width="150" height="12" rx="6" fill="#2dd4bf" opacity="0.5"/>
-  <rect x="166" y="236" width="16" height="24" rx="5" fill="#0a1420" opacity="0.5"/>
-  <rect x="312" y="236" width="16" height="24" rx="5" fill="#0a1420" opacity="0.5"/>
-
-  <!-- Indicador de encendido -->
-  <circle cx="298" cy="86" r="6" fill="#2dd4bf"/>
 </svg>
