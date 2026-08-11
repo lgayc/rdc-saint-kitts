@@ -6,19 +6,21 @@
  *    1. Estado y arranque
  *    2. Inicio de sesion
  *    3. Comunicacion con el backend
+ *   3b. Backend simulado (modo demostracion)
  *    4. Pestanas
  *    5. Reservas
- *    6. Fotos del banner
- *    7. Promocion y textos
- *    8. Publicaciones
- *    9. Utilidades
+ *    6. Contenido
+ *    7. Fotos del banner
+ *    8. Promocion y textos
+ *    9. Publicaciones
+ *   10. Utilidades
  *
  *  SOBRE LA SEGURIDAD:
- *  La contrasena NO esta en este archivo. Se manda al backend,
- *  que la verifica y devuelve un "token" temporal. Solo ese
- *  token se guarda en el navegador. Si alguien mira el codigo
- *  de esta pagina, no encuentra ninguna contrasena.
- *  La contrasena se cambia en backend/Codigo.gs -> ADMIN_PASSWORD
+ *  La contrasena real NO esta en este archivo. Se manda al backend,
+ *  que la verifica y devuelve un "token" temporal. Solo ese token
+ *  se guarda en el navegador. Si alguien mira el codigo de esta
+ *  pagina, no encuentra la contrasena real.
+ *  Se cambia en backend/Codigo.gs -> ADMIN_PASSWORD
  * ============================================================
  */
 
@@ -38,11 +40,35 @@ const state = {
 const TOKEN_KEY = "rdc_admin_token";
 const TOKEN_EXPIRY_KEY = "rdc_admin_expires";
 
+/**
+ * MODO DEMOSTRACION
+ * ----------------------------------------------------------------
+ * Cuando todavia no hay backend conectado, el panel funciona con
+ * datos de ejemplo para que se pueda ver y probar. Nada se guarda:
+ * al recargar, todo vuelve al estado inicial.
+ *
+ * Se apaga solo en cuanto api.url tenga una URL: ahi el panel pasa
+ * a hablar con el servidor de verdad y a usar la contrasena real.
+ */
+let DEMO = false;
+
+/** True si hay un Apps Script configurado */
+function hasBackend() {
+  return Boolean(SITE_CONFIG.api.url && SITE_CONFIG.api.url.trim());
+}
+
 document.addEventListener("DOMContentLoaded", () => {
-  // Si el backend no esta configurado, no tiene sentido seguir
-  if (!SITE_CONFIG.api.url || !SITE_CONFIG.api.url.trim()) {
-    showSetupRequired();
-    return;
+  if (!hasBackend()) {
+    // Sin backend: o entramos en modo demo, o avisamos que falta
+    // configurar. Antes aqui solo se mostraba el aviso y no habia
+    // manera de entrar al panel para verlo.
+    if (SITE_CONFIG.admin && SITE_CONFIG.admin.demoMode) {
+      DEMO = true;
+      showDemoNotice();
+    } else {
+      showSetupRequired();
+      return;
+    }
   }
 
   setupLogin();
@@ -55,7 +81,7 @@ document.addEventListener("DOMContentLoaded", () => {
   restoreSession();
 });
 
-/** Aviso cuando todavia no se conecto el Apps Script */
+/** Aviso cuando no hay backend Y el modo demo esta apagado */
 function showSetupRequired() {
   document.getElementById("loginScreen").innerHTML = `
     <div class="login-card">
@@ -68,6 +94,22 @@ function showSetupRequired() {
       <p class="login-sub">See <strong>GUIA-RAPIDA.md</strong> for the full steps.</p>
     </div>
   `;
+}
+
+/** Cartel en el login explicando que es una demostracion */
+function showDemoNotice() {
+  const banner = document.getElementById("demoNotice");
+  if (banner) {
+    banner.hidden = false;
+    banner.innerHTML = `
+      <strong>Demo mode.</strong>
+      Sign in with <code>${escapeHtml(SITE_CONFIG.admin.demoPassword)}</code>
+      to explore the panel. Sample data only — nothing is saved.
+    `;
+  }
+
+  const topBar = document.getElementById("demoBar");
+  if (topBar) topBar.hidden = false;
 }
 
 /** Si ya habia una sesion activa y no vencio, entrar directo */
@@ -157,6 +199,10 @@ function logout() {
    ---------------------------------------------------------------- */
 
 async function api(action, payload = {}) {
+  // En modo demostracion no se sale a internet: se responde con
+  // datos de ejemplo guardados en memoria (ver demoApi mas abajo).
+  if (DEMO) return demoApi(action, payload);
+
   const response = await fetch(SITE_CONFIG.api.url, {
     method: "POST",
     headers: { "Content-Type": "text/plain;charset=utf-8" },
@@ -175,6 +221,97 @@ async function api(action, payload = {}) {
   }
 
   return result;
+}
+
+
+/* ----------------------------------------------------------------
+   3b. BACKEND SIMULADO (solo modo demostracion)
+   ----------------------------------------------------------------
+   Imita lo que haria el Apps Script, pero en memoria. Responde con
+   la misma forma { ok: true, ... } para que el resto del panel no
+   note la diferencia y no haya que duplicar codigo.
+
+   Nada de esto se guarda: al recargar la pagina vuelve al inicio.
+   ---------------------------------------------------------------- */
+
+/** Reservas de ejemplo, con fechas relativas al dia de hoy */
+function demoBookings() {
+  const day = offset => {
+    const d = new Date(Date.now() + offset * 86400000);
+    return d.toISOString().split("T")[0];
+  };
+
+  return [
+    {
+      id: "RDC-DEMO-3", createdAt: new Date().toISOString(),
+      fullName: "Marcia Williams", phone: "+1 869 765 1122",
+      email: "marcia.w@example.com", modality: "MRI",
+      date: day(3), time: "10:00 AM",
+      notes: "Referred by Dr. Archibald. Lower back pain.",
+      status: "Pendiente"
+    },
+    {
+      id: "RDC-DEMO-2", createdAt: new Date().toISOString(),
+      fullName: "Devon Bradshaw", phone: "+1 869 662 4410",
+      email: "d.bradshaw@example.com", modality: "Digital X-Ray",
+      date: day(1), time: "2:00 PM",
+      notes: "",
+      status: "Confirmada"
+    },
+    {
+      id: "RDC-DEMO-1", createdAt: new Date().toISOString(),
+      fullName: "Anita Pemberton", phone: "+1 869 764 8890",
+      email: "anita.p@example.com", modality: "Ultrasound (incl. 3D/4D)",
+      date: day(-2), time: "9:00 AM",
+      notes: "Rescheduled from last week.",
+      status: "Cancelada"
+    }
+  ];
+}
+
+// Los datos viven aqui mientras la pagina este abierta
+let demoStore = null;
+
+function demoApi(action, payload) {
+  // Primera llamada: preparar los datos de ejemplo
+  if (!demoStore) {
+    demoStore = {
+      bookings: demoBookings(),
+      content: {
+        heroTitle: "",
+        heroSubtitle: "",
+        promoText: "",
+        slides: SITE_CONFIG.hero.slides.slice(),
+        studies: []
+      }
+    };
+  }
+
+  switch (action) {
+    case "login":
+      return payload.password === SITE_CONFIG.admin.demoPassword
+        ? { ok: true, token: "demo-token", expiresAt: Date.now() + 8 * 3600 * 1000 }
+        : { ok: false, error: "Incorrect password. Try the one shown above." };
+
+    case "listBookings":
+      return { ok: true, bookings: demoStore.bookings };
+
+    case "setBookingStatus": {
+      const booking = demoStore.bookings.find(b => b.id === payload.id);
+      if (booking) booking.status = payload.status;
+      return { ok: true };
+    }
+
+    case "getContent":
+      return { ok: true, content: demoStore.content };
+
+    case "saveContent":
+      demoStore.content = payload.content;
+      return { ok: true, content: demoStore.content };
+
+    default:
+      return { ok: false, error: "Unknown action: " + action };
+  }
 }
 
 
@@ -360,7 +497,13 @@ async function saveContent(statusEl, label) {
     const result = await api("saveContent", { content: state.content });
     if (!result.ok) throw new Error(result.error);
 
-    setStatus(statusEl, "success", label + " saved. Refresh the site to see it live.");
+    setStatus(
+      statusEl,
+      "success",
+      DEMO
+        ? label + " updated in this demo only — connect the backend to save for real."
+        : label + " saved. Refresh the site to see it live."
+    );
   } catch (err) {
     setStatus(statusEl, "error", "Couldn't save: " + err.message);
   }
