@@ -250,8 +250,8 @@ body.has-promo .navbar { top: 38px; }
   background-size: cover;
   background-position: center;
   opacity: 0;
-  transition: opacity 1.4s ease-in-out, transform 8s linear;
-  transform: scale(1.06);
+  transition: opacity 2s ease-in-out, transform 10s linear;
+  transform: scale(1.5);
 }
 .hero-slide.active { opacity: 1; transform: scale(1); }
 
@@ -299,7 +299,7 @@ body.has-promo .navbar { top: 38px; }
 .layer-2 { width: 420px; height: 420px; background: var(--blue); bottom: -140px; right: -100px; }
 .layer-3 { width: 300px; height: 300px; background: var(--amber); top: 40%; right: 15%; opacity: 0.12; }
 
-.hero-content { position: relative; z-index: 2; max-width: 780px; }
+.hero-content { position: relative; z-index: 4; max-width: 780px; }
 .hero-content h1 { font-size: clamp(2.4rem, 6vw, 4.2rem); }
 .hero-sub { color: var(--ink-dim); font-size: 1.15rem; margin: 1.25rem auto 2.25rem; max-width: 520px; }
 .hero-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
@@ -323,15 +323,15 @@ body.has-promo .navbar { top: 38px; }
 .hero-line.from-right { animation-name: heroLineRight; }
 
 .hero-line:nth-child(2) { animation-delay: 0.32s; }
-.hero-line:nth-child(3) { animation-delay: 0.48s; }
+.hero-line:nth-child(3) { animation-delay: 0.32s; }
 .hero-line:nth-child(4) { animation-delay: 0.64s; }
 
 @keyframes heroLineLeft {
-  from { opacity: 0; transform: translateX(-200px); }
+  from { opacity: 0; transform: translateX(-600px); }
   to   { opacity: 1; transform: translateX(0); }
 }
 @keyframes heroLineRight {
-  from { opacity: 0; transform: translateX(200px); }
+  from { opacity: 0; transform: translateX(600px); }
   to   { opacity: 1; transform: translateX(0); }
 }
 
