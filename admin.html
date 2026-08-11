@@ -22,10 +22,13 @@
     Desde el pie del sitio -> "Staff Login", o directo a
     admin.html. Pide contrasena.
 
-  Donde se cambia la contrasena:
-    En backend/Codigo.gs -> CONFIG.ADMIN_PASSWORD
-    (NO esta en este archivo a proposito: si estuviera aqui,
-     cualquiera podria verla con "ver codigo fuente")
+  DOS CONTRASENAS, segun el estado del sitio:
+    - Sin backend conectado -> modo demostracion, la contrasena
+      esta en js/config.js -> admin.demoPassword. Datos de
+      ejemplo, no se guarda nada.
+    - Con backend conectado -> la real, en
+      backend/Codigo.gs -> CONFIG.ADMIN_PASSWORD (del lado del
+      servidor, nunca en estos archivos).
   =============================================================
 -->
 
@@ -48,6 +51,10 @@
     <h1>Staff Panel</h1>
     <p class="login-sub">Enter your password to manage appointments and site content.</p>
 
+    <!-- Solo visible en modo demostracion. js/admin.js lo llena
+         con la contrasena de prueba para que se pueda entrar. -->
+    <p class="demo-notice" id="demoNotice" hidden></p>
+
     <form id="loginForm">
       <div class="form-row">
         <label for="password">Password</label>
@@ -64,6 +71,12 @@
      PANTALLA 2: PANEL (oculto hasta iniciar sesion)
      ============================================================ -->
 <div class="admin-shell" id="adminShell" hidden>
+
+  <!-- Franja permanente mientras se navega en modo demostracion,
+       para que nadie crea que esta viendo reservas reales. -->
+  <div class="demo-bar" id="demoBar" hidden>
+    Demo mode — sample data. Connect the backend to manage real appointments.
+  </div>
 
   <header class="admin-header">
     <div class="admin-header-inner">
@@ -166,7 +179,7 @@
       <div class="form-row">
         <label for="heroTitle">Banner headline</label>
         <textarea id="heroTitle" rows="2" placeholder="Advanced Imaging. Compassionate Care."></textarea>
-        <p class="field-hint">Press Enter to split it into two lines. Leave empty to keep the default.</p>
+        <p class="field-hint">Each sentence becomes its own line, sliding in from alternating sides. Press Enter to force a break.</p>
       </div>
 
       <div class="form-row">

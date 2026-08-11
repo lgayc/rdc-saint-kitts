@@ -7,7 +7,7 @@
 
    Indice:
      1. Base del panel
-     2. Pantalla de login
+     2. Pantalla de login (+ avisos de modo demo)
      3. Encabezado y pestanas
      4. Paneles y titulos
      5. Tarjetas de reservas
@@ -96,6 +96,40 @@
   border-radius: 4px;
   font-size: 0.85em;
 }
+
+/* --- Avisos del modo demostracion --------------------------- */
+
+/* Cartel dentro del login, con la contrasena de prueba */
+.demo-notice {
+  background: rgba(192, 136, 41, 0.10);
+  border: 1px solid rgba(192, 136, 41, 0.35);
+  border-radius: var(--radius-sm);
+  padding: 0.8rem 1rem;
+  font-size: 0.83rem;
+  line-height: 1.5;
+  color: var(--ink-dim);
+  text-align: left;
+  margin-bottom: 1.5rem;
+}
+.demo-notice[hidden] { display: none; }
+.demo-notice strong { color: #96690f; }
+.demo-notice code {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-strong);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* Franja fija arriba mientras se usa el panel en modo demo */
+.demo-bar {
+  background: #c08829;
+  color: #ffffff;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+}
+.demo-bar[hidden] { display: none; }
 
 
 /* ---------------------------------------------------------------
