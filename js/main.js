@@ -6,17 +6,14 @@
  *  (esos estan en booking.js y studies.js):
  *
  *    1. Llenar el sitio con los datos de SITE_CONFIG
+ *   1b. Ventana de detalle de cada modalidad
  *    2. Traer el contenido editable del panel admin
  *    3. Carrusel/slideshow del banner
- *    4. Barra de promocion
- *    5. Menu de navegacion (scroll + movil)
- *    6. Animaciones al hacer scroll
- *    7. Parallax "3D" del banner
- *    8. Carrusel horizontal de servicios
- *    9. Contadores animados
- *
- *  Nada de aqui tiene texto de la clinica escrito a mano: todo
- *  sale de js/config.js o del panel admin.
+ *    4. Menu de navegacion
+ *    5. Animaciones al hacer scroll
+ *    6. Parallax del banner
+ *    7. Carrusel horizontal de servicios
+ *    8. Contadores animados
  * ============================================================
  */
 
@@ -25,6 +22,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   setupNavbar();
   setupHeroParallax();
   setupModalitiesCarousel();
+  setupModalityModal();
   setupStatCounters();
 
   // El observador de animaciones se crea ANTES de pedir el
@@ -32,9 +30,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   // la respuesta y necesita engancharlas a el.
   setupRevealAnimations();
 
-  // El contenido del admin (imagenes, promo, textos) se pide al
-  // servidor. Si falla o no esta conectado, el sitio sigue
-  // funcionando con lo que hay en js/config.js.
   await loadEditableContent();
 
   document.getElementById("year").textContent = new Date().getFullYear();
@@ -49,8 +44,6 @@ function populateContent() {
   const cfg = SITE_CONFIG;
 
   // --- Logo ---------------------------------------------------
-  // Se usa en la barra de navegacion. Si el archivo no existe,
-  // se cae de vuelta al nombre en texto (ver onerror abajo).
   const logoImg = document.getElementById("brandLogo");
   if (logoImg && cfg.logo) {
     logoImg.src = cfg.logo;
@@ -101,24 +94,33 @@ function populateContent() {
   }
 
   // --- Tarjetas de servicios ----------------------------------
-  // Cada tarjeta: ilustracion arriba, con el iconito encima, y
-  // el texto abajo. La ilustracion sale de modalities[].image.
+  // Cada tarjeta es un <button> a proposito: se puede activar con
+  // el teclado (Tab + Enter) igual que con el mouse, y los lectores
+  // de pantalla la anuncian como algo pulsable.
+  // El indice queda guardado en data-modality para saber cual abrir.
   const track = document.getElementById("modalitiesTrack");
   if (track) {
     track.innerHTML = cfg.modalities
-      .map(m => `
-        <article class="modality-card reveal" role="listitem">
-          <div class="modality-media">
-            ${m.image ? `<img src="${m.image}" alt="${m.name}" loading="lazy">` : ""}
-            <span class="modality-badge">${ICONS[m.icon] || ""}</span>
-          </div>
-          <div class="modality-body">
-            <h3>${m.name}</h3>
-            <p>${m.description}</p>
-          </div>
-        </article>
+      .map((m, i) => `
+        <button type="button" class="modality-card reveal" data-modality="${i}"
+                aria-label="${escapeText(m.name)} - see details">
+          <span class="modality-media">
+            ${m.image ? `<img src="${m.image}" alt="" loading="lazy">` : ""}
+          </span>
+          <span class="modality-body">
+            <span class="modality-title">${escapeText(m.name)}</span>
+            <span class="modality-desc">${escapeText(m.description)}</span>
+            <span class="modality-more">Learn more ${ICONS.arrow || ""}</span>
+          </span>
+        </button>
       `)
       .join("");
+
+    track.querySelectorAll("[data-modality]").forEach(card => {
+      card.addEventListener("click", () => {
+        openModalityModal(Number(card.dataset.modality));
+      });
+    });
   }
 
   // --- Opciones del formulario --------------------------------
@@ -126,14 +128,119 @@ function populateContent() {
   fillSelect("preferredTime", cfg.booking.timeSlots);
 
   // --- Iconos sueltos -----------------------------------------
-  // En el HTML hay marcadores tipo <span class="icon" data-icon="phone">.
-  // Aqui se rellenan con el SVG correspondiente de js/icons.js.
-  // Asi el HTML queda limpio y los iconos viven en un solo lugar.
   document.querySelectorAll("[data-icon]").forEach(el => {
     const svg = ICONS[el.dataset.icon];
     if (svg) el.innerHTML = svg;
   });
 }
+
+
+/* ----------------------------------------------------------------
+   1b. VENTANA DE DETALLE DE CADA MODALIDAD
+   ----------------------------------------------------------------
+   Al hacer clic en una tarjeta se abre una ventana con la
+   explicacion ampliada que viene de config.js -> modalities[].details
+
+   Detalles de accesibilidad que vale la pena conservar:
+   - Se recuerda que elemento tenia el foco para devolverlo al
+     cerrar; si no, el teclado se pierde al inicio de la pagina.
+   - Se cierra con ESC, con el boton X y tocando el fondo.
+   - Se bloquea el scroll del fondo mientras esta abierta.
+   ---------------------------------------------------------------- */
+
+let lastFocusedElement = null;
+
+function openModalityModal(index) {
+  const modality = SITE_CONFIG.modalities[index];
+  const overlay = document.getElementById("modalityModal");
+  const body = document.getElementById("modalityModalBody");
+  if (!modality || !overlay || !body) return;
+
+  lastFocusedElement = document.activeElement;
+
+  const d = modality.details || {};
+
+  body.innerHTML = `
+    <div class="modal-media">
+      ${modality.image ? `<img src="${modality.image}" alt="">` : ""}
+    </div>
+
+    <div class="modal-text">
+      <p class="eyebrow">Imaging service</p>
+      <h3 id="modalityModalTitle">${escapeText(modality.name)}</h3>
+
+      ${d.summary ? `<p class="modal-summary">${escapeText(d.summary)}</p>` : ""}
+
+      ${(d.uses && d.uses.length) ? `
+        <h4>Commonly used for</h4>
+        <ul class="modal-list">
+          ${d.uses.map(u => `<li>${escapeText(u)}</li>`).join("")}
+        </ul>
+      ` : ""}
+
+      <div class="modal-facts">
+        ${d.duration ? `
+          <div class="modal-fact">
+            <span class="modal-fact-label">Typical duration</span>
+            <span class="modal-fact-value">${escapeText(d.duration)}</span>
+          </div>` : ""}
+        ${d.preparation ? `
+          <div class="modal-fact">
+            <span class="modal-fact-label">How to prepare</span>
+            <span class="modal-fact-value">${escapeText(d.preparation)}</span>
+          </div>` : ""}
+      </div>
+
+      <p class="modal-note">
+        This is general information. Your doctor or our radiologist will
+        confirm what applies to your specific case.
+      </p>
+
+      <a href="#booking" class="btn btn-primary modal-cta" data-close-modal>
+        Book this study
+      </a>
+    </div>
+  `;
+
+  overlay.hidden = false;
+  document.body.classList.add("modal-open");
+
+  // El foco entra a la ventana para que el teclado siga ahi dentro
+  overlay.querySelector(".modal-close").focus();
+}
+
+function closeModalityModal() {
+  const overlay = document.getElementById("modalityModal");
+  if (!overlay || overlay.hidden) return;
+
+  overlay.hidden = true;
+  document.body.classList.remove("modal-open");
+
+  // Devolver el foco a la tarjeta desde la que se abrio
+  if (lastFocusedElement) lastFocusedElement.focus();
+}
+
+function setupModalityModal() {
+  const overlay = document.getElementById("modalityModal");
+  if (!overlay) return;
+
+  overlay.querySelector(".modal-close")
+    .addEventListener("click", closeModalityModal);
+
+  overlay.addEventListener("click", e => {
+    // Clic en el fondo oscuro (pero no dentro de la ventana)
+    if (e.target === overlay) closeModalityModal();
+
+    // Cualquier elemento marcado con data-close-modal, como el
+    // boton de reservar: cierra y deja que el enlace siga.
+    if (e.target.closest("[data-close-modal]")) closeModalityModal();
+  });
+
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape") closeModalityModal();
+  });
+}
+
 
 /**
  * TITULO DEL BANNER CON ENTRADA POR LADOS
@@ -144,13 +251,8 @@ function populateContent() {
  * La animacion en si esta en css/styles.css (.hero-line).
  *
  * Como se decide donde cortar la linea:
- *   1. Si el texto trae saltos de linea (el admin puede escribirlos
- *      en el panel), se respetan tal cual.
+ *   1. Si el texto trae saltos de linea, se respetan tal cual.
  *   2. Si no, se corta despues de cada punto seguido.
- *
- * Ejemplo: "Advanced Imaging. Compassionate Care."
- *   -> linea 1: "Advanced Imaging."     (entra por la izquierda)
- *   -> linea 2: "Compassionate Care."   (entra por la derecha)
  */
 function renderHeroTitle(text) {
   const el = document.getElementById("heroTitle");
@@ -198,18 +300,11 @@ function fillSelect(id, options) {
 
 /* ----------------------------------------------------------------
    2. CONTENIDO EDITABLE DESDE EL PANEL ADMIN
-   ----------------------------------------------------------------
-   Trae del backend lo que el administrador haya cambiado:
-   imagenes del banner, texto de promocion y titulos.
-
-   Si no hay backend conectado, usa lo de js/config.js. El sitio
-   nunca se rompe por esto.
    ---------------------------------------------------------------- */
 
 async function loadEditableContent() {
   const apiUrl = SITE_CONFIG.api.url;
 
-  // Sin backend: usar las imagenes que esten en config.js
   if (!apiUrl || !apiUrl.trim()) {
     startHeroSlideshow(SITE_CONFIG.hero.slides);
     announceContentReady(null);
@@ -232,16 +327,11 @@ async function loadEditableContent() {
     startHeroSlideshow(SITE_CONFIG.hero.slides);
 
     // IMPORTANTE: avisar igual aunque haya fallado. Si no,
-    // studies.js se queda esperando para siempre y la seccion
-    // de publicaciones nunca aparece.
+    // studies.js se queda esperando para siempre.
     announceContentReady(null);
   }
 }
 
-/**
- * Le avisa a studies.js que ya hay (o no hay) contenido.
- * Se llama SIEMPRE, tanto si la carga salio bien como si fallo.
- */
 function announceContentReady(studies) {
   window.__RDC_STUDIES__ = studies;
   document.dispatchEvent(new CustomEvent("rdc:content-loaded"));
@@ -250,22 +340,16 @@ function announceContentReady(studies) {
 function applyEditableContent(content) {
   if (!content) content = {};
 
-  // Titulos del banner (si el admin los dejo vacios, se mantiene config.js).
-  // Se vuelve a dibujar con la misma animacion de entrada por lados.
   if (content.heroTitle) renderHeroTitle(content.heroTitle);
   if (content.heroSubtitle) setText("heroSub", content.heroSubtitle);
 
-  // Barra de promocion
   renderPromoBar(content.promoText);
 
-  // Imagenes del carrusel: manda el admin; si no hay, usa config.js
   const slides = (content.slides && content.slides.length)
     ? content.slides
     : SITE_CONFIG.hero.slides;
 
   startHeroSlideshow(slides);
-
-  // Las publicaciones las consume studies.js
   announceContentReady(content.studies || null);
 }
 
@@ -286,14 +370,6 @@ function renderPromoBar(text) {
 
 /* ----------------------------------------------------------------
    3. CARRUSEL DEL BANNER (slideshow)
-   ----------------------------------------------------------------
-   Las imagenes se apilan una encima de otra y se van cruzando con
-   un fundido. Se agrega un leve zoom (efecto Ken Burns) para que
-   no se sienta estatico.
-
-   Para cambiar la velocidad: SITE_CONFIG.hero.slideDurationMs
-   Para agregar imagenes: usar el panel admin (recomendado) o
-   SITE_CONFIG.hero.slides.
    ---------------------------------------------------------------- */
 
 let heroSlideTimer = null;
@@ -303,13 +379,10 @@ function startHeroSlideshow(slides) {
   const dotsContainer = document.getElementById("heroDots");
   if (!container) return;
 
-  // Siempre empezar limpio (por si se recarga el contenido)
   clearInterval(heroSlideTimer);
   container.innerHTML = "";
   if (dotsContainer) dotsContainer.innerHTML = "";
 
-  // Sin imagenes: se queda el fondo degradado por defecto. El
-  // banner se ve bien igual, solo sin fotos.
   if (!slides || !slides.length) {
     container.classList.remove("has-images");
     return;
@@ -317,7 +390,6 @@ function startHeroSlideshow(slides) {
 
   container.classList.add("has-images");
 
-  // Crear una capa por imagen
   slides.forEach((slide, index) => {
     const el = document.createElement("div");
     el.className = "hero-slide" + (index === 0 ? " active" : "");
@@ -325,7 +397,6 @@ function startHeroSlideshow(slides) {
     if (slide.caption) el.setAttribute("aria-label", slide.caption);
     container.appendChild(el);
 
-    // Puntos de navegacion (solo si hay mas de una imagen)
     if (dotsContainer && slides.length > 1) {
       const dot = document.createElement("button");
       dot.className = "hero-dot" + (index === 0 ? " active" : "");
@@ -388,8 +459,6 @@ function setupNavbar() {
 
 /* ----------------------------------------------------------------
    5. ANIMACIONES AL HACER SCROLL
-   Cualquier elemento con class="reveal" aparece con un fundido
-   la primera vez que entra en pantalla.
    ---------------------------------------------------------------- */
 
 function setupRevealAnimations() {
@@ -407,16 +476,12 @@ function setupRevealAnimations() {
 
   document.querySelectorAll(".reveal").forEach(el => observer.observe(el));
 
-  // Guardado para que studies.js pueda animar las tarjetas que
-  // se crean despues de cargar.
   window.__RDC_OBSERVER__ = observer;
 }
 
 
 /* ----------------------------------------------------------------
    6. PARALLAX DEL BANNER
-   Los circulos borrosos del fondo se mueven a distinta velocidad
-   al hacer scroll, lo que da sensacion de profundidad.
    ---------------------------------------------------------------- */
 
 function setupHeroParallax() {
@@ -433,7 +498,6 @@ function setupHeroParallax() {
     });
   }, { passive: true });
 
-  // Inclinacion suave siguiendo el mouse (solo escritorio)
   const content = hero.querySelector(".hero-content");
   if (!content) return;
 
@@ -452,16 +516,11 @@ function setupHeroParallax() {
 /* ----------------------------------------------------------------
    7. CARRUSEL HORIZONTAL DE SERVICIOS
    ----------------------------------------------------------------
-   Como funciona:
    - La seccion de servicios es muy alta (min-height: 220vh).
    - Adentro, .modalities-pin usa position:sticky, o sea que se
-     queda fija en pantalla mientras la seccion alta pasa por
-     detras.
-   - Aqui medimos cuanto llevas recorrido de esa seccion (de 0 a 1)
-     y movemos las tarjetas hacia el lado en esa misma proporcion.
-
-   Resultado: haces scroll normal hacia abajo y las tarjetas se
-   desplazan horizontalmente.
+     queda fija en pantalla mientras la seccion alta pasa detras.
+   - Aqui medimos cuanto llevas recorrido (de 0 a 1) y movemos
+     las tarjetas hacia el lado en esa misma proporcion.
 
    Para que dure mas o menos: cambia min-height en .modalities
    dentro de css/styles.css.
@@ -530,8 +589,8 @@ function animateCount(el) {
 
 /**
  * Convierte texto en HTML seguro.
- * Se usa con lo que escribe el admin (titulo del banner) para que
- * no pueda inyectar etiquetas por accidente ni a proposito.
+ * Se usa con lo que escribe el admin para que no pueda inyectar
+ * etiquetas por accidente ni a proposito.
  */
 function escapeText(str) {
   const div = document.createElement("div");
