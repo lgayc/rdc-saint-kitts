@@ -37,7 +37,6 @@
 <!-- ============================================================
      BARRA DE PROMOCION
      Se muestra sola si el admin escribio un texto de promocion.
-     Si esta vacia, queda oculta.
      ============================================================ -->
 <div class="promo-bar" id="promoBar" hidden></div>
 
@@ -69,8 +68,6 @@
 
   <!-- ==========================================================
        BANNER (hero) con carrusel de imagenes
-       Las imagenes se cargan desde el panel admin. Mientras no
-       haya ninguna, se ve el fondo degradado con los circulos.
        ========================================================== -->
   <section class="section hero" id="hero">
 
@@ -97,7 +94,6 @@
       </div>
     </div>
 
-    <!-- Puntos para cambiar de imagen manualmente -->
     <div class="hero-dots" id="heroDots"></div>
 
     <div class="scroll-hint" aria-hidden="true">
@@ -121,26 +117,6 @@
     <div class="modalities-pin" id="modalitiesPin">
       <div class="modalities-track" id="modalitiesTrack">
         <!-- generado por js/main.js -->
-      </div>
-    </div>
-  </section>
-
-  <!-- ==========================================================
-       ESTADISTICAS
-       ========================================================== -->
-  <section class="section about-strip">
-    <div class="about-strip-inner">
-      <div class="stat">
-        <span class="stat-number" data-count="6">0</span>
-        <span class="stat-label">Imaging Modalities</span>
-      </div>
-      <div class="stat">
-        <span class="stat-number" data-count="7">0</span>
-        <span class="stat-label">Days a Week Support</span>
-      </div>
-      <div class="stat">
-        <span class="stat-number" data-count="100" data-suffix="%">0</span>
-        <span class="stat-label">Locally Focused Care</span>
       </div>
     </div>
   </section>
@@ -193,7 +169,6 @@
           <label for="modality">Imaging Needed <span class="required">*</span></label>
           <select id="modality" name="modality">
             <option value="">Select a modality</option>
-            <!-- opciones generadas desde SITE_CONFIG.modalities -->
           </select>
         </div>
 
@@ -206,7 +181,6 @@
             <label for="preferredTime">Preferred Time <span class="required">*</span></label>
             <select id="preferredTime" name="preferredTime">
               <option value="">Select a time</option>
-              <!-- opciones generadas desde SITE_CONFIG.booking.timeSlots -->
             </select>
           </div>
         </div>
@@ -258,21 +232,16 @@
           <li><span class="icon" data-icon="mail"></span> <a id="contactEmail" href="mailto:rad.dg.center@gmail.com">rad.dg.center@gmail.com</a></li>
         </ul>
 
-        <ul class="hours-list" id="hoursList">
-          <!-- generado desde SITE_CONFIG.contact.hours -->
-        </ul>
+        <ul class="hours-list" id="hoursList"></ul>
 
-        <div class="social-links" id="socialLinks">
-          <!-- generado desde SITE_CONFIG.social -->
-        </div>
+        <div class="social-links" id="socialLinks"></div>
       </div>
     </div>
   </section>
 
   <!-- ==========================================================
        VENTANA DE DETALLE DE MODALIDAD
-       Se llena y se abre desde js/main.js al hacer clic en una
-       tarjeta de servicio. Empieza oculta.
+       Se llena y se abre desde js/main.js. Empieza oculta.
        ========================================================== -->
   <div class="modal-overlay" id="modalityModal" hidden
        role="dialog" aria-modal="true" aria-labelledby="modalityModalTitle">
