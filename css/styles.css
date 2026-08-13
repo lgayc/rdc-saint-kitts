@@ -9,7 +9,7 @@
      5. Navbar + logo
      6. Hero (carrusel + entrada del titulo)
      7. Modalities (carrusel horizontal + tarjetas)
-     8. About strip / stats
+     8. About strip / stats  (sin uso: la franja se quito del HTML)
      9. Booking form
     10. Studies grid
     11. Contact / footer
@@ -250,8 +250,8 @@ body.has-promo .navbar { top: 38px; }
   background-size: cover;
   background-position: center;
   opacity: 0;
-  transition: opacity 2s ease-in-out, transform 10s linear;
-  transform: scale(1.5);
+  transition: opacity 1.4s ease-in-out, transform 8s linear;
+  transform: scale(1.06);
 }
 .hero-slide.active { opacity: 1; transform: scale(1); }
 
@@ -299,7 +299,7 @@ body.has-promo .navbar { top: 38px; }
 .layer-2 { width: 420px; height: 420px; background: var(--blue); bottom: -140px; right: -100px; }
 .layer-3 { width: 300px; height: 300px; background: var(--amber); top: 40%; right: 15%; opacity: 0.12; }
 
-.hero-content { position: relative; z-index: 4; max-width: 780px; }
+.hero-content { position: relative; z-index: 2; max-width: 780px; }
 .hero-content h1 { font-size: clamp(2.4rem, 6vw, 4.2rem); }
 .hero-sub { color: var(--ink-dim); font-size: 1.15rem; margin: 1.25rem auto 2.25rem; max-width: 520px; }
 .hero-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
@@ -308,43 +308,45 @@ body.has-promo .navbar { top: 38px; }
    js/main.js parte el titulo y le pone a cada linea la clase
    .from-left o .from-right, alternando.
 
-   Distancia del deslizamiento: los 600px. Velocidad: 0.9s.
-   Desfase entre lineas: 0.32s / 0.32s.
+   Distancia del deslizamiento: los 70px. Velocidad: 0.9s.
+   Desfase entre lineas: los animation-delay de nth-child.
+   Para que las dos lineas entren A LA VEZ, pon los delay en 0s
+   o borra esas tres reglas.
    ------------------------------------------------------------- */
 .hero-line {
   display: block;
   opacity: 0;
   will-change: transform, opacity;
-  animation-duration: 2s;
+  animation-duration: 0.9s;
   animation-timing-function: var(--ease);
   animation-fill-mode: forwards;
 }
 .hero-line.from-left  { animation-name: heroLineLeft; }
 .hero-line.from-right { animation-name: heroLineRight; }
 
-.hero-line:nth-child(2) { animation-delay: 0s; }
+.hero-line:nth-child(2) { animation-delay: 0.16s; }
 .hero-line:nth-child(3) { animation-delay: 0.32s; }
 .hero-line:nth-child(4) { animation-delay: 0.48s; }
 
 @keyframes heroLineLeft {
-  from { opacity: 0; transform: translateX(-600px); }
+  from { opacity: 0; transform: translateX(-70px); }
   to   { opacity: 1; transform: translateX(0); }
 }
 @keyframes heroLineRight {
-  from { opacity: 0; transform: translateX(600px); }
+  from { opacity: 0; transform: translateX(70px); }
   to   { opacity: 1; transform: translateX(0); }
 }
 
 .hero-sub,
 .hero-actions {
   opacity: 0;
-  animation: heroFadeUp 1s var(--ease) forwards;
+  animation: heroFadeUp 0.8s var(--ease) forwards;
 }
 .hero-sub { animation-delay: 0.5s; }
 .hero-actions { animation-delay: 0.65s; }
 
 @keyframes heroFadeUp {
-  from { opacity: 0; transform: translateY(30px); }
+  from { opacity: 0; transform: translateY(18px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
@@ -386,16 +388,9 @@ body.has-promo .navbar { top: 38px; }
   100% { transform: scaleY(0); transform-origin: bottom; opacity: 0; }
 }
 
-.hero-content h1 {
-  font-family: 'Jost', Arial, sans-serif;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-}
-
 /* ---------------------------------------------------------------
    7. MODALITIES — el scroll vertical mueve las tarjetas de lado
    ---------------------------------------------------------------
-   La seccion lleva un fondo apenas mas gris para separarla.
    .modalities-pin usa position:sticky, asi que se queda fijo
    mientras la seccion (muy alta) pasa por detras. js/main.js mide
    el avance y desplaza .modalities-track en esa proporcion.
@@ -471,9 +466,8 @@ body.has-promo .navbar { top: 38px; }
   box-shadow: 0 0 0 3px rgba(18, 165, 148, 0.25), var(--shadow-lift);
 }
 
-/* Zona de la ilustracion.
-   Las marcas son abstractas y centradas, asi que se usa "contain"
-   con aire alrededor: con "cover" se recortarian los bordes. */
+/* Las marcas son abstractas y centradas: "contain" con aire,
+   porque con "cover" se recortarian los bordes. */
 .modality-media {
   display: flex;
   align-items: center;
@@ -531,6 +525,11 @@ body.has-promo .navbar { top: 38px; }
 
 /* ---------------------------------------------------------------
    8. ABOUT STRIP / STATS
+   ---------------------------------------------------------------
+   SIN USO. La franja de cifras (6 modalidades / 7 dias / 100%) se
+   quito del HTML porque eran afirmaciones sin respaldo.
+   Los estilos quedan por si algun dia se recupera con datos
+   reales; no afectan a nada mientras no exista el marcado.
    --------------------------------------------------------------- */
 .about-strip { padding: 3rem 1.5rem; }
 .about-strip-inner {
@@ -646,7 +645,9 @@ textarea.has-error {
    --------------------------------------------------------------- */
 .studies-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  /* 340px minimo: tarjetas mas anchas, para que la imagen del
+     estudio tenga sitio suficiente para leerse */
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
   gap: 1.75rem;
 }
 
@@ -662,11 +663,32 @@ textarea.has-error {
 
 .study-link { display: block; }
 
+/* --- Zona de la imagen del estudio ---------------------------
+   Decisiones y por que:
+
+   1. aspect-ratio en vez de altura fija: el alto crece con el
+      ancho de la tarjeta, asi que se ve igual de bien en un
+      monitor grande que en el movil.
+
+   2. background-size: contain (no cover): las imagenes son
+      estudios medicos. Con "cover" se recortaban los bordes y
+      se perdia justo la anatomia. Con "contain" se ve el
+      estudio completo, sin cortar.
+
+   3. Fondo oscuro: los estudios vienen con fondo negro, asi que
+      el panel oscuro los continua sin costura y ademas los hace
+      resaltar sobre la tarjeta blanca, como un negatoscopio.
+
+   Si algun dia publican fotos normales (equipo, eventos) y las
+   prefieren a sangre, cambia "contain" por "cover" y quita el
+   background-repeat.
+   ------------------------------------------------------------- */
 .study-card-media {
-  height: 140px;
-  background-size: cover;
+  aspect-ratio: 4 / 3;
+  background-size: contain;
+  background-repeat: no-repeat;   /* obligatorio con "contain" */
   background-position: center;
-  background-color: var(--surface-tint);
+  background-color: #0b1520;
 }
 .study-card-body { padding: 1.6rem; }
 .study-card-date { color: var(--ink-dim); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; }
@@ -914,7 +936,6 @@ body.modal-open { overflow: hidden; }
   .modality-media { padding: 1.25rem; }
   .modality-body { padding: 1.2rem 1.25rem 1.4rem; }
   .form-row.two-col { grid-template-columns: 1fr; }
-  .about-strip-inner { justify-content: center; }
 
   /* El modal pasa a una sola columna, con la ilustracion arriba */
   .modal-overlay { padding: 0.75rem; }
