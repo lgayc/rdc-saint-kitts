@@ -182,8 +182,12 @@ body.has-promo .navbar { top: 38px; }
 
 .brand { display: flex; align-items: center; gap: 0.7rem; }
 
+/* 56px y no 44px: el logo es un ovalo de proporcion 1,7:1 con tres
+   lineas de texto fino dentro. A 44 de alto, "Radiology Diagnostic
+   Center" quedaba en una mancha ilegible — no por calidad del
+   archivo, sino por geometria. */
 .brand-logo {
-  height: 44px;
+  height: 56px;
   width: auto;
   border-radius: 50% / 40%;
   object-fit: cover;
@@ -628,6 +632,20 @@ textarea.has-error {
   font-size: 0.8rem;
   margin-top: 0.35rem;
   line-height: 1.4;
+}
+
+/* Trampa anti-robots del formulario de reservas.
+   Se saca de la pantalla en vez de usar display:none porque
+   algunos robots detectan display:none y saltan el campo. Fuera
+   del viewport lo rellenan igual, que es justo lo que se busca.
+   Nadie lo ve, nadie llega con el tabulador, y ningun lector de
+   pantalla lo anuncia (el div lleva aria-hidden). */
+.hp-field {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
 }
 
 .form-note {

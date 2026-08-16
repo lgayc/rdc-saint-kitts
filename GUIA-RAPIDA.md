@@ -1,5 +1,18 @@
 # Guía rápida — RDC Saint Kitts
 
+> ## ⚠️ Esta guía está desfasada
+>
+> Describe el montaje con **Google Apps Script**, que ya no se usa.
+> El backend actual es Supabase.
+>
+> **La guía vigente es [`backend/SUPABASE.md`](backend/SUPABASE.md).**
+>
+> Esta se conserva porque la sección de **CallMeBot** (WhatsApp)
+> sigue siendo válida palabra por palabra, y porque documenta de
+> dónde venía el proyecto. Para instalar, no la sigas.
+
+---
+
 Todo lo que hay que configurar, en orden. Son unos 15 minutos en total.
 
 > **Estado actual:** el sitio está en **modo prueba**. Funciona y se ve completo, pero el formulario todavía no envía nada real hasta que hagas el paso 1.
@@ -65,7 +78,10 @@ Usamos **CallMeBot**, que es gratis. El número que va a *recibir* los avisos ti
 
 Desde el teléfono con el número **+1 869 762 9440** (el de prueba):
 
-1. Guarda este contacto: **+34 644 51 95 23**
+1. Guarda este contacto: **+34 644 33 66 63**
+   ⚠️ *Este número está actualizado; el que había antes aquí
+   (644 51 95 23) quedó desfasado. Y lee el aviso sobre datos de
+   pacientes en `backend/SUPABASE.md`, sección 5b, antes de usarlo.*
 2. Mándale por WhatsApp este mensaje exacto:
    ```
    I allow callmebot to send me messages
@@ -152,7 +168,7 @@ Lista de verificación. Ahora mismo hay **datos de prueba** que hay que cambiar:
   - ⚠️ El número nuevo tiene que hacer el paso 2 (autorizar CallMeBot) con su propia API key
 - [ ] **Contraseña del admin:** cambiar `rdc2026` en `backend/Codigo.gs`
 - [ ] **Apagar el modo demo:** `demoMode: false` en `js/config.js` (o simplemente conectar el backend, que lo apaga solo)
-- [ ] **Logo:** poner el archivo real en `assets/logo.jpg`
+- [ ] **Logo:** poner el archivo real en `assets/logo.png`
 - [ ] **Fotos del banner:** reemplazar las tres de relleno
 - [ ] **Dirección exacta** de la clínica en `js/config.js` → `contact.address`
 - [ ] **Horarios reales** en `js/config.js` → `contact.hours`
@@ -194,4 +210,4 @@ No hay que compilar nada ni instalar dependencias. Son archivos sueltos.
 → Falta la API key de CallMeBot, o el número no autorizó el bot (paso 2). El sistema está hecho para que si WhatsApp falla, la reserva igual se guarde y el correo igual salga.
 
 **El logo no se ve**
-→ El archivo debe estar en `assets/logo.jpg`. Si falta, el sitio muestra el nombre en texto para no romperse.
+→ El archivo debe estar en `assets/logo.png`. Si falta, el sitio muestra el nombre en texto para no romperse.

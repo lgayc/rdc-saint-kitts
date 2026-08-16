@@ -22,13 +22,18 @@
     Desde el pie del sitio -> "Staff Login", o directo a
     admin.html. Pide contrasena.
 
-  DOS CONTRASENAS, segun el estado del sitio:
-    - Sin backend conectado -> modo demostracion, la contrasena
+  DOS FORMAS DE ENTRAR, segun el estado del sitio:
+    - Sin Supabase conectado -> modo demostracion. La contrasena
       esta en js/config.js -> admin.demoPassword. Datos de
       ejemplo, no se guarda nada.
-    - Con backend conectado -> la real, en
-      backend/Codigo.gs -> CONFIG.ADMIN_PASSWORD (del lado del
-      servidor, nunca en estos archivos).
+    - Con Supabase conectado -> correo y contrasena de una cuenta
+      real de Supabase Auth, que ademas tiene que estar dada de
+      alta en la tabla `staff`. Ninguna credencial vive en estos
+      archivos.
+
+  Aunque alguien se saltara esta pantalla, no veria ni una
+  reserva: quien decide es Row Level Security en la base de
+  datos, no este HTML.
   =============================================================
 -->
 
@@ -36,7 +41,11 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
-<link rel="icon" href="assets/logo.jpg">
+<link rel="icon" href="assets/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<meta name="theme-color" content="#02b2e4">
+
 <link rel="stylesheet" href="css/styles.css">
 <link rel="stylesheet" href="css/admin.css">
 </head>
@@ -47,7 +56,7 @@
      ============================================================ -->
 <div class="login-screen" id="loginScreen">
   <div class="login-card">
-    <img src="assets/logo.jpg" alt="RDC Saint Kitts" class="login-logo">
+    <img src="assets/logo.png" alt="RDC Saint Kitts" class="login-logo">
     <h1>Staff Panel</h1>
     <p class="login-sub">Enter your password to manage appointments and site content.</p>
 
@@ -56,6 +65,13 @@
     <p class="demo-notice" id="demoNotice" hidden></p>
 
     <form id="loginForm">
+      <!-- El correo solo hace falta con Supabase conectado. En
+           modo demostracion js/admin.js esconde esta fila, porque
+           ahi solo hay una contrasena de ejemplo. -->
+      <div class="form-row" id="emailRow" hidden>
+        <label for="loginEmail">Email</label>
+        <input type="email" id="loginEmail" name="email" autocomplete="username">
+      </div>
       <div class="form-row">
         <label for="password">Password</label>
         <input type="password" id="password" name="password" autocomplete="current-password" required>
@@ -81,7 +97,7 @@
   <header class="admin-header">
     <div class="admin-header-inner">
       <div class="admin-brand">
-        <img src="assets/logo.jpg" alt="" class="admin-logo">
+        <img src="assets/logo.png" alt="" class="admin-logo">
         <span>Staff Panel</span>
       </div>
       <div class="admin-header-actions">
@@ -218,7 +234,11 @@
   </main>
 </div>
 
+<!-- Misma version que en index.html. Si se cambia una, cambiar la otra. -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.3/dist/umd/supabase.js"></script>
+
 <script src="js/config.js"></script>
+<script src="js/supabase-api.js"></script>
 <script src="js/admin.js"></script>
 </body>
 </html>

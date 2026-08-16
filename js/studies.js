@@ -4,9 +4,9 @@
  * ============================================================
  *  De donde saca las publicaciones, en orden de prioridad:
  *
- *    1. Del panel admin (si el backend esta conectado).
+ *    1. De la tabla `posts` de Supabase (si esta conectado).
  *       Es la forma recomendada: el personal las agrega desde
- *       admin.html sin tocar codigo.
+ *       admin.html, arrastrando la foto, sin tocar codigo.
  *
  *    2. De un Google Sheet publicado como CSV, si se configuro
  *       SITE_CONFIG.studies.sheetCsvUrl. Alternativa por si se

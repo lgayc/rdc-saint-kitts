@@ -18,25 +18,39 @@ HTML, CSS y JavaScript planos. **Sin framework, sin compilación, sin `npm insta
 | Diseño y maquetación | ✅ Terminado |
 | Carrusel del banner con fotos reales | ✅ Funciona |
 | Catálogo de 6 servicios + ventana de detalle | ✅ Funciona |
-| Formulario de reservas con validación | ✅ Valida — **no envía a ningún sitio todavía** |
-| Publicaciones (Studies & Work) | ✅ Muestra 3 estudios reales |
-| Panel de administración | ⚠️ Funciona en **modo demostración** con datos falsos |
-| Backend (base de datos, avisos) | ❌ **Sin hacer — es el próximo trabajo** |
+| Formulario de reservas con validación | ✅ Valida y envía a Supabase |
+| Publicaciones (Studies & Work) | ✅ Salen de la base, con respaldo local |
+| Panel de administración | ✅ Cuentas reales + subida de fotos arrastrando |
+| Base de datos, RLS y Storage | ✅ **Aplicado y probado** en el proyecto real |
+| Edge Function de reservas | ✅ **Desplegada y probada** (validación, anti-spam, anti-robots) |
+| Avisos: correo, WhatsApp, Calendar | ⚠️ Código listo — **faltan los secretos del cliente** |
+| Cuentas del personal | ⚠️ Pendiente (paso 4 de la guía) |
+| Anti-pausa del plan gratuito | ⚠️ Escrito — faltan los secretos en GitHub |
 
-**En una frase:** el sitio está presentable para enseñárselo al cliente, pero una reserva enviada no llega a ninguna parte. Falta todo el backend.
+**En una frase:** una reserva enviada hoy **se guarda de verdad** y responde con su código, pero no avisa a nadie todavía. Lo que falta son credenciales que solo puede generar el dueño de las cuentas: App Password de Gmail, autorización de CallMeBot y la cuenta de servicio de Google. Todo eso está en `backend/SUPABASE.md`, pasos 4, 5 y 7.
+
+**Proyecto:** `rdc-saint-kitts` · `tittyvorxepzjoffqado` · región `ca-central-1`
 
 ---
 
-## Lo próximo: el backend con Supabase
+## El backend, en corto
 
-Ahí es donde arranca la siguiente conversación.
+Instalación paso a paso: **`backend/SUPABASE.md`**.
 
-### Qué tiene que hacer
+### Qué hace
 
-1. Guardar las reservas en base de datos
-2. Avisar de cada reserva por **correo**, **WhatsApp** y **evento en Google Calendar**
-3. Permitir que el personal suba fotos **arrastrando el archivo**, sin copiar enlaces
-4. Panel para gestionar reservas y contenido
+1. Guarda las reservas en Postgres
+2. Avisa de cada una por **correo**, **WhatsApp** y **evento en Google Calendar**
+3. Deja al personal subir fotos **arrastrando el archivo**, sin copiar enlaces
+4. Panel para gestionar reservas y contenido, con cuentas de verdad
+
+### La decisión que da forma a todo lo demás
+
+**Las reservas no se insertan desde el navegador.** El formulario manda a la Edge Function `book`, que valida del lado del servidor, guarda con la `service_role` key y dispara los tres avisos.
+
+La alternativa —dejar que el formulario escriba directo en la tabla— obliga a abrir una política de escritura pública sobre una tabla llena de nombres, teléfonos y correos de pacientes. Es un error fácil de cometer y difícil de notar hasta que ya pasó.
+
+Así, `bookings` **no tiene ninguna política para `anon`**: desde el navegador no existe. Y como no hay otra puerta, la validación del servidor y el freno anti-spam no se pueden esquivar.
 
 ### Por qué Supabase
 
@@ -44,33 +58,47 @@ Se evaluaron tres rutas. Vale la pena conocer el razonamiento para no repetirlo:
 
 - **Google Apps Script** (lo que había): gratis y sin servidor, con correo y Calendar resueltos por vivir dentro de la cuenta de Google. Pero es lento, tiene el engorro de "volver a implementar" en cada cambio y sirve mal las imágenes.
 - **PocketBase**: excelente panel y subidas nativas, pero **su motor JavaScript solo firma HS256** y Google Calendar exige **RS256**. Obligaba a un híbrido con Apps Script, o a compilar un binario propio en Go. Se llegó a escribir el híbrido; ver `backend/POCKETBASE.md`.
-- **Supabase** ← elegido. Las Edge Functions corren sobre **Deno, que sí tiene WebCrypto**, así que pueden firmar RS256 y hablar con Google Calendar directamente. Backend de una sola pieza, sin híbrido.
+- **Supabase** ← elegido. Las Edge Functions corren sobre **Deno, que sí tiene WebCrypto**, así que firman RS256 y hablan con Google Calendar directamente. Backend de una sola pieza, sin híbrido. Son 40 líneas en `supabase/functions/_shared/notify.ts`.
 
-### Aviso sobre el plan gratuito
+### El plan gratuito se pausa — y eso ya está resuelto
 
-Los proyectos de Supabase **se pausan tras un tiempo sin actividad** en el plan gratuito. Una clínica con reservas esporádicas puede caer justo en ese caso. Hay que preverlo: un ping programado que lo mantenga despierto, o pasar al plan de pago al entrar en producción. **Si el proyecto está pausado, las reservas no entran.**
+Supabase pausa los proyectos gratuitos tras una ventana de **7 días** con poca actividad, y lo que cuenta son *peticiones de usuario contra la base de datos*. Una clínica con reservas esporádicas cae justo ahí. **Con el proyecto pausado, las reservas no entran** — y nadie se entera, porque lo que deja de llegar son avisos.
 
-### Esquema de datos propuesto
+El ping vive en `.github/workflows/supabase-keepalive.yml` y corre cada dos días desde GitHub Actions. Tiene que ser externo: `pg_cron` no vale, porque es actividad interna y porque **si el proyecto se pausa, se detiene con él** — el despertador quedaría dentro de la casa cerrada.
 
-Está pensado para PocketBase pero se traduce casi tal cual a tablas de Postgres. Los campos y las reglas de acceso están detallados en **`backend/POCKETBASE.md`** (sección "Crear las colecciones"). Resumen:
+El workflow también se defiende de un segundo problema: GitHub apaga los cron de los repositorios sin actividad durante 60 días, así que hace un commit al mes en `.github/keepalive-stamp` para mantenerse vivo.
 
-| Tabla | Para qué | Acceso |
+Para vigilarlo: `select last_ping from public.keepalive;` no debería tener más de tres días. Y ojo — un proyecto **ya pausado no se despierta con un ping**: hay que pulsar *Restore* en el panel.
+
+### Esquema
+
+| Tabla | Para qué | Quién puede |
 |---|---|---|
-| `bookings` | Reservas | **Lectura solo autenticado.** Escritura pública. |
-| `posts` | Publicaciones | Lectura pública si `published`. Escritura autenticada. |
-| `banners` | Fotos del carrusel | Lectura pública si `active`. Escritura autenticada. |
-| `site_content` | Textos editables | Lectura pública. Escritura autenticada. |
+| `bookings` | Reservas | **Nadie desde el navegador.** Solo la Edge Function escribe; solo el personal lee. |
+| `posts` | Publicaciones | Lectura pública si `published`. Escritura solo personal. |
+| `banners` | Fotos del carrusel | Lectura pública si `active`. Escritura solo personal. |
+| `site_content` | Textos editables | Lectura pública. Escritura solo personal. |
+| `staff` | Quién entra al panel | Solo personal. |
+| `keepalive` | Marca del último ping | Nadie. Solo la función `ping()`. |
 
-> ⚠️ **`bookings` nunca puede tener lectura pública.** Guarda nombre,
-> teléfono y correo de pacientes. Con RLS mal puesta, cualquiera
-> listaría los pacientes de la clínica desde el navegador. En
-> Supabase esto se hace con Row Level Security, activada por defecto.
+Todo en `supabase/migrations/0001_init.sql`, comentado.
 
-### Lo que se puede reaprovechar
+> ⚠️ **Ser usuario de Supabase Auth no da acceso a nada.** Hay que
+> estar además en la tabla `staff`. Son dos comprobaciones a
+> propósito: si algún día se habilita el registro público por
+> descuido, un desconocido tendría cuenta pero no vería una sola
+> reserva.
 
-- **`backend/Codigo.gs`** — la lógica de correo, WhatsApp (CallMeBot) y Calendar ya está escrita y comentada. Se traduce a una Edge Function.
-- **`backend/pb_hooks/notify.pb.js`** — el patrón del disparador y el freno anti-spam.
-- **`js/admin.js`** — todo el panel: pestañas, filtros, tarjetas de reserva. Solo hay que cambiar la capa que habla con el servidor (la función `api()`); el resto sirve igual.
+### Las dos claves, que no son lo mismo
+
+La **anon key** va en `js/config.js` y es pública por diseño: viaja dentro de la página y cualquiera puede leerla. No pasa nada — lo que protege los datos es RLS, no el secreto de la clave.
+
+La **service_role key** salta todas las reglas de RLS. Solo vive en los secretos de las Edge Functions. Si alguna vez aparece en el repositorio, en un mensaje o en una captura: **rotarla de inmediato**, porque borrarla no la quita del historial de git.
+
+### Lo que quedó como referencia histórica
+
+- **`backend/Codigo.gs`** — el Apps Script original. Ya no se usa; su lógica está traducida en `supabase/functions/_shared/notify.ts`.
+- **`backend/POCKETBASE.md`** y **`notify.pb.js`** — la ruta descartada. Conviene no borrarlos: explican por qué no volver a intentarlo.
 
 ---
 
@@ -83,7 +111,9 @@ admin.html            Panel de administración.
 css/styles.css        Todos los estilos. Índice numerado dentro.
 css/admin.css         Estilos del panel.
 
-js/config.js          ← EDITAR ESTO PRIMERO. Textos, contacto, servicios.
+js/config.js          ← EDITAR ESTO PRIMERO. Textos, contacto, servicios, claves.
+js/supabase-api.js    ÚNICA capa que habla con Supabase. Todo lo demás
+                      la usa y no sabe que Supabase existe.
 js/icons.js           Iconos SVG en línea.
 js/main.js            Navegación, carrusel, animaciones, modal.
 js/booking.js         Formulario y validación.
@@ -98,10 +128,20 @@ assets/posts/              Estudios publicados (3).
 assets/services/           Ilustraciones de los 6 servicios (SVG).
 assets/placeholders/       Respaldo, ya sin uso.
 
-backend/Codigo.gs          Apps Script: correo, WhatsApp, Calendar.
+supabase/migrations/0001_init.sql       Esquema, RLS y buckets. Comentado.
+supabase/functions/book/index.ts        Entrada única de las reservas.
+supabase/functions/_shared/notify.ts    Correo, WhatsApp y Calendar.
+supabase/functions/_shared/cors.ts      Orígenes permitidos.
+supabase/config.toml                    Config de la CLI.
+
+.github/workflows/supabase-keepalive.yml   Ping anti-pausa.
+.github/keepalive-stamp                    Sello mensual del propio cron.
+
+backend/SUPABASE.md        ← LA GUÍA DE INSTALACIÓN. Empieza por aquí.
+backend/Codigo.gs          Apps Script antiguo. Referencia histórica.
 backend/pb_hooks/          Hook de PocketBase (ruta descartada).
-backend/POCKETBASE.md      Esquema y reglas. Sirve de base para Supabase.
-GUIA-RAPIDA.md             Guía de instalación en español.
+backend/POCKETBASE.md      Por qué PocketBase no sirvió.
+GUIA-RAPIDA.md             Guía del montaje anterior (Apps Script).
 ```
 
 **Regla práctica:** para cambiar textos, contacto, servicios o enlaces, casi siempre basta con `js/config.js`. Para colores y espaciados, el bloque `:root` al principio de `css/styles.css`. Rara vez hace falta tocar el HTML.
@@ -118,6 +158,10 @@ Anotadas para que no se deshagan sin querer:
 - **Las tarjetas de servicio son `<button>`, no `<div>`.** Para poder activarlas con teclado y que los lectores de pantalla las anuncien como pulsables.
 - **El título del banner entra por líneas alternas.** `js/main.js` lo parte; la animación está en `css/styles.css` (`.hero-line`).
 - **Se quitó la franja de estadísticas.** Decía "7 Days a Week Support" y "100% Locally Focused Care" — afirmaciones inventadas de relleno. Los estilos quedan por si algún día hay cifras reales.
+- **Un solo `RDC_API` para toda la red.** `js/supabase-api.js` es lo único que sabe que Supabase existe; el resto del sitio llama a funciones con nombres propios. La migración de Apps Script a Supabase no tocó ni una línea de las secciones que dibujan el panel, y la siguiente tampoco tendría por qué.
+- **La miniatura es la zona de soltar la foto.** No hay un recuadro de subida aparte: se arrastra encima de donde la imagen va a aparecer. Se puede pulsar también, porque arrastrar no existe en el móvil.
+- **Un booleano de aviso por canal, no uno solo.** Si el correo sale y el WhatsApp falla, el panel lo dice con nombre y apellido. Con un único `notified` esa distinción se pierde — y es justo la que importa, porque si falló el WhatsApp nadie en la clínica se enteró por el móvil.
+- **Trampa anti-robots fuera de pantalla, no `display:none`.** Algunos robots detectan `display:none` y saltan el campo. Movido a `left: -9999px` lo rellenan igual, que es lo que se busca.
 
 ---
 
@@ -125,9 +169,19 @@ Anotadas para que no se deshagan sin querer:
 
 Todo lo pendiente está marcado con la palabra `PLACEHOLDER` en el código. Busca esa palabra y los encuentras todos.
 
-- [ ] **Correo de avisos** — cambiar `869thesignstudio@gmail.com` por el real
-- [ ] **WhatsApp de avisos** — cambiar `18697629440` por el real (y reautorizar CallMeBot con ese número)
-- [ ] **Contraseña del admin** — `rdc2026` es un valor inicial
+**Del backend** (detalle completo en `backend/SUPABASE.md`, sección 9):
+
+- [ ] **Correo de avisos** — el secreto `NOTIFY_EMAIL_TO`, no `869thesignstudio@gmail.com`
+- [ ] **WhatsApp de avisos** — el secreto `CALLMEBOT_PHONE` con el número real, y reautorizar CallMeBot desde él
+- [ ] **`ALLOWED_ORIGINS`** con el dominio real. Vacío = cualquier página puede mandar reservas
+- [ ] **Registro público desactivado** en Authentication → Providers → Email
+- [ ] **Cuentas del personal** creadas y dadas de alta en la tabla `staff`
+- [ ] **Keepalive corriendo**, con al menos dos ejecuciones verdes
+- [ ] **La `service_role` key** en ningún sitio salvo los secretos de las Edge Functions
+- [ ] **Contarle al cliente** que el plan gratuito depende del keepalive, y qué cuesta el de pago
+
+**Del sitio:**
+
 - [ ] **Apagar el modo demostración** — `demoMode: false` en `js/config.js`
 - [ ] **Dirección exacta** de la clínica
 - [ ] **Horarios reales** — los actuales son inventados
@@ -155,15 +209,24 @@ Las tres imágenes de `assets/posts/` son estudios reales de la clínica. A dos 
 
 Dos cosas pendientes:
 
-1. **Los originales sin recortar siguen en el historial de git**, en el commit `5ca9df2`. El repositorio es privado, así que no hay exposición hoy. **Pero si algún día se hace público, el historial se hace público con él.** Para purgarlos:
+**De dónde salieron.** Las tomamos de la **página pública de Facebook de la clínica**: ya estaban publicadas por ellos. Eso importa para calibrar lo de abajo — no hay filtración que hayamos causado nosotros, y la decisión de retirarlas o no es suya. Se anota aquí para que nadie vuelva a tratarlo como una urgencia sin este contexto.
+
+Dicho eso, quedan dos cosas:
+
+1. **Los originales sin recortar siguen en el historial de git**, en el commit **`65d8a93`** — ojo, no en el `5ca9df2` que decía antes este README; ese error hacía que el comando de purga no borrara nada y pareciera que sí. Son tres archivos, con nombre, fecha de nacimiento, número y fecha del estudio visibles.
+
+   **El repositorio es público** (GitHub Pages en plan gratuito lo exige), así que el historial también lo es. Como las imágenes ya estaban en el Facebook del cliente, la exposición añadida es pequeña — pero si algún día la clínica las retira de allí, este repositorio pasa a ser la fuente que queda. Para purgarlas:
    ```bash
    git clone https://github.com/lgayc/rdc-saint-kitts.git
    cd rdc-saint-kitts
-   git filter-repo --path "post 2.jpg" --path "post 3.jpg" --invert-paths
-   git remote add origin https://github.com/lgayc/rdc-saint-kitts.git
+   git filter-repo --path "post 1.jpg" --path "post 2.jpg" --path "post 3.jpg" --invert-paths
    git push origin --force --all
    ```
-2. **Consentimiento.** Aunque estén anonimizadas, publicar imágenes clínicas suele requerir el consentimiento documentado del paciente. Lo confirma la clínica, no el desarrollador.
+   **Y después escribe a GitHub Support** para que hagan `gc` del repositorio: tras un force-push, los objetos huérfanos siguen siendo accesibles por su SHA directo hasta que pase el recolector. Saltarse este paso es la razón habitual de que una purga no purgue nada.
+
+   Alternativa que evita todo esto para siempre: publicar en **Netlify**, que sirve desde un repositorio privado.
+
+2. **Consentimiento.** Aunque estén anonimizadas, publicar imágenes clínicas suele requerir el consentimiento documentado del paciente. Que estén en el Facebook de la clínica sugiere que ya lo trataron, pero conviene confirmarlo. Lo decide la clínica, no el desarrollador.
 
 ### Las fotos de interiores
 

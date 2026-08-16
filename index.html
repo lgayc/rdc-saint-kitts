@@ -29,7 +29,43 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
-<link rel="icon" href="assets/logo.jpg">
+<!-- ============================================================
+     ICONOS
+     ============================================================
+     El favicon NO es el ovalo completo: es solo el monograma RDC
+     recortado. El ovalo es 1,7 veces mas ancho que alto, y metido
+     en 16x16 pixeles se convierte en una mancha. Las tres letras
+     grandes si se leen a ese tamano.
+     ============================================================ -->
+<link rel="icon" href="assets/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<meta name="theme-color" content="#02b2e4">
+<link rel="manifest" href="site.webmanifest">
+
+<!-- ============================================================
+     VISTA PREVIA AL COMPARTIR (Open Graph)
+     ============================================================
+     Sin esto, mandar el enlace por WhatsApp o pegarlo en Facebook
+     muestra un rectangulo gris sin imagen. Y esos son justo los
+     dos canales que usa la clinica.
+
+     og:image tiene que ser una URL ABSOLUTA — las rutas relativas
+     no funcionan aqui. Si algun dia se pasa a dominio propio, hay
+     que cambiar las tres lineas de abajo.
+     ============================================================ -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="RDC Saint Kitts">
+<meta property="og:title" content="RDC Saint Kitts — Radiology Diagnostic Center">
+<meta property="og:description" content="Advanced diagnostic imaging in St. Kitts & Nevis: X-Ray, Ultrasound, CT, MRI and Mammography. Book your appointment online.">
+<meta property="og:url" content="https://lgayc.github.io/rdc-saint-kitts/">
+<meta property="og:image" content="https://lgayc.github.io/rdc-saint-kitts/assets/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Radiology Diagnostic Center — St. Kitts & Nevis">
+<meta name="twitter:card" content="summary_large_image">
+
 <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
@@ -47,7 +83,7 @@
   <div class="navbar-inner">
     <a href="#hero" class="brand">
       <!-- Logo del cliente. Si el archivo falta, se muestra el nombre. -->
-      <img id="brandLogo" class="brand-logo" src="assets/logo.jpg" alt="RDC Saint Kitts">
+      <img id="brandLogo" class="brand-logo" src="assets/logo.png" alt="RDC Saint Kitts">
       <span class="brand-name" id="brandName">RDC Saint Kitts</span>
     </a>
 
@@ -190,6 +226,27 @@
           <textarea id="notes" name="notes" rows="3" placeholder="Referral info, questions, or anything we should know."></textarea>
         </div>
 
+        <!--
+          TRAMPA ANTI-ROBOTS. No lo quites.
+
+          Es un campo que una persona nunca ve ni rellena: esta
+          escondido por CSS y fuera del recorrido del tabulador.
+          Los robots que llenan formularios automaticamente si lo
+          rellenan, porque leen el HTML y no la pantalla.
+
+          Si llega con algo, la Edge Function descarta la reserva
+          en silencio (responde "ok" para no delatarse) y no manda
+          ningun aviso.
+
+          aria-hidden y tabindex="-1" son para que ningun lector de
+          pantalla se lo lea a nadie ni se pueda llegar con el
+          teclado sin querer.
+        -->
+        <div class="hp-field" aria-hidden="true">
+          <label for="website">Leave this field empty</label>
+          <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+        </div>
+
         <p class="form-note"><span class="required">*</span> Required. We need your phone and email to confirm your appointment.</p>
 
         <button type="submit" class="btn btn-primary btn-block" id="bookingSubmit">
@@ -260,7 +317,20 @@
 </footer>
 
 <!-- El orden importa: primero los datos, luego el comportamiento -->
+<!--
+  supabase-js desde CDN. El sitio sigue sin compilacion ni
+  npm install: es un <script> mas.
+
+  La version esta fijada a proposito (@2.112.3 y no @2). Con un
+  rango abierto, una version nueva del CDN podria romper el sitio
+  en produccion sin que nadie haya tocado el codigo. Para
+  actualizar: se sube el numero aqui, se prueba, y se sube igual
+  en admin.html.
+-->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.3/dist/umd/supabase.js"></script>
+
 <script src="js/config.js"></script>
+<script src="js/supabase-api.js"></script>
 <script src="js/icons.js"></script>
 <script src="js/main.js"></script>
 <script src="js/booking.js"></script>

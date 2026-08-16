@@ -20,7 +20,7 @@ const SITE_CONFIG = {
   tagline: "Advanced Imaging. Compassionate Care.",
   subTagline: "Serving St. Kitts & Nevis with modern diagnostic radiology.",
 
-  logo: "assets/logo.jpg",
+  logo: "assets/logo.png",
 
   // ---------------------------------------------------------
   // 2. CONTACTO
@@ -190,15 +190,34 @@ const SITE_CONFIG = {
   ], // PLACEHOLDER - confirmar la lista real de servicios
 
   // ---------------------------------------------------------
-  // 6. BACKEND / CONEXIONES
-  // Como obtener esta URL: ver GUIA-RAPIDA.md, seccion 1.
+  // 6. BACKEND (Supabase)
+  // De donde salen estos dos valores: panel de Supabase ->
+  // Project Settings -> API. Paso a paso en backend/SUPABASE.md.
   // ---------------------------------------------------------
-  api: {
-    url: "", // PLACEHOLDER - pegar aqui la URL del Apps Script
+  supabase: {
+    url: "https://tittyvorxepzjoffqado.supabase.co",
 
-    // Mientras esto este vacio, el sitio funciona en "modo prueba":
-    // el formulario valida todo normalmente pero abre un correo
-    // prellenado en vez de enviarlo solo.
+    // Publishable key (el formato nuevo, sb_publishable_...). Se eligio
+    // sobre la anon key antigua porque se puede rotar por separado sin
+    // invalidar el resto. Probada contra la Edge Function: verify_jwt
+    // la acepta aunque no sea un JWT.
+    anonKey: "sb_publishable_V2Sw6gEFai2E8_BUrXEaYQ_AV2wfg8y"
+
+    // >>> AQUI VA LA anon KEY. LA service_role NUNCA. <<<
+    //
+    // La anon key es publica por diseno: viaja dentro de esta
+    // pagina y cualquiera puede leerla. Lo que protege los datos
+    // no es que la clave sea secreta, sino Row Level Security en
+    // la base.
+    //
+    // La service_role key salta TODAS las reglas de RLS. Si acaba
+    // en este archivo, cualquiera puede descargar la lista
+    // completa de pacientes. Esa clave vive unicamente en los
+    // secretos de las Edge Functions.
+    //
+    // Mientras esto este vacio, el sitio funciona en "modo
+    // prueba": el formulario valida todo normalmente pero abre un
+    // correo prellenado en vez de enviarlo.
   },
 
   // ---------------------------------------------------------
@@ -209,10 +228,11 @@ const SITE_CONFIG = {
     // Sirve para entrar al panel y probarlo ANTES de conectar el
     // backend. Usa reservas de ejemplo y NO guarda nada.
     //
-    // En cuanto pongas la URL en api.url (arriba), este modo se
-    // apaga solo y el panel pasa a usar la contrasena de verdad,
-    // la que esta en backend/Codigo.gs -> ADMIN_PASSWORD.
-    demoMode: true,
+    // Ya no aplica: con url y anonKey puestas (arriba), el panel usa
+    // siempre cuentas reales de Supabase Auth, que ademas tienen que
+    // estar dadas de alta en la tabla `staff`. Este valor solo se
+    // consulta si el backend no esta configurado.
+    demoMode: false,
 
     // Contrasena SOLO del modo demostracion.
     // Ojo: esta a la vista en el codigo, por eso solo funciona

@@ -8,18 +8,20 @@
  *      Sin telefono valido y sin correo valido NO se envia.
  *      Cada campo muestra su propio mensaje de error debajo.
  *
- *   2. ENVIA la reserva al backend (Google Apps Script), que se
- *      encarga de: guardar en la hoja, mandar correo, mandar
- *      WhatsApp y crear el evento en Calendar.
+ *   2. ENVIA la reserva a la Edge Function `book` de Supabase,
+ *      que la guarda y avisa por correo, WhatsApp y Calendar.
+ *      El navegador NO escribe en la base de datos.
  *
- *   3. MODO PRUEBA: si SITE_CONFIG.api.url esta vacio, el
- *      formulario valida igual pero abre un correo prellenado
- *      en vez de enviarlo. Asi se puede probar el sitio antes
- *      de conectar el backend.
+ *   3. MODO PRUEBA: si Supabase no esta configurado en
+ *      js/config.js, el formulario valida igual pero abre un
+ *      correo prellenado en vez de enviarlo. Asi se puede probar
+ *      el sitio antes de conectar el backend.
  *
- *  La validacion se repite en el servidor (backend/Codigo.gs).
- *  Eso es a proposito: la del navegador es por comodidad del
- *  usuario, la del servidor es la que realmente protege.
+ *  La validacion se repite en el servidor
+ *  (supabase/functions/book/index.ts). Eso es a proposito: la del
+ *  navegador es por comodidad del usuario, la del servidor es la
+ *  que realmente protege, porque cualquiera puede saltarse este
+ *  formulario y llamar a la URL directamente.
  * ============================================================
  */
 
@@ -212,19 +214,19 @@ async function handleBookingSubmit(e) {
   const data = Object.fromEntries(new FormData(form).entries());
   data.submittedAt = new Date().toLocaleString();
 
-  const apiUrl = SITE_CONFIG.api.url;
-  const isConnected = Boolean(apiUrl && apiUrl.trim());
+  const isConnected = typeof RDC_API !== "undefined" && RDC_API.isConfigured();
 
   setSubmitting(submitBtn, true);
   clearStatus(statusEl);
 
   try {
     if (isConnected) {
-      await sendToBackend(apiUrl, data);
+      const result = await sendToBackend(data);
       showStatus(
         statusEl,
         "success",
-        "Thank you! Your request was received. We'll contact you shortly to confirm."
+        `Thank you! Your request was received (ref. ${result.ref}). ` +
+          "We'll contact you shortly to confirm."
       );
       form.reset();
     } else {
@@ -233,15 +235,22 @@ async function handleBookingSubmit(e) {
       showStatus(
         statusEl,
         "success",
-        "Test mode: the booking system isn't connected yet, so we opened an email draft with your details. See GUIA-RAPIDA.md to finish setup."
+        "Test mode: the booking system isn't connected yet, so we opened an email draft with your details. See backend/SUPABASE.md to finish setup."
       );
     }
   } catch (err) {
     console.error("Error al enviar la reserva:", err);
+
+    // El mensaje del servidor se muestra tal cual cuando lo hay:
+    // distingue "demasiadas solicitudes, espera unos minutos" de
+    // un fallo de red, y eso le sirve al paciente. Si no hay
+    // mensaje, se cae al telefono, que es la salida que siempre
+    // funciona aunque el backend este pausado o caido.
     showStatus(
       statusEl,
       "error",
-      "We couldn't send your request. Please call or WhatsApp us instead: " +
+      (err && err.message ? err.message + " " : "We couldn't send your request. ") +
+        "You can also call or WhatsApp us: " +
         SITE_CONFIG.contact.phoneDisplay
     );
   } finally {
@@ -250,24 +259,17 @@ async function handleBookingSubmit(e) {
 }
 
 /**
- * Manda la reserva al Apps Script.
+ * Manda la reserva a la Edge Function `book` de Supabase.
  *
- * Nota tecnica: se usa Content-Type "text/plain" a proposito.
- * Apps Script no responde bien al pre-vuelo (preflight) de CORS
- * que dispara "application/json"; con text/plain el navegador lo
- * manda directo. El backend igual lo lee como JSON.
+ * El navegador NO escribe en la base de datos. La funcion valida
+ * otra vez del lado del servidor, guarda con permisos elevados y
+ * dispara los avisos. Asi la tabla de reservas no necesita ninguna
+ * politica de escritura publica: desde aqui es inalcanzable.
+ *
+ * Los detalles de red viven en js/supabase-api.js.
  */
-async function sendToBackend(apiUrl, data) {
-  const response = await fetch(apiUrl, {
-    method: "POST",
-    headers: { "Content-Type": "text/plain;charset=utf-8" },
-    body: JSON.stringify({ action: "book", data: data })
-  });
-
-  if (!response.ok) throw new Error("El servidor respondio " + response.status);
-
-  const result = await response.json();
-  if (!result.ok) throw new Error(result.error || "Error desconocido del servidor");
+async function sendToBackend(data) {
+  const result = await RDC_API.submitBooking(data);
 
   return result;
 }

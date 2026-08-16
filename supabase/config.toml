@@ -1,0 +1,17 @@
+# Configuración de la CLI de Supabase.
+#
+# Solo hace falta si se trabaja con la CLI (supabase db push,
+# supabase functions deploy). Todo lo de este proyecto se puede
+# hacer también desde el panel web; ver backend/SUPABASE.md.
+#
+# project_id es el "reference ID" del proyecto, en
+# Project Settings → General. Ponlo antes de usar la CLI.
+
+project_id = "tittyvorxepzjoffqado"
+
+[functions.book]
+# verify_jwt activado: la función exige que la petición traiga una
+# clave del proyecto. El sitio manda la anon key, que es pública
+# por diseño. Lo que esto corta es el ruido de fondo: peticiones
+# sin ninguna clave se rechazan antes de ejecutar código nuestro.
+verify_jwt = true

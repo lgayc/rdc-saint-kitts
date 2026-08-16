@@ -16,11 +16,21 @@
  *   10. Utilidades
  *
  *  SOBRE LA SEGURIDAD:
- *  La contrasena real NO esta en este archivo. Se manda al backend,
- *  que la verifica y devuelve un "token" temporal. Solo ese token
- *  se guarda en el navegador. Si alguien mira el codigo de esta
- *  pagina, no encuentra la contrasena real.
- *  Se cambia en backend/Codigo.gs -> ADMIN_PASSWORD
+ *  No hay ninguna contrasena en este archivo. Se entra con una
+ *  cuenta de Supabase Auth (correo y contrasena), y supabase-js
+ *  guarda y renueva la sesion solo.
+ *
+ *  Ademas de tener cuenta, el usuario tiene que estar dado de alta
+ *  en la tabla `staff`. Son dos comprobaciones distintas a
+ *  proposito: si algun dia se habilitara el registro publico por
+ *  error, un desconocido tendria cuenta pero seguiria sin poder
+ *  ver una sola reserva.
+ *
+ *  Y lo mas importante: esconder esta pantalla NO es lo que
+ *  protege los datos. Lo que decide quien ve que es Row Level
+ *  Security dentro de la base. Aunque alguien saltara todo este
+ *  archivo y llamara a la API a mano, sin sesion valida de
+ *  personal no recibiria ni una fila.
  * ============================================================
  */
 
@@ -30,15 +40,10 @@
    ---------------------------------------------------------------- */
 
 const state = {
-  token: null,
   bookings: [],
   filter: "all",
   content: { heroTitle: "", heroSubtitle: "", promoText: "", slides: [], studies: [] }
 };
-
-// Donde se guarda el token entre recargas de pagina
-const TOKEN_KEY = "rdc_admin_token";
-const TOKEN_EXPIRY_KEY = "rdc_admin_expires";
 
 /**
  * MODO DEMOSTRACION
@@ -47,14 +52,15 @@ const TOKEN_EXPIRY_KEY = "rdc_admin_expires";
  * datos de ejemplo para que se pueda ver y probar. Nada se guarda:
  * al recargar, todo vuelve al estado inicial.
  *
- * Se apaga solo en cuanto api.url tenga una URL: ahi el panel pasa
- * a hablar con el servidor de verdad y a usar la contrasena real.
+ * Se apaga solo en cuanto config.js tenga la url y la anonKey de
+ * Supabase: ahi el panel pasa a hablar con la base de verdad y a
+ * pedir una cuenta real.
  */
 let DEMO = false;
 
-/** True si hay un Apps Script configurado */
+/** True si Supabase esta configurado en js/config.js */
 function hasBackend() {
-  return Boolean(SITE_CONFIG.api.url && SITE_CONFIG.api.url.trim());
+  return typeof RDC_API !== "undefined" && RDC_API.isConfigured();
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -69,6 +75,12 @@ document.addEventListener("DOMContentLoaded", () => {
       showSetupRequired();
       return;
     }
+  } else {
+    // Con Supabase conectado hace falta el correo. En demo no,
+    // porque ahi solo hay una contrasena de ejemplo.
+    const emailRow = document.getElementById("emailRow");
+    if (emailRow) emailRow.hidden = false;
+    document.getElementById("loginEmail").required = true;
   }
 
   setupLogin();
@@ -88,10 +100,10 @@ function showSetupRequired() {
       <h1>Setup Required</h1>
       <p class="login-sub">
         The admin panel isn't connected yet. Open
-        <code>js/config.js</code> and paste your Google Apps Script
-        URL into <code>api.url</code>.
+        <code>js/config.js</code> and fill in <code>supabase.url</code>
+        and <code>supabase.anonKey</code>.
       </p>
-      <p class="login-sub">See <strong>GUIA-RAPIDA.md</strong> for the full steps.</p>
+      <p class="login-sub">See <strong>backend/SUPABASE.md</strong> for the full steps.</p>
     </div>
   `;
 }
@@ -112,14 +124,21 @@ function showDemoNotice() {
   if (topBar) topBar.hidden = false;
 }
 
-/** Si ya habia una sesion activa y no vencio, entrar directo */
-function restoreSession() {
-  const token = localStorage.getItem(TOKEN_KEY);
-  const expires = Number(localStorage.getItem(TOKEN_EXPIRY_KEY) || 0);
+/**
+ * Si ya habia una sesion activa, entrar directo.
+ *
+ * En modo demostracion no se restaura nada a proposito: cada
+ * recarga empieza de cero, que es lo que se espera de una demo.
+ * Con Supabase, la sesion la guarda y la renueva supabase-js.
+ */
+async function restoreSession() {
+  if (DEMO) return;
 
-  if (token && Date.now() < expires) {
-    state.token = token;
-    enterPanel();
+  try {
+    const session = await RDC_API.admin.currentSession();
+    if (session) enterPanel();
+  } catch (err) {
+    console.warn("No se pudo recuperar la sesion:", err);
   }
 }
 
@@ -136,9 +155,15 @@ function setupLogin() {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
+    const email = (document.getElementById("loginEmail").value || "").trim();
     const password = document.getElementById("password").value;
+
     if (!password) {
       setStatus(statusEl, "error", "Please enter the password.");
+      return;
+    }
+    if (!DEMO && !email) {
+      setStatus(statusEl, "error", "Please enter your email.");
       return;
     }
 
@@ -147,16 +172,12 @@ function setupLogin() {
     setStatus(statusEl, "", "");
 
     try {
-      const result = await api("login", { password });
+      const result = await api("login", { email, password });
 
       if (!result.ok) {
         setStatus(statusEl, "error", result.error || "Incorrect password.");
         return;
       }
-
-      state.token = result.token;
-      localStorage.setItem(TOKEN_KEY, result.token);
-      localStorage.setItem(TOKEN_EXPIRY_KEY, String(result.expiresAt));
 
       enterPanel();
     } catch (err) {
@@ -179,10 +200,17 @@ function enterPanel() {
   loadContent();
 }
 
-function logout() {
-  localStorage.removeItem(TOKEN_KEY);
-  localStorage.removeItem(TOKEN_EXPIRY_KEY);
-  state.token = null;
+async function logout() {
+  if (!DEMO) {
+    try {
+      await RDC_API.admin.signOut();
+    } catch (err) {
+      // Aunque falle el cierre remoto, se recarga igual: quien
+      // pulsa "salir" espera salir. supabase-js ya borro la sesion
+      // local antes de intentar avisar al servidor.
+      console.warn("No se pudo cerrar sesion limpiamente:", err);
+    }
+  }
   location.reload();
 }
 
@@ -190,12 +218,15 @@ function logout() {
 /* ----------------------------------------------------------------
    3. COMUNICACION CON EL BACKEND
    ----------------------------------------------------------------
-   Todo pasa por esta unica funcion. Agrega el token
-   automaticamente y, si la sesion vencio, saca al usuario.
+   Toda la red pasa por esta unica funcion, que reparte hacia
+   RDC_API (js/supabase-api.js) o hacia el backend simulado del
+   modo demostracion.
 
-   Nota tecnica: se usa Content-Type "text/plain" a proposito.
-   Con "application/json" el navegador hace una peticion previa
-   (preflight CORS) que Apps Script no responde bien.
+   Este reparto es lo que permitio cambiar de Apps Script a
+   Supabase sin tocar nada de las secciones 4 a 9: todas siguen
+   recibiendo { ok: true, ... } con los mismos nombres de campo.
+   Si algun dia hay que migrar otra vez, el trabajo vuelve a estar
+   aqui dentro.
    ---------------------------------------------------------------- */
 
 async function api(action, payload = {}) {
@@ -203,24 +234,25 @@ async function api(action, payload = {}) {
   // datos de ejemplo guardados en memoria (ver demoApi mas abajo).
   if (DEMO) return demoApi(action, payload);
 
-  const response = await fetch(SITE_CONFIG.api.url, {
-    method: "POST",
-    headers: { "Content-Type": "text/plain;charset=utf-8" },
-    body: JSON.stringify({ action, token: state.token, ...payload })
-  });
+  switch (action) {
+    case "login":
+      return RDC_API.admin.signIn(payload.email, payload.password);
 
-  if (!response.ok) throw new Error("El servidor respondio " + response.status);
+    case "listBookings":
+      return RDC_API.admin.listBookings();
 
-  const result = await response.json();
+    case "setBookingStatus":
+      return RDC_API.admin.setBookingStatus(payload.id, payload.status);
 
-  // Sesion vencida o invalida -> volver al login
-  if (result.authFailed) {
-    alert("Your session expired. Please sign in again.");
-    logout();
-    throw new Error("Sesion expirada");
+    case "getContent":
+      return RDC_API.admin.getContent();
+
+    case "saveContent":
+      return RDC_API.admin.saveContent(payload.content);
+
+    default:
+      return { ok: false, error: "Accion no reconocida: " + action };
   }
-
-  return result;
 }
 
 
@@ -290,7 +322,7 @@ function demoApi(action, payload) {
   switch (action) {
     case "login":
       return payload.password === SITE_CONFIG.admin.demoPassword
-        ? { ok: true, token: "demo-token", expiresAt: Date.now() + 8 * 3600 * 1000 }
+        ? { ok: true }
         : { ok: false, error: "Incorrect password. Try the one shown above." };
 
     case "listBookings":
@@ -429,7 +461,10 @@ function bookingCard(b) {
         </div>
 
         ${b.notes ? `<p class="booking-notes">"${escapeHtml(b.notes)}"</p>` : ""}
-        <p class="booking-id">${escapeHtml(b.id)}</p>
+
+        ${notifyWarning(b)}
+
+        <p class="booking-id">${escapeHtml(b.ref || b.id)}</p>
       </div>
 
       <div class="booking-actions">
@@ -444,6 +479,35 @@ function bookingCard(b) {
           : ""}
       </div>
     </article>
+  `;
+}
+
+/**
+ * Avisa cuando alguno de los tres canales no salio.
+ *
+ * Importa mas de lo que parece: si el WhatsApp fallo, nadie en la
+ * clinica se entero de esa reserva por el movil, y solo la va a
+ * ver quien abra este panel. Por eso se dice cual fallo, y no un
+ * generico "hubo un problema".
+ *
+ * Las reservas anteriores a Supabase no traen este dato: se
+ * detecta con `b.notified` y no se pinta nada para ellas.
+ */
+function notifyWarning(b) {
+  if (!b.notified) return "";
+
+  const failed = [
+    b.notified.email ? null : "email",
+    b.notified.whatsapp ? null : "WhatsApp",
+    b.notified.calendar ? null : "calendar"
+  ].filter(Boolean);
+
+  if (!failed.length) return "";
+
+  return `
+    <p class="booking-warning" title="${escapeAttr(b.notifyError || "")}">
+      Not delivered to: ${escapeHtml(failed.join(", "))}
+    </p>
   `;
 }
 
@@ -538,11 +602,16 @@ function renderSlides() {
 
   container.innerHTML = state.content.slides.map((slide, i) => `
     <div class="editor-item">
-      <div class="editor-preview" style="background-image:url('${escapeAttr(slide.image)}')"></div>
+      <div class="editor-preview dropzone" data-drop="banners" data-index="${i}" data-list="slides"
+           style="background-image:url('${escapeAttr(slide.image)}')"
+           tabindex="0" role="button"
+           aria-label="Drop a photo here or click to choose one">
+        <span class="dropzone-hint">${slide.image ? "Replace" : "Drop photo<br>or click"}</span>
+      </div>
 
       <div class="editor-fields">
         <div class="form-row">
-          <label>Image link</label>
+          <label>Image link <span class="label-hint">(fills in on its own when you drop a photo)</span></label>
           <input type="url" data-slide="${i}" data-field="image"
                  value="${escapeAttr(slide.image)}"
                  placeholder="https://...">
@@ -579,6 +648,98 @@ function renderSlides() {
       renderSlides();
     });
   });
+
+  setupDropzones(container);
+}
+
+
+/* ----------------------------------------------------------------
+   7b. SUBIR FOTOS ARRASTRANDO
+   ----------------------------------------------------------------
+   Era el punto que hacia falta de verdad: el personal de la
+   clinica no deberia tener que subir una foto a otro sitio, copiar
+   el enlace y pegarlo aqui. Se arrastra encima y ya.
+
+   La foto va al Storage de Supabase y lo que se guarda en la fila
+   es la URL publica. El campo de enlace sigue existiendo por si
+   alguien prefiere pegar una direccion externa: las dos formas
+   acaban en el mismo sitio.
+
+   En modo demostracion no se sube nada, porque no hay a donde.
+   ---------------------------------------------------------------- */
+
+function setupDropzones(container) {
+  container.querySelectorAll(".dropzone").forEach(zone => {
+    // Clic: abre el selector de archivos de siempre. Arrastrar no
+    // es evidente para todo el mundo, y desde el movil no existe.
+    zone.addEventListener("click", () => pickFile(zone));
+    zone.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        pickFile(zone);
+      }
+    });
+
+    // Sin estos preventDefault, el navegador abre la imagen en
+    // lugar de dejarla caer en la zona.
+    ["dragenter", "dragover"].forEach(evt =>
+      zone.addEventListener(evt, e => {
+        e.preventDefault();
+        zone.classList.add("dragging");
+      })
+    );
+
+    ["dragleave", "drop"].forEach(evt =>
+      zone.addEventListener(evt, e => {
+        e.preventDefault();
+        zone.classList.remove("dragging");
+      })
+    );
+
+    zone.addEventListener("drop", e => {
+      const file = e.dataTransfer && e.dataTransfer.files[0];
+      if (file) uploadInto(zone, file);
+    });
+  });
+}
+
+function pickFile(zone) {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "image/*";
+  input.addEventListener("change", () => {
+    if (input.files[0]) uploadInto(zone, input.files[0]);
+  });
+  input.click();
+}
+
+async function uploadInto(zone, file) {
+  const bucket = zone.dataset.drop;              // "banners" o "posts"
+  const list = zone.dataset.list;                // "slides" o "studies"
+  const index = Number(zone.dataset.index);
+  const hint = zone.querySelector(".dropzone-hint");
+
+  if (DEMO) {
+    if (hint) hint.textContent = "Demo mode — no uploads";
+    return;
+  }
+
+  zone.classList.add("uploading");
+  if (hint) hint.textContent = "Uploading…";
+
+  try {
+    const url = await RDC_API.admin.uploadImage(file, bucket);
+
+    // Se escribe en el estado y se vuelve a dibujar la lista, para
+    // que la miniatura y el campo de enlace queden a la vez con el
+    // valor nuevo.
+    state.content[list][index].image = url;
+    list === "slides" ? renderSlides() : renderPosts();
+  } catch (err) {
+    zone.classList.remove("uploading");
+    if (hint) hint.textContent = "Upload failed";
+    alert("Couldn't upload that image: " + err.message);
+  }
 }
 
 
@@ -637,6 +798,13 @@ function renderPosts() {
 
   container.innerHTML = state.content.studies.map((post, i) => `
     <div class="editor-item post-item">
+      <div class="editor-preview dropzone" data-drop="posts" data-index="${i}" data-list="studies"
+           style="background-image:url('${escapeAttr(post.image || "")}')"
+           tabindex="0" role="button"
+           aria-label="Drop a cover image here or click to choose one">
+        <span class="dropzone-hint">${post.image ? "Replace" : "Drop cover<br>or click"}</span>
+      </div>
+
       <div class="editor-fields">
         <div class="form-row">
           <label>Title</label>
@@ -662,7 +830,7 @@ function renderPosts() {
         </div>
 
         <div class="form-row">
-          <label>Cover image link (optional)</label>
+          <label>Cover image link <span class="label-hint">(fills in on its own when you drop a photo)</span></label>
           <input type="url" data-post="${i}" data-field="image"
                  value="${escapeAttr(post.image || "")}" placeholder="https://...">
         </div>
@@ -690,6 +858,8 @@ function renderPosts() {
       renderPosts();
     });
   });
+
+  setupDropzones(container);
 }
 
 

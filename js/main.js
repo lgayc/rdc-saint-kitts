@@ -40,6 +40,29 @@ document.addEventListener("DOMContentLoaded", async () => {
    1. LLENAR EL SITIO DESDE LA CONFIGURACION
    ---------------------------------------------------------------- */
 
+/**
+ * Iconos, tolerante a que js/icons.js no haya cargado.
+ *
+ * Sin esta red, un solo archivo que falte deja la pagina MUERTA: al
+ * evaluar ICONS[...] se lanza un ReferenceError, populateContent()
+ * se corta a la mitad y ya no se llenan ni el catalogo de servicios
+ * ni los desplegables del formulario. El visitante ve una pagina que
+ * parece cargada pero no se puede usar, y en la consola solo hay un
+ * error que no dice nada de eso.
+ *
+ * Paso de verdad al subir el sitio sin icons.js. Un SVG decorativo
+ * no puede costar el formulario de reservas: si falta, se avisa por
+ * consola y se sigue.
+ */
+const ICON_SET = (typeof ICONS !== "undefined" && ICONS) ? ICONS : {};
+
+if (!Object.keys(ICON_SET).length) {
+  console.warn(
+    "js/icons.js no cargo: el sitio funciona pero sin iconos. " +
+    "Comprueba que el archivo existe y que el <script> apunta bien."
+  );
+}
+
 function populateContent() {
   const cfg = SITE_CONFIG;
 
@@ -89,7 +112,7 @@ function populateContent() {
       { key: "whatsapp", url: cfg.social.whatsapp }
     ]
       .filter(s => s.url)
-      .map(s => `<a href="${s.url}" target="_blank" rel="noopener" aria-label="${s.key}">${ICONS[s.key] || ""}</a>`)
+      .map(s => `<a href="${s.url}" target="_blank" rel="noopener" aria-label="${s.key}">${ICON_SET[s.key] || ""}</a>`)
       .join("");
   }
 
@@ -110,7 +133,7 @@ function populateContent() {
           <span class="modality-body">
             <span class="modality-title">${escapeText(m.name)}</span>
             <span class="modality-desc">${escapeText(m.description)}</span>
-            <span class="modality-more">Learn more ${ICONS.arrow || ""}</span>
+            <span class="modality-more">Learn more ${ICON_SET.arrow || ""}</span>
           </span>
         </button>
       `)
@@ -129,7 +152,7 @@ function populateContent() {
 
   // --- Iconos sueltos -----------------------------------------
   document.querySelectorAll("[data-icon]").forEach(el => {
-    const svg = ICONS[el.dataset.icon];
+    const svg = ICON_SET[el.dataset.icon];
     if (svg) el.innerHTML = svg;
   });
 }
@@ -303,27 +326,25 @@ function fillSelect(id, options) {
    ---------------------------------------------------------------- */
 
 async function loadEditableContent() {
-  const apiUrl = SITE_CONFIG.api.url;
-
-  if (!apiUrl || !apiUrl.trim()) {
+  // Sin Supabase configurado, el sitio se sirve entero desde
+  // config.js y los archivos del repositorio. Sigue funcionando:
+  // lo unico que no hay es contenido editable desde el panel.
+  if (typeof RDC_API === "undefined" || !RDC_API.isConfigured()) {
     startHeroSlideshow(SITE_CONFIG.hero.slides);
     announceContentReady(null);
     return;
   }
 
   try {
-    const response = await fetch(apiUrl, {
-      method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify({ action: "getContent" })
-    });
-
-    const result = await response.json();
-    if (!result.ok) throw new Error(result.error);
-
-    applyEditableContent(result.content);
+    const content = await RDC_API.getPublicContent();
+    applyEditableContent(content);
   } catch (err) {
-    console.warn("No se pudo cargar el contenido del admin, usando el de config.js:", err);
+    // Este catch tambien cubre el caso de que el proyecto de
+    // Supabase este pausado por inactividad. La portada se dibuja
+    // igual con las fotos del repositorio, asi que el visitante no
+    // ve una pagina rota. Lo que si deja de funcionar es el envio
+    // de reservas; de eso avisa booking.js.
+    console.warn("No se pudo leer el contenido de Supabase, usando el de config.js:", err);
     startHeroSlideshow(SITE_CONFIG.hero.slides);
 
     // IMPORTANTE: avisar igual aunque haya fallado. Si no,
