@@ -1,32 +1,28 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 340" role="img" aria-label="CT Scan">
-  <!-- ============================================================
-       CT SCAN  ·  marca abstracta
-       ------------------------------------------------------------
-       Idea: anillos concentricos con un arco de acento girando.
-       El CT toma imagenes dando vueltas alrededor del paciente;
-       esto lo dice con dos circulos y un arco, sin dibujar el
-       equipo entero.
-       ============================================================ -->
-  <rect width="400" height="340" fill="none"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"
+     role="img" aria-label="CT Scan">
+  <title>CT Scan</title>
 
-  <g transform="translate(200 170)">
-    <!-- Anillo exterior -->
-    <circle r="112" fill="none" stroke="#0e1c28" stroke-width="8" opacity="0.10"/>
-    <!-- Anillo medio -->
-    <circle r="82" fill="none" stroke="#0e1c28" stroke-width="9" opacity="0.85"/>
-    <!-- Nucleo -->
-    <circle r="44" fill="none" stroke="#0e1c28" stroke-width="8" opacity="0.28"/>
+  <!-- CT Scan
+       Anillo visto de frente y la camilla entrando. El arco de color
+       marca el giro: el TAC toma las imagenes dando vueltas.
 
-    <!-- Arco de acento: el recorrido del tubo -->
-    <path d="M0 -112 A 112 112 0 0 1 97 -56"
-          fill="none" stroke="#12a594" stroke-width="10" stroke-linecap="round"/>
-    <circle cx="0" cy="-112" r="11" fill="#12a594"/>
+       Set de seis iconos con el mismo vocabulario: trazo de 6,
+       extremos redondeados, tinta #0e1c28 para el equipo y
+       #12a594 solo para lo que el equipo emite o mide. Un unico
+       acento por icono; si se colorea todo, ninguno destaca.
 
-    <!-- Ejes discretos -->
-    <g stroke="#3b7fc4" stroke-width="5" stroke-linecap="round" opacity="0.45">
-      <line x1="-140" y1="0" x2="-124" y2="0"/>
-      <line x1="124"  y1="0" x2="140"  y2="0"/>
-      <line x1="0" y1="124" x2="0" y2="140"/>
-    </g>
+       Nota para quien edite estos archivos: en XML esta PROHIBIDO
+       poner dos guiones seguidos dentro de un comentario. Los seis
+       archivos de esta carpeta estuvieron rotos por eso y el
+       navegador no mostraba ninguno. -->
+
+  <g fill="none" stroke="#0e1c28" stroke-width="6"
+     stroke-linecap="round" stroke-linejoin="round">
+
+    <circle cx="100" cy="86" r="54"/>
+    <circle cx="100" cy="86" r="24"/>
+    <path d="M138 48a54 54 0 0 1 14 30" stroke="#12a594" stroke-width="7"/>
+    <path d="M40 164h120"/>
+    <rect x="62" y="146" width="96" height="14" rx="7"/>
   </g>
 </svg>

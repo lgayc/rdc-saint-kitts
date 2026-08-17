@@ -1,40 +1,28 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 340" role="img" aria-label="MRI">
-  <!-- ============================================================
-       MRI  ·  marca abstracta
-       ------------------------------------------------------------
-       Idea: cortes horizontales atravesando una forma ovalada.
-       La resonancia entrega el cuerpo "en rebanadas"; se muestra
-       eso, con un corte resaltado en acento.
-       ============================================================ -->
-  <defs>
-    <clipPath id="mriShape">
-      <ellipse cx="200" cy="170" rx="112" ry="96"/>
-    </clipPath>
-  </defs>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"
+     role="img" aria-label="MRI">
+  <title>MRI</title>
 
-  <rect width="400" height="340" fill="none"/>
+  <!-- MRI
+       Tunel largo con la boca ovalada, que es lo que distingue una
+       resonancia de un TAC. Dentro, las lineas del campo.
 
-  <!-- Volumen -->
-  <ellipse cx="200" cy="170" rx="112" ry="96" fill="#0e1c28" opacity="0.06"/>
+       Set de seis iconos con el mismo vocabulario: trazo de 6,
+       extremos redondeados, tinta #0e1c28 para el equipo y
+       #12a594 solo para lo que el equipo emite o mide. Un unico
+       acento por icono; si se colorea todo, ninguno destaca.
 
-  <!-- Cortes, recortados dentro del volumen -->
-  <g clip-path="url(#mriShape)" stroke="#0e1c28" stroke-width="8" stroke-linecap="round">
-    <line x1="70" y1="106" x2="330" y2="106" opacity="0.30"/>
-    <line x1="70" y1="138" x2="330" y2="138" opacity="0.55"/>
-    <line x1="70" y1="202" x2="330" y2="202" opacity="0.55"/>
-    <line x1="70" y1="234" x2="330" y2="234" opacity="0.30"/>
-  </g>
+       Nota para quien edite estos archivos: en XML esta PROHIBIDO
+       poner dos guiones seguidos dentro de un comentario. Los seis
+       archivos de esta carpeta estuvieron rotos por eso y el
+       navegador no mostraba ninguno. -->
 
-  <!-- Corte activo: se sale del volumen para marcar el foco -->
-  <line x1="66" y1="170" x2="334" y2="170"
-        stroke="#12a594" stroke-width="10" stroke-linecap="round"/>
+  <g fill="none" stroke="#0e1c28" stroke-width="6"
+     stroke-linecap="round" stroke-linejoin="round">
 
-  <!-- Contorno -->
-  <ellipse cx="200" cy="170" rx="112" ry="96"
-           fill="none" stroke="#0e1c28" stroke-width="9"/>
-
-  <!-- Campo magnetico insinuado -->
-  <g fill="none" stroke="#3b7fc4" stroke-width="4" opacity="0.35">
-    <ellipse cx="200" cy="170" rx="140" ry="120"/>
+    <rect x="34" y="40" width="132" height="98" rx="32"/>
+    <ellipse cx="100" cy="89" rx="27" ry="32"/>
+    <path d="M86 78h28M84 89h32M86 100h28" stroke="#12a594" stroke-width="5"/>
+    <path d="M44 166h112"/>
+    <rect x="66" y="148" width="88" height="14" rx="7"/>
   </g>
 </svg>

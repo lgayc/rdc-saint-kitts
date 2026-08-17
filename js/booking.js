@@ -45,47 +45,47 @@ document.addEventListener("DOMContentLoaded", () => {
 
 const VALIDATORS = {
   fullName(value) {
-    if (!value.trim()) return "Please enter your full name.";
-    if (value.trim().length < 3) return "Please enter your complete name.";
+    if (!value.trim()) return RDC_I18N.t("booking.errName");
+    if (value.trim().length < 3) return RDC_I18N.t("booking.errNameShort");
     return "";
   },
 
   // OBLIGATORIO - sin esto no se envia
   phone(value) {
-    if (!value.trim()) return "Phone number is required so we can confirm your appointment.";
+    if (!value.trim()) return RDC_I18N.t("booking.errPhone");
     const digits = value.replace(/\D/g, "");
-    if (digits.length < 7) return "Please enter a valid phone number (at least 7 digits).";
-    if (digits.length > 15) return "That phone number looks too long.";
+    if (digits.length < 7) return RDC_I18N.t("booking.errPhoneShort");
+    if (digits.length > 15) return RDC_I18N.t("booking.errPhoneLong");
     return "";
   },
 
   // OBLIGATORIO - sin esto no se envia
   email(value) {
-    if (!value.trim()) return "Email is required so we can send your confirmation.";
+    if (!value.trim()) return RDC_I18N.t("booking.errEmail");
     // Formato basico: algo@algo.algo
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value.trim())) {
-      return "Please enter a valid email address.";
+      return RDC_I18N.t("booking.errEmailBad");
     }
     return "";
   },
 
   modality(value) {
-    return value ? "" : "Please select the imaging service you need.";
+    return value ? "" : RDC_I18N.t("booking.errModality");
   },
 
   preferredDate(value) {
-    if (!value) return "Please choose a date.";
+    if (!value) return RDC_I18N.t("booking.errDate");
 
     const chosen = new Date(value + "T00:00:00");
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    if (chosen < today) return "Please choose a date that hasn't passed.";
+    if (chosen < today) return RDC_I18N.t("booking.errDatePast");
     return "";
   },
 
   preferredTime(value) {
-    return value ? "" : "Please choose a time.";
+    return value ? "" : RDC_I18N.t("booking.errTime");
   }
 
   // "notes" no se valida: es opcional
@@ -207,12 +207,20 @@ async function handleBookingSubmit(e) {
 
   // PUERTA PRINCIPAL: si algo falta o esta mal, no pasa de aqui.
   if (!validateForm(form)) {
-    showStatus(statusEl, "error", "Please fix the highlighted fields before submitting.");
+    showStatus(statusEl, "error", RDC_I18N.t("booking.errForm"));
     return;
   }
 
   const data = Object.fromEntries(new FormData(form).entries());
   data.submittedAt = new Date().toLocaleString();
+
+  /* El idioma en el que el paciente rellena el formulario viaja con
+     la reserva. No es un dato decorativo: decide en que idioma le
+     llegan los correos de "recibimos tu solicitud" y de "tu cita
+     esta confirmada". Escribir en español y recibir la confirmacion
+     en ingles es exactamente el momento en que alguien deja de
+     entender cuando tiene que presentarse. */
+  data.language = RDC_I18N.current();
 
   const isConnected = typeof RDC_API !== "undefined" && RDC_API.isConfigured();
 
@@ -225,8 +233,7 @@ async function handleBookingSubmit(e) {
       showStatus(
         statusEl,
         "success",
-        `Thank you! Your request was received (ref. ${result.ref}). ` +
-          "We'll contact you shortly to confirm."
+        `${RDC_I18N.t("booking.okTitle")} (${result.ref}) ` + RDC_I18N.t("booking.okBody")
       );
       form.reset();
     } else {
@@ -249,8 +256,8 @@ async function handleBookingSubmit(e) {
     showStatus(
       statusEl,
       "error",
-      (err && err.message ? err.message + " " : "We couldn't send your request. ") +
-        "You can also call or WhatsApp us: " +
+      (err && err.message ? err.message + " " : RDC_I18N.t("booking.failLead") + " ") +
+        RDC_I18N.t("booking.failTail") + " " +
         SITE_CONFIG.contact.phoneDisplay
     );
   } finally {
@@ -300,7 +307,7 @@ function openFallbackEmail(data) {
 
 function setSubmitting(btn, isSubmitting) {
   btn.disabled = isSubmitting;
-  btn.textContent = isSubmitting ? "Sending..." : "Request Appointment";
+  btn.textContent = isSubmitting ? RDC_I18N.t("booking.submitting") : RDC_I18N.t("booking.submit");
 }
 
 function showStatus(el, type, message) {

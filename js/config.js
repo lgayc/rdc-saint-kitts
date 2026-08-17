@@ -17,8 +17,8 @@ const SITE_CONFIG = {
   // ---------------------------------------------------------
   clinicName: "RDC Saint Kitts",
   clinicFullName: "Radiology Diagnostic Center",
-  tagline: "Advanced Imaging. Compassionate Care.",
-  subTagline: "Serving St. Kitts & Nevis with modern diagnostic radiology.",
+  tagline: { en: "Advanced Imaging. Compassionate Care.", es: "Imagenología avanzada. Trato humano." },
+  subTagline: { en: "Serving St. Kitts & Nevis with modern diagnostic radiology.", es: "Radiología diagnóstica moderna para San Cristóbal y Nieves." },
 
   logo: "assets/logo.png",
 
@@ -29,11 +29,11 @@ const SITE_CONFIG = {
     phone: "+1 869-665-7171",
     phoneDisplay: "(869) 665-7171",
     email: "rad.dg.center@gmail.com",
-    address: "Basseterre, St. Kitts & Nevis", // PLACEHOLDER - falta direccion exacta
+    address: { en: "Basseterre, St. Kitts & Nevis", es: "Basseterre, San Cristóbal y Nieves" }, // PLACEHOLDER - falta direccion exacta
     hours: [
-      { days: "Monday - Friday", time: "8:00 AM - 5:00 PM" }, // PLACEHOLDER
-      { days: "Saturday", time: "9:00 AM - 1:00 PM" },        // PLACEHOLDER
-      { days: "Sunday", time: "Closed" }
+      { days: { en: "Monday - Friday", es: "Lunes a viernes" }, time: "8:00 AM - 5:00 PM" }, // PLACEHOLDER
+      { days: { en: "Saturday", es: "Sábado" }, time: "9:00 AM - 1:00 PM" },        // PLACEHOLDER
+      { days: { en: "Sunday", es: "Domingo" }, time: { en: "Closed", es: "Cerrado" } }
     ]
   },
 
@@ -86,105 +86,153 @@ const SITE_CONFIG = {
   // ---------------------------------------------------------
   modalities: [
     {
-      name: "Digital X-Ray",
+      name: { en: "Digital X-Ray", es: "Radiografía digital" },
       icon: "xray",
       image: "assets/services/xray.svg",
-      description: "Fast, low-dose digital radiography for bones, chest, and joint imaging.",
+      description: { en: "Fast, low-dose digital radiography for bones, chest, and joint imaging.", es: "Radiografía digital rápida y de baja dosis para huesos, tórax y articulaciones." },
       details: {
-        summary: "X-ray uses a small, carefully controlled dose of radiation to create an image of the structures inside your body. Dense tissue like bone absorbs more of the beam and appears lighter, while softer tissue appears darker. It is the fastest imaging study we offer and often the first step in diagnosis.",
-        uses: [
-          "Suspected fractures and bone injuries",
-          "Chest imaging for the lungs and heart outline",
-          "Joint problems and arthritis",
-          "Follow-up after an injury or surgery"
-        ],
-        preparation: "No special preparation is usually needed. You may be asked to remove jewellery or clothing with metal near the area being imaged.", // REVISAR
-        duration: "About 10-15 minutes"  // REVISAR
+        summary: { en: "X-ray uses a small, carefully controlled dose of radiation to create an image of the structures inside your body. Dense tissue like bone absorbs more of the beam and appears lighter, while softer tissue appears darker. It is the fastest imaging study we offer and often the first step in diagnosis.", es: "La radiografía usa una dosis pequeña y controlada de radiación para obtener una imagen de lo que hay dentro del cuerpo. Los tejidos densos como el hueso absorben más y salen más claros; los blandos salen más oscuros. Es el estudio más rápido que hacemos y muchas veces el primer paso del diagnóstico." },
+        uses: {
+          en: [
+            "Suspected fractures and bone injuries",
+            "Chest imaging for the lungs and heart outline",
+            "Joint problems and arthritis",
+            "Follow-up after an injury or surgery"
+          ],
+          es: [
+            "Sospecha de fractura o lesión ósea",
+            "Estudio del tórax: pulmones y silueta del corazón",
+            "Problemas articulares y artritis",
+            "Control después de una lesión o una cirugía"
+          ]
+        },
+        preparation: { en: "No special preparation is usually needed. You may be asked to remove jewellery or clothing with metal near the area being imaged.", es: "Normalmente no hace falta ninguna preparación. Puede que le pidamos quitarse joyas o ropa con metal cerca de la zona que se va a estudiar." }, // REVISAR
+        duration: { en: "About 10-15 minutes", es: "Unos 10-15 minutos" }  // REVISAR
       }
     },
     {
-      name: "Ultrasound (incl. 3D/4D)",
+      name: { en: "Ultrasound (incl. 3D/4D)", es: "Ultrasonido (incluye 3D/4D)" },
       icon: "ultrasound",
       image: "assets/services/ultrasound.svg",
-      description: "General, obstetric, and vascular ultrasound with high-resolution 3D/4D imaging.",
+      description: { en: "General, obstetric, and vascular ultrasound with high-resolution 3D/4D imaging.", es: "Ultrasonido general, obstétrico y vascular, con imagen 3D/4D de alta resolución." },
       details: {
-        summary: "Ultrasound builds an image from sound waves that bounce off the structures inside your body. It uses no radiation at all, which is why it is the standard choice during pregnancy. Our 3D/4D capability adds depth and live movement to the image.",
-        uses: [
-          "Pregnancy and fetal monitoring",
-          "Abdominal organs: liver, gallbladder, kidneys",
-          "Thyroid, breast, and soft tissue evaluation",
-          "Blood flow and vascular studies"
-        ],
-        preparation: "Preparation depends on the type of study. Some abdominal scans require fasting, and some pelvic scans require a full bladder. Our team will tell you what applies when you book.", // REVISAR
-        duration: "About 20-45 minutes"  // REVISAR
+        summary: { en: "Ultrasound builds an image from sound waves that bounce off the structures inside your body. It uses no radiation at all, which is why it is the standard choice during pregnancy. Our 3D/4D capability adds depth and live movement to the image.", es: "El ultrasonido forma la imagen con ondas de sonido que rebotan dentro del cuerpo. No usa radiación en absoluto, y por eso es el estudio habitual durante el embarazo. Nuestro equipo 3D/4D añade volumen y movimiento en vivo a la imagen." },
+        uses: {
+          en: [
+            "Pregnancy and fetal monitoring",
+            "Abdominal organs: liver, gallbladder, kidneys",
+            "Thyroid, breast, and soft tissue evaluation",
+            "Blood flow and vascular studies"
+          ],
+          es: [
+            "Embarazo y control del bebé",
+            "Órganos del abdomen: hígado, vesícula, riñones",
+            "Tiroides, mama y tejidos blandos",
+            "Flujo sanguíneo y estudios vasculares"
+          ]
+        },
+        preparation: { en: "Preparation depends on the type of study. Some abdominal scans require fasting, and some pelvic scans require a full bladder. Our team will tell you what applies when you book.", es: "La preparación depende del tipo de estudio. Algunos de abdomen piden ayuno y algunos de pelvis piden la vejiga llena. Al pedir la cita le decimos qué aplica en su caso." }, // REVISAR
+        duration: { en: "About 20-45 minutes", es: "Unos 20-45 minutos" }  // REVISAR
       }
     },
     {
-      name: "CT Scan",
+      name: { en: "CT Scan", es: "Tomografía (TAC)" },
       icon: "ct",
       image: "assets/services/ct.svg",
-      description: "Detailed cross-sectional imaging for rapid, accurate diagnosis.",
+      description: { en: "Detailed cross-sectional imaging for rapid, accurate diagnosis.", es: "Imagen por cortes con gran detalle, para un diagnóstico rápido y preciso." },
       details: {
-        summary: "A CT scan takes a series of X-ray images as the scanner rotates around you, then combines them into detailed cross-sections. It shows bone, soft tissue, and blood vessels together, which makes it valuable when a fast and thorough answer is needed.",
-        uses: [
-          "Emergency assessment after trauma",
-          "Abdominal and chest evaluation",
-          "Detecting and staging tumours",
-          "Detailed views of complex fractures"
-        ],
-        preparation: "Some CT studies use a contrast agent, which may require fasting beforehand. Tell us if you have any allergies, kidney problems, or if you are or might be pregnant.", // REVISAR
-        duration: "About 15-30 minutes"  // REVISAR
+        summary: { en: "A CT scan takes a series of X-ray images as the scanner rotates around you, then combines them into detailed cross-sections. It shows bone, soft tissue, and blood vessels together, which makes it valuable when a fast and thorough answer is needed.", es: "La tomografía toma muchas radiografías mientras el equipo gira alrededor de usted y luego las combina en cortes detallados. Muestra a la vez hueso, tejido blando y vasos sanguíneos, lo que la hace muy útil cuando hace falta una respuesta rápida y completa." },
+        uses: {
+          en: [
+            "Emergency assessment after trauma",
+            "Abdominal and chest evaluation",
+            "Detecting and staging tumours",
+            "Detailed views of complex fractures"
+          ],
+          es: [
+            "Valoración urgente después de un golpe o accidente",
+            "Estudio del abdomen y del tórax",
+            "Detección y estadificación de tumores",
+            "Vista detallada de fracturas complejas"
+          ]
+        },
+        preparation: { en: "Some CT studies use a contrast agent, which may require fasting beforehand. Tell us if you have any allergies, kidney problems, or if you are or might be pregnant.", es: "Algunos estudios de tomografía usan contraste, y eso puede exigir ayuno previo. Avísenos si tiene alergias, problemas de riñón, o si está o podría estar embarazada." }, // REVISAR
+        duration: { en: "About 15-30 minutes", es: "Unos 15-30 minutos" }  // REVISAR
       }
     },
     {
-      name: "MRI",
+      name: { en: "MRI", es: "Resonancia magnética" },
       icon: "mri",
       image: "assets/services/mri.svg",
-      description: "High-field magnetic resonance imaging for soft tissue, brain, and spine studies.",
+      description: { en: "High-field magnetic resonance imaging for soft tissue, brain, and spine studies.", es: "Resonancia magnética de alto campo para tejidos blandos, cerebro y columna." },
       details: {
-        summary: "MRI uses a strong magnetic field and radio waves - no radiation - to produce highly detailed images, especially of soft tissue. It is the study of choice for the brain, spinal cord, ligaments, and joints, where fine detail matters most.",
-        uses: [
-          "Brain and spinal cord studies",
-          "Ligament, cartilage, and joint injuries",
-          "Soft tissue masses",
-          "Detailed neurological evaluation"
-        ],
-        preparation: "Because of the strong magnet, you must tell us about any pacemaker, metal implant, surgical clip, or metal fragment before the scan. The scanner is noisy and you will need to stay still; let us know if you experience claustrophobia so we can help.", // REVISAR
-        duration: "About 30-60 minutes"  // REVISAR
+        summary: { en: "MRI uses a strong magnetic field and radio waves - no radiation - to produce highly detailed images, especially of soft tissue. It is the study of choice for the brain, spinal cord, ligaments, and joints, where fine detail matters most.", es: "La resonancia usa un campo magnético potente y ondas de radio, sin nada de radiación, para obtener imágenes muy detalladas, sobre todo de tejidos blandos. Es el estudio de elección para cerebro, médula, ligamentos y articulaciones, donde el detalle fino es lo que cuenta." },
+        uses: {
+          en: [
+            "Brain and spinal cord studies",
+            "Ligament, cartilage, and joint injuries",
+            "Soft tissue masses",
+            "Detailed neurological evaluation"
+          ],
+          es: [
+            "Estudios del cerebro y la médula espinal",
+            "Lesiones de ligamentos, cartílago y articulaciones",
+            "Masas en tejidos blandos",
+            "Valoración neurológica detallada"
+          ]
+        },
+        preparation: { en: "Because of the strong magnet, you must tell us about any pacemaker, metal implant, surgical clip, or metal fragment before the scan. The scanner is noisy and you will need to stay still; let us know if you experience claustrophobia so we can help.", es: "Por el imán potente, tiene que avisarnos antes del estudio si lleva marcapasos, algún implante metálico, clips de cirugía o fragmentos de metal. El equipo hace ruido y hay que quedarse quieto; si sufre claustrofobia, dígalo y le ayudamos." }, // REVISAR
+        duration: { en: "About 30-60 minutes", es: "Unos 30-60 minutos" }  // REVISAR
       }
     },
     {
-      name: "Mammography",
+      name: { en: "Mammography", es: "Mamografía" },
       icon: "mammography",
       image: "assets/services/mammography.svg",
-      description: "Digital breast imaging for screening and diagnostic evaluation.",
+      description: { en: "Digital breast imaging for screening and diagnostic evaluation.", es: "Estudio digital de mama, para chequeo periódico y para diagnóstico." },
       details: {
-        summary: "Mammography is a low-dose X-ray study of the breast. Brief, gentle compression spreads the tissue so that small changes show up clearly. It can detect changes years before they can be felt, which is why regular screening matters.",
-        uses: [
-          "Routine screening",
-          "Evaluating a lump or other change",
-          "Follow-up of a previous finding",
-          "Assessment after breast surgery"
-        ],
-        preparation: "Avoid deodorant, powder, or lotion on the chest and underarms on the day of your appointment, since these can show up on the image. If you have previous mammograms from elsewhere, bring them for comparison.", // REVISAR
-        duration: "About 20 minutes"  // REVISAR
+        summary: { en: "Mammography is a low-dose X-ray study of the breast. Brief, gentle compression spreads the tissue so that small changes show up clearly. It can detect changes years before they can be felt, which is why regular screening matters.", es: "La mamografía es un estudio de rayos X de baja dosis de la mama. Una compresión breve y suave extiende el tejido para que los cambios pequeños se vean con claridad. Puede detectar cambios años antes de que se noten al tacto, y por eso el chequeo periódico importa tanto." },
+        uses: {
+          en: [
+            "Routine screening",
+            "Evaluating a lump or other change",
+            "Follow-up of a previous finding",
+            "Assessment after breast surgery"
+          ],
+          es: [
+            "Chequeo periódico",
+            "Estudio de un bulto u otro cambio",
+            "Control de un hallazgo anterior",
+            "Valoración después de una cirugía de mama"
+          ]
+        },
+        preparation: { en: "Avoid deodorant, powder, or lotion on the chest and underarms on the day of your appointment, since these can show up on the image. If you have previous mammograms from elsewhere, bring them for comparison.", es: "El día de la cita, no use desodorante, talco ni crema en el pecho ni en las axilas: pueden salir en la imagen. Si tiene mamografías anteriores de otro centro, tráigalas para comparar." }, // REVISAR
+        duration: { en: "About 20 minutes", es: "Unos 20 minutos" }  // REVISAR
       }
     },
     {
-      name: "Bone Densitometry (DEXA)",
+      name: { en: "Bone Densitometry (DEXA)", es: "Densitometría ósea (DEXA)" },
       icon: "bone",
       image: "assets/services/bone.svg",
-      description: "Precise bone density scanning for osteoporosis screening.",
+      description: { en: "Precise bone density scanning for osteoporosis screening.", es: "Medición precisa de la densidad de los huesos, para detectar osteoporosis." },
       details: {
-        summary: "A DEXA scan measures how much mineral your bones contain, usually at the spine and hip. The result is compared against reference values to assess bone strength. It is quick, painless, and uses a very low dose of radiation.",
-        uses: [
-          "Screening for osteoporosis",
-          "Assessing fracture risk",
-          "Monitoring response to treatment",
-          "Follow-up after menopause or long-term steroid use"
-        ],
-        preparation: "Avoid calcium supplements for about 24 hours before the scan. Wear comfortable clothing without metal zippers or buttons. Tell us if you have had a recent study using contrast.", // REVISAR
-        duration: "About 15 minutes"  // REVISAR
+        summary: { en: "A DEXA scan measures how much mineral your bones contain, usually at the spine and hip. The result is compared against reference values to assess bone strength. It is quick, painless, and uses a very low dose of radiation.", es: "La densitometría mide cuánto mineral tienen sus huesos, normalmente en la columna y la cadera. El resultado se compara con valores de referencia para saber qué tan fuertes están. Es rápida, no duele y usa una dosis de radiación muy baja." },
+        uses: {
+          en: [
+            "Screening for osteoporosis",
+            "Assessing fracture risk",
+            "Monitoring response to treatment",
+            "Follow-up after menopause or long-term steroid use"
+          ],
+          es: [
+            "Detección de osteoporosis",
+            "Valoración del riesgo de fractura",
+            "Control de la respuesta al tratamiento",
+            "Seguimiento tras la menopausia o el uso prolongado de corticoides"
+          ]
+        },
+        preparation: { en: "Avoid calcium supplements for about 24 hours before the scan. Wear comfortable clothing without metal zippers or buttons. Tell us if you have had a recent study using contrast.", es: "No tome suplementos de calcio en las 24 horas previas. Venga con ropa cómoda, sin cremalleras ni botones de metal. Avísenos si le hicieron hace poco un estudio con contraste." }, // REVISAR
+        duration: { en: "About 15 minutes", es: "Unos 15 minutos" }  // REVISAR
       }
     }
   ], // PLACEHOLDER - confirmar la lista real de servicios

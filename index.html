@@ -25,9 +25,51 @@
   =============================================================
 -->
 
+<!-- ============================================================
+     CONTENT SECURITY POLICY
+     ============================================================
+     Segunda barrera. La primera es escapar y filtrar lo que se
+     pinta (ver safeUrl y escapeAttr en js/), y con eso deberia
+     bastar. Esto es lo que queda en pie el dia que se escape un
+     sitio: aunque alguien consiga meter codigo en la pagina, el
+     navegador se niega a ejecutarlo.
+
+     Sin 'unsafe-inline' en script-src NO se ejecutan ni los
+     <script> inyectados ni los href="javascript:...". Se puede
+     escribir asi porque este sitio no tiene ni un solo script
+     dentro del HTML ni un solo onclick=: todo va en archivos.
+     Si algun dia se anade uno, deja de cargar la pagina entera
+     y hay que sacarlo a un archivo, no relajar esta linea.
+
+     style-src si lleva 'unsafe-inline' porque hay muchos style=
+     en el codigo. Un estilo no ejecuta JavaScript, asi que el
+     riesgo es cosmetico.
+
+     >>> connect-src lleva la URL del proyecto de Supabase. <<<
+     Si algun dia se cambia de proyecto, hay que cambiarla AQUI
+     tambien y en admin.html, no solo en js/config.js. Si no, el
+     formulario deja de enviar sin decir por que.
+
+     frame-ancestors no funciona en un <meta> (solo como cabecera
+     HTTP). Si el sitio se mueve a un hosting que permita poner
+     cabeceras, conviene anadirla para que nadie pueda meter la
+     pagina dentro de un iframe suyo.
+     ============================================================ -->
+<meta http-equiv="Content-Security-Policy" content="
+  default-src 'self';
+  script-src 'self' https://cdn.jsdelivr.net;
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+  font-src 'self' https://fonts.gstatic.com;
+  img-src 'self' data: https:;
+  connect-src 'self' https://tittyvorxepzjoffqado.supabase.co wss://tittyvorxepzjoffqado.supabase.co;
+  object-src 'none';
+  base-uri 'self';
+  form-action 'self';
+">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
 <!-- ============================================================
      ICONOS
@@ -88,13 +130,31 @@
     </a>
 
     <nav class="nav-links" id="navLinks" aria-label="Primary">
-      <a href="#modalities">Modalities</a>
-      <a href="#studies">Studies &amp; Work</a>
-      <a href="#contact">Contact</a>
-      <a href="#booking" class="nav-cta">Book Appointment</a>
+      <a href="#modalities" data-i18n="nav.modalities">Modalities</a>
+      <a href="#studies" data-i18n="nav.studies">Studies &amp; Work</a>
+      <a href="#contact" data-i18n="nav.contact">Contact</a>
+      <!--
+        Acceso al panel. Va en gris y separado del resto a proposito:
+        el visitante que viene a pedir una cita no debe dudar ni un
+        segundo entre este enlace y el boton azul de al lado.
+      -->
+      <!--
+        Selector de idioma. Va ANTES del acceso del personal y del
+        boton de reservar porque cambia como se lee todo lo demas:
+        quien lo necesita tiene que encontrarlo sin buscar. Muestra
+        el idioma AL QUE se cambia, no el actual, que es lo que la
+        gente espera de un boton.
+      -->
+      <button type="button" class="nav-lang" id="langToggle"
+              data-i18n="lang.switch" data-i18n-aria="lang.switchAria"
+              aria-label="Ver este sitio en español">Español</button>
+
+      <a href="admin.html" class="nav-staff" data-i18n="nav.staff">Staff</a>
+      <a href="#booking" class="nav-cta" data-i18n="nav.book">Book Appointment</a>
     </nav>
 
-    <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false">
+    <button class="nav-toggle" id="navToggle" data-i18n-aria="nav.toggle"
+            aria-label="Toggle menu" aria-expanded="false">
       <span></span><span></span><span></span>
     </button>
   </div>
@@ -120,20 +180,20 @@
     <!-- Capa 3: texto. El h1 lo llena js/main.js partiendolo en
          lineas que entran desde lados alternos. -->
     <div class="hero-content">
-      <p class="eyebrow">Diagnostic Imaging · St. Kitts &amp; Nevis</p>
+      <p class="eyebrow" data-i18n="hero.eyebrow">Diagnostic Imaging · St. Kitts &amp; Nevis</p>
       <h1 id="heroTitle">Advanced Imaging. Compassionate Care.</h1>
       <p class="hero-sub" id="heroSub">Serving St. Kitts &amp; Nevis with modern diagnostic radiology.</p>
 
       <div class="hero-actions">
-        <a href="#booking" class="btn btn-primary">Book an Appointment</a>
-        <a href="#modalities" class="btn btn-ghost">See Our Services</a>
+        <a href="#booking" class="btn btn-primary" data-i18n="hero.ctaBook">Book an Appointment</a>
+        <a href="#modalities" class="btn btn-ghost" data-i18n="hero.ctaServices">See Our Services</a>
       </div>
     </div>
 
     <div class="hero-dots" id="heroDots"></div>
 
     <div class="scroll-hint" aria-hidden="true">
-      <span>Scroll</span>
+      <span data-i18n="hero.scroll">Scroll</span>
       <div class="scroll-hint-line"></div>
     </div>
   </section>
@@ -145,9 +205,9 @@
        ========================================================== -->
   <section class="section modalities" id="modalities">
     <div class="section-heading">
-      <p class="eyebrow">What We Offer</p>
-      <h2>Our Modalities</h2>
-      <p class="section-sub">Scroll down to move through our services. Tap any card to learn more about the study.</p>
+      <p class="eyebrow" data-i18n="modalities.eyebrow">What We Offer</p>
+      <h2 data-i18n="modalities.heading">Our Modalities</h2>
+      <p class="section-sub" data-i18n="modalities.sub">Scroll down to move through our services. Tap any card to learn more about the study.</p>
     </div>
 
     <div class="modalities-pin" id="modalitiesPin">
@@ -165,19 +225,19 @@
   <section class="section booking" id="booking">
     <div class="booking-inner">
       <div class="booking-intro">
-        <p class="eyebrow">Book an Appointment</p>
-        <h2>Let's find you a time.</h2>
-        <p class="section-sub">
+        <p class="eyebrow" data-i18n="booking.eyebrow">Book an Appointment</p>
+        <h2 data-i18n="booking.heading">Let's find you a time.</h2>
+        <p class="section-sub" data-i18n="booking.sub">
           Fill out the form and our team will confirm your appointment.
           Prefer to talk? Call or WhatsApp us directly.
         </p>
 
         <div class="booking-contact-links">
           <a id="callLink" href="tel:+18696657171" class="contact-pill">
-            <span class="icon" data-icon="phone"></span> Call the Center
+            <span class="icon" data-icon="phone"></span> <span data-i18n="booking.call">Call the Center</span>
           </a>
           <a id="whatsappLink" href="#" target="_blank" rel="noopener" class="contact-pill">
-            <span class="icon" data-icon="whatsapp"></span> WhatsApp Us
+            <span class="icon" data-icon="whatsapp"></span> <span data-i18n="booking.whatsapp">WhatsApp Us</span>
           </a>
         </div>
       </div>
@@ -186,44 +246,45 @@
            usar la nuestra, que da mensajes mas claros -->
       <form class="booking-form" id="bookingForm" novalidate>
         <div class="form-row">
-          <label for="fullName">Full Name <span class="required">*</span></label>
+          <label for="fullName"><span data-i18n="booking.fullName">Full Name</span> <span class="required">*</span></label>
           <input type="text" id="fullName" name="fullName" autocomplete="name">
         </div>
 
         <div class="form-row two-col">
           <div>
-            <label for="phone">Phone Number <span class="required">*</span></label>
+            <label for="phone"><span data-i18n="booking.phone">Phone Number</span> <span class="required">*</span></label>
             <input type="tel" id="phone" name="phone" autocomplete="tel" placeholder="e.g. 869 765 4321">
           </div>
           <div>
-            <label for="email">Email <span class="required">*</span></label>
+            <label for="email"><span data-i18n="booking.email">Email</span> <span class="required">*</span></label>
             <input type="email" id="email" name="email" autocomplete="email" placeholder="you@example.com">
           </div>
         </div>
 
         <div class="form-row">
-          <label for="modality">Imaging Needed <span class="required">*</span></label>
+          <label for="modality"><span data-i18n="booking.modality">Imaging Needed</span> <span class="required">*</span></label>
           <select id="modality" name="modality">
-            <option value="">Select a modality</option>
+            <option value="" data-i18n="booking.modalityPlaceholder">Select a modality</option>
           </select>
         </div>
 
         <div class="form-row two-col">
           <div>
-            <label for="preferredDate">Preferred Date <span class="required">*</span></label>
+            <label for="preferredDate"><span data-i18n="booking.date">Preferred Date</span> <span class="required">*</span></label>
             <input type="date" id="preferredDate" name="preferredDate">
           </div>
           <div>
-            <label for="preferredTime">Preferred Time <span class="required">*</span></label>
+            <label for="preferredTime"><span data-i18n="booking.time">Preferred Time</span> <span class="required">*</span></label>
             <select id="preferredTime" name="preferredTime">
-              <option value="">Select a time</option>
+              <option value="" data-i18n="booking.timePlaceholder">Select a time</option>
             </select>
           </div>
         </div>
 
         <div class="form-row">
-          <label for="notes">Notes (optional)</label>
-          <textarea id="notes" name="notes" rows="3" placeholder="Referral info, questions, or anything we should know."></textarea>
+          <label for="notes" data-i18n="booking.notes">Notes (optional)</label>
+          <textarea id="notes" name="notes" rows="3" data-i18n-placeholder="booking.notesPlaceholder"
+                    placeholder="Referral info, questions, or anything we should know."></textarea>
         </div>
 
         <!--
@@ -243,15 +304,14 @@
           teclado sin querer.
         -->
         <div class="hp-field" aria-hidden="true">
-          <label for="website">Leave this field empty</label>
+          <label for="website" data-i18n="booking.honeypot">Leave this field empty</label>
           <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
         </div>
 
-        <p class="form-note"><span class="required">*</span> Required. We need your phone and email to confirm your appointment.</p>
+        <p class="form-note"><span class="required">*</span> <span data-i18n="booking.formNote">Required. We need your phone and email to confirm your appointment.</span></p>
 
-        <button type="submit" class="btn btn-primary btn-block" id="bookingSubmit">
-          Request Appointment
-        </button>
+        <button type="submit" class="btn btn-primary btn-block" id="bookingSubmit"
+                data-i18n="booking.submit">Request Appointment</button>
 
         <p class="form-status" id="formStatus" role="status" aria-live="polite"></p>
       </form>
@@ -264,9 +324,9 @@
        ========================================================== -->
   <section class="section studies" id="studies">
     <div class="section-heading">
-      <p class="eyebrow">From the Center</p>
-      <h2>Studies &amp; Work We're Sharing</h2>
-      <p class="section-sub">Updates, news, and imaging highlights from our team.</p>
+      <p class="eyebrow" data-i18n="studies.eyebrow">From the Center</p>
+      <h2 data-i18n="studies.heading">Studies &amp; Work We're Sharing</h2>
+      <p class="section-sub" data-i18n="studies.sub">Updates, news, and imaging highlights from our team.</p>
     </div>
 
     <div class="studies-grid" id="studiesGrid">
@@ -280,8 +340,8 @@
   <section class="section contact" id="contact">
     <div class="contact-inner">
       <div class="contact-block">
-        <p class="eyebrow">Visit or Reach Us</p>
-        <h2 id="contactHeading">Get in Touch</h2>
+        <p class="eyebrow" data-i18n="contact.eyebrow">Visit or Reach Us</p>
+        <h2 id="contactHeading" data-i18n="contact.heading">Get in Touch</h2>
 
         <ul class="contact-list">
           <li><span class="icon" data-icon="pin"></span> <span id="contactAddress">Basseterre, St. Kitts &amp; Nevis</span></li>
@@ -303,7 +363,7 @@
   <div class="modal-overlay" id="modalityModal" hidden
        role="dialog" aria-modal="true" aria-labelledby="modalityModalTitle">
     <div class="modal-window">
-      <button type="button" class="modal-close" aria-label="Close">&times;</button>
+      <button type="button" class="modal-close" data-i18n-aria="modal.close" aria-label="Close">&times;</button>
       <div class="modal-body" id="modalityModalBody"></div>
     </div>
   </div>
@@ -311,9 +371,9 @@
 </main>
 
 <footer class="site-footer">
-  <p>&copy; <span id="year"></span> <span id="footerName">RDC Saint Kitts</span>. All rights reserved.</p>
-  <!-- Acceso discreto al panel. Solo entra quien tenga la contrasena. -->
-  <p><a href="admin.html" class="admin-link">Staff Login</a></p>
+  <p>&copy; <span id="year"></span> <span id="footerName">RDC Saint Kitts</span>.
+     <span data-i18n="footer.rights">All rights reserved.</span></p>
+  <!-- El acceso al panel se movio a la barra de arriba (.nav-staff). -->
 </footer>
 
 <!-- El orden importa: primero los datos, luego el comportamiento -->
@@ -330,6 +390,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.3/dist/umd/supabase.js"></script>
 
 <script src="js/config.js"></script>
+<script src="js/i18n.js"></script>
 <script src="js/supabase-api.js"></script>
 <script src="js/icons.js"></script>
 <script src="js/main.js"></script>

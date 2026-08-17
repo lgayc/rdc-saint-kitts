@@ -1,23 +1,28 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 340" role="img" aria-label="Ultrasound">
-  <!-- ============================================================
-       ULTRASOUND  ·  marca abstracta
-       ------------------------------------------------------------
-       Idea: ondas concentricas que se abren desde un punto y se
-       van desvaneciendo. Es la lectura mas directa de "sonido
-       que viaja y rebota", sin dibujar el aparato.
-       ============================================================ -->
-  <rect width="400" height="340" fill="none"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"
+     role="img" aria-label="Ultrasound">
+  <title>Ultrasound</title>
 
-  <!-- Ondas: mismo centro, radios crecientes, opacidad decreciente -->
-  <g fill="none" stroke="#3b7fc4" stroke-linecap="round">
-    <path d="M144 118 A 60 60 0 0 0 256 118"  stroke-width="9" opacity="0.95"/>
-    <path d="M124 152 A 92 92 0 0 0 276 152"  stroke-width="8" opacity="0.68"/>
-    <path d="M106 188 A 124 124 0 0 0 294 188" stroke-width="7" opacity="0.44"/>
-    <path d="M90 226 A 156 156 0 0 0 310 226"  stroke-width="6" opacity="0.26"/>
-    <path d="M76 264 A 188 188 0 0 0 324 264"  stroke-width="5" opacity="0.14"/>
+  <!-- Ultrasound
+       Transductor y las ondas abriendose. Las ondas pierden opacidad
+       segun se alejan, que es justo lo que hace el sonido.
+
+       Set de seis iconos con el mismo vocabulario: trazo de 6,
+       extremos redondeados, tinta #0e1c28 para el equipo y
+       #12a594 solo para lo que el equipo emite o mide. Un unico
+       acento por icono; si se colorea todo, ninguno destaca.
+
+       Nota para quien edite estos archivos: en XML esta PROHIBIDO
+       poner dos guiones seguidos dentro de un comentario. Los seis
+       archivos de esta carpeta estuvieron rotos por eso y el
+       navegador no mostraba ninguno. -->
+
+  <g fill="none" stroke="#0e1c28" stroke-width="6"
+     stroke-linecap="round" stroke-linejoin="round">
+
+    <rect x="82" y="26" width="36" height="46" rx="13"/>
+    <path d="M100 72v10"/>
+    <path d="M68 106a44 44 0 0 1 64 0" stroke="#12a594"/>
+    <path d="M56 134a62 62 0 0 1 88 0" stroke="#12a594" opacity="0.6"/>
+    <path d="M44 162a80 80 0 0 1 112 0" stroke="#12a594" opacity="0.3"/>
   </g>
-
-  <!-- Origen de la onda -->
-  <circle cx="200" cy="96" r="15" fill="#12a594"/>
-  <circle cx="200" cy="96" r="27" fill="none" stroke="#12a594" stroke-width="3" opacity="0.35"/>
 </svg>

@@ -18,6 +18,11 @@
  */
 
 document.addEventListener("DOMContentLoaded", async () => {
+  // El idioma va PRIMERO. Si se aplicara despues de dibujar, el
+  // visitante veria el sitio parpadear del ingles al español.
+  RDC_I18N.apply();
+  setupLanguageToggle();
+
   populateContent();
   setupNavbar();
   setupHeroParallax();
@@ -34,6 +39,62 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   document.getElementById("year").textContent = new Date().getFullYear();
 });
+
+
+/* ----------------------------------------------------------------
+   SELECTOR DE IDIOMA
+   ----------------------------------------------------------------
+   El texto marcado con data-i18n lo cambia RDC_I18N solo. Lo que
+   hay que rehacer a mano es lo que se genera desde JavaScript: las
+   tarjetas de estudios, los desplegables del formulario y el
+   contenido que vino de la base de datos.
+
+   NO se recarga la pagina. Si alguien esta a mitad del formulario
+   de reserva, cambiar de idioma no puede borrarle lo que escribio.
+   ---------------------------------------------------------------- */
+function setupLanguageToggle() {
+  const boton = document.getElementById("langToggle");
+  if (boton) boton.addEventListener("click", () => RDC_I18N.toggle());
+
+  document.addEventListener("rdc:lang-changed", () => {
+    // Se guarda lo que el visitante ya habia elegido en el
+    // formulario para devolverselo despues de rehacer las opciones.
+    const elegidos = {
+      modality: valorDe("modality"),
+      preferredTime: valorDe("preferredTime"),
+    };
+
+    populateContent();
+    RDC_I18N.apply();
+
+    restaurarValor("modality", elegidos.modality);
+    restaurarValor("preferredTime", elegidos.preferredTime);
+
+    // El contenido de la base se guardo tal cual llego, con los dos
+    // idiomas dentro, asi que se puede repintar sin volver a pedirlo.
+    if (window.__RDC_CONTENT_RAW__ !== undefined) {
+      applyEditableContent(window.__RDC_CONTENT_RAW__);
+    }
+
+    cerrarModalSiAbierto();
+  });
+}
+
+function valorDe(id) {
+  const el = document.getElementById(id);
+  return el ? el.value : "";
+}
+
+function restaurarValor(id, valor) {
+  const el = document.getElementById(id);
+  if (el && valor) el.value = valor;
+}
+
+/** La ventana de detalle se quedaria en el idioma viejo. Se cierra. */
+function cerrarModalSiAbierto() {
+  const overlay = document.getElementById("modalityModal");
+  if (overlay && !overlay.hidden) closeModalityModal();
+}
 
 
 /* ----------------------------------------------------------------
@@ -81,12 +142,12 @@ function populateContent() {
   // --- Textos -------------------------------------------------
   setText("brandName", cfg.clinicName);
   setText("footerName", cfg.clinicName);
-  setText("heroSub", cfg.subTagline);
-  setText("contactAddress", cfg.contact.address);
+  setText("heroSub", RDC_I18N.pick(cfg.subTagline));
+  setText("contactAddress", RDC_I18N.pick(cfg.contact.address));
   setText("contactPhone", cfg.contact.phoneDisplay);
   setText("contactEmail", cfg.contact.email);
 
-  renderHeroTitle(cfg.tagline);
+  renderHeroTitle(RDC_I18N.pick(cfg.tagline));
 
   // --- Enlaces ------------------------------------------------
   const telHref = `tel:${cfg.contact.phone.replace(/\s/g, "")}`;
@@ -99,7 +160,8 @@ function populateContent() {
   const hoursList = document.getElementById("hoursList");
   if (hoursList) {
     hoursList.innerHTML = cfg.contact.hours
-      .map(h => `<li><span>${h.days}</span><span>${h.time}</span></li>`)
+      .map(h => `<li><span>${escapeText(RDC_I18N.pick(h.days))}</span>` +
+                `<span>${escapeText(RDC_I18N.pick(h.time))}</span></li>`)
       .join("");
   }
 
@@ -111,8 +173,9 @@ function populateContent() {
       { key: "instagram", url: cfg.social.instagram },
       { key: "whatsapp", url: cfg.social.whatsapp }
     ]
+      .map(s => ({ key: s.key, url: safeUrl(s.url) }))
       .filter(s => s.url)
-      .map(s => `<a href="${s.url}" target="_blank" rel="noopener" aria-label="${s.key}">${ICON_SET[s.key] || ""}</a>`)
+      .map(s => `<a href="${escapeAttr(s.url)}" target="_blank" rel="noopener" aria-label="${escapeAttr(s.key)}">${ICON_SET[s.key] || ""}</a>`)
       .join("");
   }
 
@@ -126,14 +189,14 @@ function populateContent() {
     track.innerHTML = cfg.modalities
       .map((m, i) => `
         <button type="button" class="modality-card reveal" data-modality="${i}"
-                aria-label="${escapeText(m.name)} - see details">
+                aria-label="${escapeText(RDC_I18N.pick(m.name))} - ${escapeText(RDC_I18N.t("modalities.cardAria"))}">
           <span class="modality-media">
-            ${m.image ? `<img src="${m.image}" alt="" loading="lazy">` : ""}
+            ${safeUrl(m.image) ? `<img src="${escapeAttr(safeUrl(m.image))}" alt="" loading="lazy">` : ""}
           </span>
           <span class="modality-body">
-            <span class="modality-title">${escapeText(m.name)}</span>
-            <span class="modality-desc">${escapeText(m.description)}</span>
-            <span class="modality-more">Learn more ${ICON_SET.arrow || ""}</span>
+            <span class="modality-title">${escapeText(RDC_I18N.pick(m.name))}</span>
+            <span class="modality-desc">${escapeText(RDC_I18N.pick(m.description))}</span>
+            <span class="modality-more">${escapeText(RDC_I18N.t("modalities.learnMore"))} ${ICON_SET.arrow || ""}</span>
           </span>
         </button>
       `)
@@ -147,8 +210,22 @@ function populateContent() {
   }
 
   // --- Opciones del formulario --------------------------------
-  fillSelect("modality", cfg.modalities.map(m => m.name));
-  fillSelect("preferredTime", cfg.booking.timeSlots);
+  /* Los desplegables llevan VALOR y ETIQUETA separados.
+     El valor de cada estudio es siempre su nombre en ingles, aunque
+     la etiqueta salga en español. Sin eso, la misma resonancia
+     entraria en la base como "MRI" o como "Resonancia magnetica"
+     segun el idioma en que estuviera el visitante, y la clinica
+     acabaria con dos nombres para el mismo estudio en sus reservas
+     y en su calendario. */
+  fillSelect("modality", cfg.modalities.map(m => ({
+    valor: pickEn(m.name),
+    etiqueta: RDC_I18N.pick(m.name),
+  })));
+
+  // Las horas son iguales en los dos idiomas ("2:00 PM").
+  fillSelect("preferredTime", cfg.booking.timeSlots.map(v => ({
+    valor: v, etiqueta: v,
+  })));
 
   // --- Iconos sueltos -----------------------------------------
   document.querySelectorAll("[data-icon]").forEach(el => {
@@ -182,45 +259,46 @@ function openModalityModal(index) {
   lastFocusedElement = document.activeElement;
 
   const d = modality.details || {};
+  const resumen = RDC_I18N.pick(d.summary);
+  const usos = RDC_I18N.pick(d.uses);
+  const duracion = RDC_I18N.pick(d.duration);
+  const preparacion = RDC_I18N.pick(d.preparation);
 
   body.innerHTML = `
     <div class="modal-media">
-      ${modality.image ? `<img src="${modality.image}" alt="">` : ""}
+      ${safeUrl(modality.image) ? `<img src="${escapeAttr(safeUrl(modality.image))}" alt="">` : ""}
     </div>
 
     <div class="modal-text">
-      <p class="eyebrow">Imaging service</p>
-      <h3 id="modalityModalTitle">${escapeText(modality.name)}</h3>
+      <p class="eyebrow">${escapeText(RDC_I18N.t("modal.eyebrow"))}</p>
+      <h3 id="modalityModalTitle">${escapeText(RDC_I18N.pick(modality.name))}</h3>
 
-      ${d.summary ? `<p class="modal-summary">${escapeText(d.summary)}</p>` : ""}
+      ${resumen ? `<p class="modal-summary">${escapeText(resumen)}</p>` : ""}
 
-      ${(d.uses && d.uses.length) ? `
-        <h4>Commonly used for</h4>
+      ${(usos && usos.length) ? `
+        <h4>${escapeText(RDC_I18N.t("modal.usedFor"))}</h4>
         <ul class="modal-list">
-          ${d.uses.map(u => `<li>${escapeText(u)}</li>`).join("")}
+          ${usos.map(u => `<li>${escapeText(u)}</li>`).join("")}
         </ul>
       ` : ""}
 
       <div class="modal-facts">
-        ${d.duration ? `
+        ${duracion ? `
           <div class="modal-fact">
-            <span class="modal-fact-label">Typical duration</span>
-            <span class="modal-fact-value">${escapeText(d.duration)}</span>
+            <span class="modal-fact-label">${escapeText(RDC_I18N.t("modal.duration"))}</span>
+            <span class="modal-fact-value">${escapeText(duracion)}</span>
           </div>` : ""}
-        ${d.preparation ? `
+        ${preparacion ? `
           <div class="modal-fact">
-            <span class="modal-fact-label">How to prepare</span>
-            <span class="modal-fact-value">${escapeText(d.preparation)}</span>
+            <span class="modal-fact-label">${escapeText(RDC_I18N.t("modal.preparation"))}</span>
+            <span class="modal-fact-value">${escapeText(preparacion)}</span>
           </div>` : ""}
       </div>
 
-      <p class="modal-note">
-        This is general information. Your doctor or our radiologist will
-        confirm what applies to your specific case.
-      </p>
+      <p class="modal-note">${escapeText(RDC_I18N.t("modal.note"))}</p>
 
       <a href="#booking" class="btn btn-primary modal-cta" data-close-modal>
-        Book this study
+        ${escapeText(RDC_I18N.t("modal.cta"))}
       </a>
     </div>
   `;
@@ -312,12 +390,25 @@ function fillSelect(id, options) {
   const select = document.getElementById(id);
   if (!select) return;
 
-  options.forEach(value => {
+  // Se borran solo las opciones que generamos nosotros. La primera
+  // ("Elija un estudio") viene del HTML, la traduce RDC_I18N sola y
+  // tiene que quedarse donde esta. Sin esta limpieza, cada cambio de
+  // idioma añadiria otra tanda de opciones debajo de las anteriores.
+  select.querySelectorAll("option[data-generada]").forEach(o => o.remove());
+
+  options.forEach(item => {
     const opt = document.createElement("option");
-    opt.value = value;
-    opt.textContent = value;
+    opt.value = item.valor;
+    opt.textContent = item.etiqueta;
+    opt.dataset.generada = "1";
     select.appendChild(opt);
   });
+}
+
+/** El nombre en ingles de un valor que puede ser objeto o cadena. */
+function pickEn(valor) {
+  if (valor && typeof valor === "object") return valor.en || "";
+  return valor || "";
 }
 
 
@@ -361,10 +452,22 @@ function announceContentReady(studies) {
 function applyEditableContent(content) {
   if (!content) content = {};
 
-  if (content.heroTitle) renderHeroTitle(content.heroTitle);
-  if (content.heroSubtitle) setText("heroSub", content.heroSubtitle);
+  /* Se guarda la respuesta TAL CUAL, con los dos idiomas dentro.
+     Asi, al cambiar de idioma, se repinta sin volver a pedirle nada
+     al servidor: el visitante ve el cambio al instante y la clinica
+     no gasta una peticion mas de su plan gratuito. */
+  window.__RDC_CONTENT_RAW__ = content;
 
-  renderPromoBar(content.promoText);
+  /* Cada campo llega como { en: "...", es: "..." } desde la base.
+     pick() elige, y si el idioma actual esta vacio cae al otro: mas
+     vale el titular en ingles que un banner sin titulo. */
+  const titulo = RDC_I18N.pick(content.heroTitle);
+  const subtitulo = RDC_I18N.pick(content.heroSubtitle);
+
+  if (titulo) renderHeroTitle(titulo);
+  if (subtitulo) setText("heroSub", subtitulo);
+
+  renderPromoBar(RDC_I18N.pick(content.promoText));
 
   const slides = (content.slides && content.slides.length)
     ? content.slides
@@ -414,7 +517,12 @@ function startHeroSlideshow(slides) {
   slides.forEach((slide, index) => {
     const el = document.createElement("div");
     el.className = "hero-slide" + (index === 0 ? " active" : "");
-    el.style.backgroundImage = `url("${slide.image}")`;
+    // Las fotos del banner vienen de la base de datos, o sea del
+    // panel. Se filtra el esquema y se quitan comillas y barras
+    // invertidas: no puede escaparse de la declaracion CSS porque
+    // se asigna por propiedad, pero un valor roto dejaria el banner
+    // en blanco y nadie sabria por que.
+    el.style.backgroundImage = `url("${safeUrl(slide.image).replace(/["\\]/g, "")}")`;
     if (slide.caption) el.setAttribute("aria-label", slide.caption);
     container.appendChild(el);
 
@@ -617,4 +725,43 @@ function escapeText(str) {
   const div = document.createElement("div");
   div.textContent = str == null ? "" : str;
   return div.innerHTML;
+}
+
+/**
+ * Igual, pero para valores que van DENTRO de un atributo.
+ *
+ * escapeText no vale aqui: como pasa por textContent, escapa `<`,
+ * `>` y `&`, pero NO las comillas — y son las comillas las que
+ * cierran un atributo. Un valor con `"` metido en un `src="..."`
+ * se sale del atributo con escapeText, y no con este.
+ */
+function escapeAttr(str) {
+  return String(str == null ? "" : str)
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+/**
+ * Deja pasar solo direcciones que no ejecutan nada.
+ *
+ * Escapar comillas evita SALIR del atributo; no evita que el
+ * atributo entero sea codigo. `href="javascript:..."` es HTML
+ * perfectamente valido y se ejecuta al hacer clic.
+ *
+ * La explicacion larga esta en js/studies.js, que es donde de
+ * verdad hacia falta: alli la direccion la escribe el personal
+ * desde el panel. Aqui salen de config.js, o sea de quien edita el
+ * codigo — pero cuesta una linea y quita de la ecuacion el "esto
+ * es seguro porque nadie va a tocarlo".
+ */
+function safeUrl(url) {
+  const limpio = String(url == null ? "" : url)
+    .replace(/[\u0000-\u0020\u007f-\u009f]/g, "");
+
+  if (!limpio) return "";
+  if (!/^[a-z][a-z0-9+.-]*:/i.test(limpio)) return limpio;
+  return /^(https?|mailto|tel):/i.test(limpio) ? limpio : "";
 }

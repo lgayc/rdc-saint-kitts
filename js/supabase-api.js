@@ -105,22 +105,32 @@ const RDC_API = (function () {
     const banners = bannersRes.status === "fulfilled" ? bannersRes.value.data || [] : [];
     const posts = postsRes.status === "fulfilled" ? postsRes.value.data || [] : [];
 
+    /* Cada texto sale como { en, es } y NO resuelto a un idioma.
+       Es la decision que hace que cambiar de idioma sea instantaneo:
+       la pagina ya tiene las dos versiones en memoria y no vuelve a
+       pedir nada. Quien elige cual se ve es RDC_I18N.pick(), en el
+       momento de pintar.
+
+       Si se resolviera aqui, cada clic en "Español" costaria tres
+       consultas mas contra un plan gratuito, y una espera. */
+    const par = (en, es) => ({ en: en || "", es: es || "" });
+
     return {
-      heroTitle: content?.hero_title || "",
-      heroSubtitle: content?.hero_subtitle || "",
-      promoText: content?.promo_text || "",
+      heroTitle: par(content?.hero_title, content?.hero_title_es),
+      heroSubtitle: par(content?.hero_subtitle, content?.hero_subtitle_es),
+      promoText: par(content?.promo_text, content?.promo_text_es),
 
       slides: banners.map((b) => ({
         _id: b.id,
         image: imageOf(b, "banners"),
-        caption: b.caption || "",
+        caption: par(b.caption, b.caption_es),
       })).filter((s) => s.image),
 
       studies: posts.map((p) => ({
         _id: p.id,
-        title: p.title,
+        title: par(p.title, p.title_es),
         date: p.date,
-        excerpt: p.excerpt || "",
+        excerpt: par(p.excerpt, p.excerpt_es),
         image: imageOf(p, "posts"),
         color: p.accent_color || "#2dd4bf",
         link: p.link || "",
@@ -351,23 +361,39 @@ const RDC_API = (function () {
       if (!d) return { ok: false, error: "Supabase no está configurado." };
 
       try {
+        /* Cada texto llega del panel como { en, es } y va a dos
+           columnas. La de español puede quedar vacia sin problema:
+           el sitio cae al ingles antes que enseñar un hueco.
+
+           Se guarda null y no "" cuando esta vacio para que la
+           base distinga "no traducido todavia" de "traducido a
+           una cadena vacia a proposito". */
+        const en = (v) => (v && v.en ? v.en : null);
+        const es = (v) => (v && v.es ? v.es : null);
+
         await d.from("site_content").update({
-          hero_title: content.heroTitle || null,
-          hero_subtitle: content.heroSubtitle || null,
-          promo_text: content.promoText || null,
+          hero_title: en(content.heroTitle),
+          hero_title_es: es(content.heroTitle),
+          hero_subtitle: en(content.heroSubtitle),
+          hero_subtitle_es: es(content.heroSubtitle),
+          promo_text: en(content.promoText),
+          promo_text_es: es(content.promoText),
         }).eq("id", 1);
 
         await syncTable(d, "banners", content.slides || [], (slide, i) => ({
           image_url: slide.image || null,
-          caption: slide.caption || null,
+          caption: en(slide.caption),
+          caption_es: es(slide.caption),
           sort: i,
           active: true,
         }));
 
         await syncTable(d, "posts", content.studies || [], (post, i) => ({
-          title: post.title,
+          title: en(post.title) || "",
+          title_es: es(post.title),
           date: post.date || new Date().toISOString().split("T")[0],
-          excerpt: post.excerpt || null,
+          excerpt: en(post.excerpt),
+          excerpt_es: es(post.excerpt),
           image_url: post.image || null,
           link: post.link || null,
           accent_color: post.color || "#2dd4bf",

@@ -46,7 +46,12 @@
 
   --on-accent: #ffffff;
 
-  --font-head: 'Space Grotesk', 'Poppins', Arial, sans-serif;
+  /* Montserrat, que es la que pediste. Los sustitutos de detras son
+     geometricos de palo seco como ella, para que si un dia no carga
+     Google Fonts el titular no cambie de caracter: Futura si esta
+     instalada (Mac y muchos Windows la traen), luego Century Gothic,
+     y al final el palo seco del sistema. */
+  --font-head: 'Montserrat', Futura, 'Century Gothic', Arial, sans-serif;
   --font-body: 'Inter', Georgia, sans-serif;
 
   --radius: 14px;
@@ -214,6 +219,44 @@ body.has-promo .navbar { top: 38px; }
   font-weight: 600;
 }
 
+/* Selector de idioma.
+   Con borde y no como enlace suelto: es un CONTROL, no un destino, y
+   la diferencia importa porque esta rodeado de enlaces. El ancho
+   minimo evita que la barra entera baile al pasar de "Español" a
+   "English", que tienen distinto largo. */
+.nav-lang {
+  background: none;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  padding: 0.3rem 0.85rem;
+  min-width: 5.6rem;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ink-dim);
+  letter-spacing: 0.02em;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+.nav-lang:hover {
+  color: var(--teal-dim);
+  border-color: var(--teal-dim);
+  background: rgba(18, 165, 148, 0.06);
+}
+
+/* Acceso al panel del personal.
+   Se ve, pero pesa menos que el resto del menu: es una puerta de
+   servicio, no un destino para el visitante. La linea vertical la
+   separa de los enlaces de la clinica, que es lo que evita que se
+   lea como una seccion mas del sitio. */
+.nav-staff {
+  font-size: 0.82rem !important;
+  opacity: 0.65;
+  padding-left: 2rem;
+  border-left: 1px solid var(--border);
+  transition: opacity 0.2s, color 0.2s;
+}
+.nav-staff:hover { opacity: 1; color: var(--teal-dim) !important; }
+
 .nav-toggle {
   display: none;
   flex-direction: column;
@@ -304,7 +347,15 @@ body.has-promo .navbar { top: 38px; }
 .layer-3 { width: 300px; height: 300px; background: var(--amber); top: 40%; right: 15%; opacity: 0.12; }
 
 .hero-content { position: relative; z-index: 2; max-width: 780px; }
-.hero-content h1 { font-size: clamp(2.4rem, 6vw, 4.2rem); }
+/* Montserrat es mas ancha que la fuente anterior y a tamano de
+   titular las letras se separan de mas. Se aprieta el espaciado solo
+   aqui: en un parrafo esto se leeria peor, en un titular grande lo
+   compacta y le da presencia. */
+.hero-content h1 {
+  font-size: clamp(2.4rem, 6vw, 4.2rem);
+  letter-spacing: -0.03em;
+  font-weight: 700;
+}
 .hero-sub { color: var(--ink-dim); font-size: 1.15rem; margin: 1.25rem auto 2.25rem; max-width: 520px; }
 .hero-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
 
@@ -321,23 +372,27 @@ body.has-promo .navbar { top: 38px; }
   display: block;
   opacity: 0;
   will-change: transform, opacity;
-  animation-duration: 0.9s;
+  /* Recorrido largo y lento a proposito. Estos valores estuvieron
+     en el sitio y se perdieron en el commit 4911bfb, que iba de
+     otra cosa: bajaron de 600px a 70px y de 2s a 0.9s. Con 70px el
+     titulo apenas se mueve y el efecto no se lee. */
+  animation-duration: 2s;
   animation-timing-function: var(--ease);
   animation-fill-mode: forwards;
 }
 .hero-line.from-left  { animation-name: heroLineLeft; }
 .hero-line.from-right { animation-name: heroLineRight; }
 
-.hero-line:nth-child(2) { animation-delay: 0.16s; }
+.hero-line:nth-child(2) { animation-delay: 0s; }
 .hero-line:nth-child(3) { animation-delay: 0.32s; }
 .hero-line:nth-child(4) { animation-delay: 0.48s; }
 
 @keyframes heroLineLeft {
-  from { opacity: 0; transform: translateX(-70px); }
+  from { opacity: 0; transform: translateX(-600px); }
   to   { opacity: 1; transform: translateX(0); }
 }
 @keyframes heroLineRight {
-  from { opacity: 0; transform: translateX(70px); }
+  from { opacity: 0; transform: translateX(600px); }
   to   { opacity: 1; transform: translateX(0); }
 }
 
@@ -750,15 +805,9 @@ textarea.has-error {
   background: var(--surface-tint);
 }
 
-/* Enlace al panel de personal: discreto a proposito */
-.admin-link {
-  display: inline-block;
-  margin-top: 0.6rem;
-  font-size: 0.78rem;
-  opacity: 0.6;
-  transition: opacity 0.2s, color 0.2s;
-}
-.admin-link:hover { opacity: 1; color: var(--teal-dim); }
+/* El enlace al panel del personal ya no vive en el pie: se movio a
+   la barra de arriba. Sus estilos estan en .nav-staff, junto al
+   resto del menu. */
 
 /* ---------------------------------------------------------------
    11b. VENTANA DE DETALLE (modal de modalidades)
@@ -935,7 +984,14 @@ body.modal-open { overflow: hidden; }
   .nav-links {
     position: fixed;
     top: 68px; left: 0; right: 0;
-    background: rgba(247, 249, 250, 0.98);
+    /* Opaco del todo y con sombra. Antes era rgba(...,0.98) y aun
+       asi el titulo del banner se leia a traves del menu: sobre un
+       texto de 4rem en negrita, un 2% de transparencia se nota. Con
+       el menu abierto, las opciones tienen que ser lo unico que se
+       lee ahi. */
+    background: var(--surface-tint, #f7f9fa);
+    box-shadow: 0 18px 32px rgba(0, 0, 0, 0.12);
+    z-index: 1;
     flex-direction: column;
     align-items: flex-start;
     padding: 1.5rem;
@@ -946,6 +1002,18 @@ body.modal-open { overflow: hidden; }
   }
   .nav-links.open { transform: translateY(0); }
   .nav-toggle { display: flex; }
+
+  /* En el menu desplegable los enlaces se apilan, asi que la linea
+     separadora tiene que ir arriba y no a la izquierda: una raya
+     vertical junto a un solo elemento de una columna se lee como un
+     error de maquetacion, no como una separacion. */
+  .nav-staff {
+    width: 100%;
+    padding-left: 0;
+    padding-top: 1.25rem;
+    border-left: none;
+    border-top: 1px solid var(--border);
+  }
 
   .section { padding: 4.5rem 1.25rem; }
   .modalities { padding-top: 4.5rem; }

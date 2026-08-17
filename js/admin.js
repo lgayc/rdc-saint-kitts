@@ -42,7 +42,13 @@
 const state = {
   bookings: [],
   filter: "all",
-  content: { heroTitle: "", heroSubtitle: "", promoText: "", slides: [], studies: [] }
+  content: {
+    heroTitle: { en: "", es: "" },
+    heroSubtitle: { en: "", es: "" },
+    promoText: { en: "", es: "" },
+    slides: [],
+    studies: []
+  }
 };
 
 /**
@@ -310,9 +316,9 @@ function demoApi(action, payload) {
     demoStore = {
       bookings: demoBookings(),
       content: {
-        heroTitle: "",
-        heroSubtitle: "",
-        promoText: "",
+        heroTitle: { en: "", es: "" },
+        heroSubtitle: { en: "", es: "" },
+        promoText: { en: "", es: "" },
         slides: SITE_CONFIG.hero.slides.slice(),
         studies: []
       }
@@ -634,7 +640,7 @@ async function saveContent(statusEl, label) {
 
 function setupBannerUI() {
   document.getElementById("addSlide").addEventListener("click", () => {
-    state.content.slides.push({ image: "", caption: "" });
+    state.content.slides.push({ image: "", caption: { en: "", es: "" } });
     renderSlides();
   });
 
@@ -657,7 +663,7 @@ function renderSlides() {
   container.innerHTML = state.content.slides.map((slide, i) => `
     <div class="editor-item">
       <div class="editor-preview dropzone" data-drop="banners" data-index="${i}" data-list="slides"
-           style="background-image:url('${escapeAttr(slide.image)}')"
+           style="background-image:url('${escapeAttr(safeUrl(slide.image))}')"
            tabindex="0" role="button"
            aria-label="Drop a photo here or click to choose one">
         <span class="dropzone-hint">${slide.image ? "Replace" : "Drop photo<br>or click"}</span>
@@ -672,9 +678,20 @@ function renderSlides() {
         </div>
         <div class="form-row">
           <label>Caption (optional)</label>
-          <input type="text" data-slide="${i}" data-field="caption"
-                 value="${escapeAttr(slide.caption || "")}"
-                 placeholder="e.g. Our MRI suite">
+          <div class="lang-pair">
+            <div>
+              <span class="lang-tag">EN</span>
+              <input type="text" data-slide="${i}" data-field="caption" data-lang="en"
+                     value="${escapeAttr(normalizarPar(slide.caption).en)}"
+                     placeholder="e.g. Our MRI suite">
+            </div>
+            <div>
+              <span class="lang-tag">ES</span>
+              <input type="text" data-slide="${i}" data-field="caption" data-lang="es"
+                     value="${escapeAttr(normalizarPar(slide.caption).es)}"
+                     placeholder="ej. Nuestra sala de resonancia">
+            </div>
+          </div>
         </div>
       </div>
 
@@ -686,12 +703,12 @@ function renderSlides() {
   container.querySelectorAll("[data-slide]").forEach(input => {
     input.addEventListener("input", () => {
       const index = Number(input.dataset.slide);
-      state.content.slides[index][input.dataset.field] = input.value;
+      guardarCampo(state.content.slides[index], input);
 
       // Actualizar la miniatura en vivo
       if (input.dataset.field === "image") {
         const preview = input.closest(".editor-item").querySelector(".editor-preview");
-        preview.style.backgroundImage = `url('${input.value}')`;
+        preview.style.backgroundImage = `url('${safeUrl(input.value).replace(/['\\]/g, "")}')`;
       }
     });
   });
@@ -803,18 +820,72 @@ async function uploadInto(zone, file) {
 
 function setupPromoUI() {
   document.getElementById("savePromo").addEventListener("click", () => {
-    state.content.promoText = document.getElementById("promoText").value;
-    state.content.heroTitle = document.getElementById("heroTitle").value;
-    state.content.heroSubtitle = document.getElementById("heroSubtitle").value;
+    state.content.promoText = leerPar("promoText");
+    state.content.heroTitle = leerPar("heroTitle");
+    state.content.heroSubtitle = leerPar("heroSubtitle");
 
     saveContent(document.getElementById("promoStatus"), "Text");
   });
 }
 
 function renderPromoFields() {
-  document.getElementById("promoText").value = state.content.promoText || "";
-  document.getElementById("heroTitle").value = state.content.heroTitle || "";
-  document.getElementById("heroSubtitle").value = state.content.heroSubtitle || "";
+  escribirPar("promoText", state.content.promoText);
+  escribirPar("heroTitle", state.content.heroTitle);
+  escribirPar("heroSubtitle", state.content.heroSubtitle);
+}
+
+/* ----------------------------------------------------------------
+   CAMPOS EN DOS IDIOMAS
+   ----------------------------------------------------------------
+   Convenio: el campo en ingles lleva el id normal ("heroTitle") y
+   el de español el mismo id con "Es" detras ("heroTitleEs"). Con
+   eso, estas dos funciones sirven para todos los pares y no hay que
+   escribir seis veces lo mismo.
+
+   par() acepta tambien una cadena suelta porque el contenido
+   guardado ANTES de que el sitio fuera bilingue llega asi. Se
+   interpreta como el texto en ingles, que es lo que era.
+   ---------------------------------------------------------------- */
+function normalizarPar(valor) {
+  if (valor && typeof valor === "object") {
+    return { en: valor.en || "", es: valor.es || "" };
+  }
+  return { en: valor || "", es: "" };
+}
+
+/**
+ * Guarda lo que se escribe en un campo del editor.
+ *
+ * Los campos con data-lang son mitad de un par: escriben dentro de
+ * { en, es } y no encima del objeto entero. Sin esta distincion, la
+ * primera letra tecleada en el campo en español convertiria el par
+ * en una cadena suelta y borraria el ingles de golpe.
+ */
+function guardarCampo(destino, input) {
+  const campo = input.dataset.field;
+  const idioma = input.dataset.lang;
+
+  if (!idioma) {
+    destino[campo] = input.value;
+    return;
+  }
+
+  destino[campo] = normalizarPar(destino[campo]);
+  destino[campo][idioma] = input.value;
+}
+
+function leerPar(id) {
+  const en = document.getElementById(id);
+  const es = document.getElementById(id + "Es");
+  return { en: en ? en.value : "", es: es ? es.value : "" };
+}
+
+function escribirPar(id, valor) {
+  const par = normalizarPar(valor);
+  const en = document.getElementById(id);
+  const es = document.getElementById(id + "Es");
+  if (en) en.value = par.en;
+  if (es) es.value = par.es;
 }
 
 
@@ -825,9 +896,9 @@ function renderPromoFields() {
 function setupPostsUI() {
   document.getElementById("addPost").addEventListener("click", () => {
     state.content.studies.unshift({
-      title: "",
+      title: { en: "", es: "" },
       date: new Date().toISOString().split("T")[0],
-      excerpt: "",
+      excerpt: { en: "", es: "" },
       image: "",
       color: "#2dd4bf",
       link: ""
@@ -836,7 +907,18 @@ function setupPostsUI() {
   });
 
   document.getElementById("savePosts").addEventListener("click", () => {
-    state.content.studies = state.content.studies.filter(p => p.title && p.title.trim());
+    /* Se descartan las publicaciones sin titulo en NINGUNO de los
+       dos idiomas. Basta con tener uno: publicar solo en ingles es
+       legitimo, y el sitio en español enseña esa version. Lo que no
+       tiene sentido es guardar una tarjeta sin titulo en ninguno.
+
+       (Este filtro miraba p.title.trim() cuando el titulo era una
+       cadena suelta. Con el par, eso lanzaba TypeError y el boton
+       de guardar dejaba de responder.) */
+    state.content.studies = state.content.studies.filter(p => {
+      const t = normalizarPar(p.title);
+      return t.en.trim() || t.es.trim();
+    });
     renderPosts();
     saveContent(document.getElementById("postsStatus"), "Posts");
   });
@@ -853,7 +935,7 @@ function renderPosts() {
   container.innerHTML = state.content.studies.map((post, i) => `
     <div class="editor-item post-item">
       <div class="editor-preview dropzone" data-drop="posts" data-index="${i}" data-list="studies"
-           style="background-image:url('${escapeAttr(post.image || "")}')"
+           style="background-image:url('${escapeAttr(safeUrl(post.image || ""))}')"
            tabindex="0" role="button"
            aria-label="Drop a cover image here or click to choose one">
         <span class="dropzone-hint">${post.image ? "Replace" : "Drop cover<br>or click"}</span>
@@ -862,8 +944,18 @@ function renderPosts() {
       <div class="editor-fields">
         <div class="form-row">
           <label>Title</label>
-          <input type="text" data-post="${i}" data-field="title"
-                 value="${escapeAttr(post.title)}" placeholder="Post headline">
+          <div class="lang-pair">
+            <div>
+              <span class="lang-tag">EN</span>
+              <input type="text" data-post="${i}" data-field="title" data-lang="en"
+                     value="${escapeAttr(normalizarPar(post.title).en)}" placeholder="Post headline">
+            </div>
+            <div>
+              <span class="lang-tag">ES</span>
+              <input type="text" data-post="${i}" data-field="title" data-lang="es"
+                     value="${escapeAttr(normalizarPar(post.title).es)}" placeholder="Titular en español">
+            </div>
+          </div>
         </div>
 
         <div class="form-row two-col">
@@ -879,8 +971,18 @@ function renderPosts() {
 
         <div class="form-row">
           <label>Summary</label>
-          <textarea data-post="${i}" data-field="excerpt" rows="2"
-                    placeholder="One or two sentences">${escapeHtml(post.excerpt || "")}</textarea>
+          <div class="lang-pair">
+            <div>
+              <span class="lang-tag">EN</span>
+              <textarea data-post="${i}" data-field="excerpt" data-lang="en" rows="2"
+                        placeholder="One or two sentences">${escapeHtml(normalizarPar(post.excerpt).en)}</textarea>
+            </div>
+            <div>
+              <span class="lang-tag">ES</span>
+              <textarea data-post="${i}" data-field="excerpt" data-lang="es" rows="2"
+                        placeholder="Una o dos frases">${escapeHtml(normalizarPar(post.excerpt).es)}</textarea>
+            </div>
+          </div>
         </div>
 
         <div class="form-row">
@@ -902,7 +1004,7 @@ function renderPosts() {
 
   container.querySelectorAll("[data-post]").forEach(input => {
     input.addEventListener("input", () => {
-      state.content.studies[Number(input.dataset.post)][input.dataset.field] = input.value;
+      guardarCampo(state.content.studies[Number(input.dataset.post)], input);
     });
   });
 
@@ -934,10 +1036,37 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
-/** Igual, pero para valores dentro de atributos HTML */
+/**
+ * Igual, pero para valores dentro de atributos HTML.
+ *
+ * Se anadio la comilla simple: hay valores que caen dentro de un
+ * `url('...')` en un atributo style, y ahi es la comilla simple la
+ * que delimita. Con solo la doble escapada, una foto cuyo nombre
+ * llevara `'` podia inyectar CSS en el panel.
+ */
 function escapeAttr(str) {
   return String(str == null ? "" : str)
     .replace(/&/g, "&amp;")
     .replace(/"/g, "&quot;")
-    .replace(/</g, "&lt;");
+    .replace(/'/g, "&#39;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+/**
+ * Deja pasar solo direcciones que no ejecutan nada.
+ *
+ * Aqui protege al propio personal: las direcciones de las fotos se
+ * guardan en la base de datos, y este panel las vuelve a pintar.
+ * Sin este filtro, un valor guardado una vez se ejecuta cada vez
+ * que alguien abre la pestana de contenido. La explicacion completa
+ * esta en js/studies.js.
+ */
+function safeUrl(url) {
+  const limpio = String(url == null ? "" : url)
+    .replace(/[\u0000-\u0020\u007f-\u009f]/g, "");
+
+  if (!limpio) return "";
+  if (!/^[a-z][a-z0-9+.-]*:/i.test(limpio)) return limpio;
+  return /^(https?|mailto|tel):/i.test(limpio) ? limpio : "";
 }

