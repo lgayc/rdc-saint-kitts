@@ -246,6 +246,7 @@ const RDC_API = (function () {
           status: b.status,
           notified: {
             email: b.notified_email,
+            patient: b.notified_patient,
             whatsapp: b.notified_whatsapp,
             calendar: b.notified_calendar,
           },
@@ -254,10 +255,80 @@ const RDC_API = (function () {
       };
     },
 
-    async setBookingStatus(id, status) {
+    /**
+     * Cambia el estado de una reserva y avisa al paciente.
+     *
+     * Esto era un UPDATE directo contra la tabla. Ahora va a la
+     * Edge Function `booking-status`, y no por gusto: confirmar
+     * una cita tiene que mandarle un correo al paciente, y para
+     * mandar correo hace falta la contraseña del SMTP. Un secreto
+     * en un archivo .js es un secreto que cualquiera puede leer
+     * con Ctrl+U, así que el envío tiene que ocurrir en el
+     * servidor. Y si el envío se va allí, el cambio de estado se
+     * va con él: de otro modo existiría el caso "se confirmó pero
+     * no se avisó".
+     *
+     * Se manda el token de la sesión, no la anon key: la función
+     * comprueba contra la base de datos que quien llama está en
+     * la tabla `staff`.
+     */
+    async setBookingStatus(id, status, options) {
+      const c = cfg();
       const d = db();
-      const { error } = await d.from("bookings").update({ status }).eq("id", id);
-      return error ? { ok: false, error: error.message } : { ok: true };
+      if (!d) return { ok: false, error: "Supabase no está configurado." };
+
+      const { data: sessionData } = await d.auth.getSession();
+      const token = sessionData && sessionData.session
+        ? sessionData.session.access_token
+        : null;
+      if (!token) {
+        return { ok: false, error: "La sesión caducó. Vuelve a entrar." };
+      }
+
+      const url = `${c.url.trim().replace(/\/$/, "")}/functions/v1/booking-status`;
+
+      let response;
+      try {
+        response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            apikey: c.anonKey.trim(),
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            id,
+            status,
+            resend: Boolean(options && options.resend),
+          }),
+        });
+      } catch (err) {
+        return { ok: false, error: `Sin conexión con el servidor. ${err}` };
+      }
+
+      let result;
+      try {
+        result = await response.json();
+      } catch {
+        return { ok: false, error: `El servidor respondió ${response.status}.` };
+      }
+
+      if (!response.ok || !result.ok) {
+        return {
+          ok: false,
+          error: result.error || `El servidor respondió ${response.status}.`,
+        };
+      }
+
+      // `warning` no es un fallo: el estado cambió. Es "cambió,
+      // pero al paciente no le llegó el correo", que es justo lo
+      // que quien pulsó el botón necesita saber.
+      return {
+        ok: true,
+        notice: result.notice || null,
+        emailedTo: result.emailedTo || null,
+        warning: result.warning || null,
+      };
     },
 
     async getContent() {

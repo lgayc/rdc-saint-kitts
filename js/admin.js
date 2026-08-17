@@ -497,7 +497,11 @@ function notifyWarning(b) {
   if (!b.notified) return "";
 
   const failed = [
-    b.notified.email ? null : "email",
+    b.notified.email ? null : "staff email",
+    // Se nombra aparte del anterior a proposito: que el aviso
+    // interno saliera no significa que el paciente recibiera su
+    // copia, y al reves. Son dos correos distintos.
+    b.notified.patient ? null : "patient copy",
     b.notified.whatsapp ? null : "WhatsApp",
     b.notified.calendar ? null : "calendar"
   ].filter(Boolean);
@@ -522,11 +526,61 @@ async function updateBookingStatus(id, status) {
   try {
     const result = await api("setBookingStatus", { id, status });
     if (!result.ok) throw new Error(result.error);
+
+    /* --- Que paso con el correo al paciente ------------------
+       Confirmar una cita ahora le manda un correo al paciente.
+       Quien pulsa el boton tiene que saber si salio, porque de
+       eso depende lo siguiente que haga: si no salio, hay que
+       coger el telefono.
+
+       Solo se avisa cuando hay algo que contar. Un "correo
+       enviado" en cada pulsacion se vuelve ruido y a los dos
+       dias nadie lo lee — que es justo cuando falla.
+       -------------------------------------------------------- */
+    if (result.warning) {
+      alert(
+        "Status changed to " + status + ", but the patient was NOT notified:\n\n" +
+        result.warning +
+        "\n\nPlease call the patient."
+      );
+    } else if (result.emailedTo) {
+      showToast(status + ". Email sent to " + result.emailedTo + ".");
+    } else if (result.notice === "ya-enviado") {
+      showToast("Status changed. The patient had already been notified.");
+    }
   } catch (err) {
     if (booking && previous) booking.status = previous;
     renderBookings();
     alert("Couldn't update that appointment: " + err.message);
   }
+}
+
+
+/**
+ * Aviso breve que no interrumpe.
+ *
+ * alert() se reserva para lo que hay que atender ahora mismo:
+ * que el correo NO salio. Para lo que salio bien, un alert
+ * obligaria a pulsar Aceptar en cada reserva confirmada, y una
+ * mañana con quince reservas son quince clics inutiles.
+ */
+function showToast(message) {
+  let box = document.getElementById("rdcToast");
+  if (!box) {
+    box = document.createElement("div");
+    box.id = "rdcToast";
+    box.setAttribute("role", "status");
+    box.style.cssText =
+      "position:fixed;left:50%;bottom:28px;transform:translateX(-50%);" +
+      "background:#111827;color:#fff;padding:12px 20px;border-radius:8px;" +
+      "font-size:14px;box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:9999;" +
+      "max-width:90vw;text-align:center;transition:opacity .25s";
+    document.body.appendChild(box);
+  }
+  box.textContent = message;
+  box.style.opacity = "1";
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(function () { box.style.opacity = "0"; }, 4000);
 }
 
 
