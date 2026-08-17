@@ -1,0 +1,147 @@
+# =====================================================================
+#  ANTI-PAUSA DE SUPABASE  (plan gratuito)
+# =====================================================================
+#  EL PROBLEMA
+#  Supabase pausa los proyectos del plan gratuito cuando detecta poca
+#  actividad durante una ventana de 7 días. Su documentación dice que
+#  lo que cuenta son "peticiones de usuario contra la base de datos",
+#  y que con unas pocas al día basta.
+#
+#  Una clínica con reservas esporádicas cae justo en ese caso. Y
+#  cuando el proyecto está pausado, las reservas no entran: el
+#  formulario falla y el paciente se va.
+#
+#  POR QUÉ EL PING VIVE AQUÍ Y NO DENTRO DE SUPABASE
+#  Parece más natural usar pg_cron, pero no sirve, por dos motivos:
+#
+#    1. Es actividad interna de la base, no una petición de usuario.
+#       La documentación de Supabase nunca dice que cuente.
+#    2. Y sobre todo: si el proyecto llegara a pausarse, pg_cron se
+#       detiene con él. El despertador estaría dentro de la casa
+#       cerrada.
+#
+#  El ping tiene que venir de fuera. GitHub Actions es gratis, ya
+#  aloja este repositorio, y deja ver en el historial de ejecuciones
+#  si algún día deja de funcionar.
+#
+#  ---------------------------------------------------------------
+#  PUESTA EN MARCHA  (una sola vez)
+#
+#  Settings → Secrets and variables → Actions → New repository secret:
+#
+#      SUPABASE_URL        https://xxxxxxxx.supabase.co
+#      SUPABASE_ANON_KEY   la anon/publishable key del proyecto
+#
+#  Es la anon key, NUNCA la service_role. La anon es pública por
+#  diseño (va dentro del sitio web). Lo único que puede hacer aquí
+#  es actualizar una marca de tiempo.
+#
+#  Después: pestaña Actions → "Supabase keepalive" → Run workflow,
+#  para comprobar que responde antes de fiarse del cron.
+# =====================================================================
+
+name: Supabase keepalive
+
+on:
+  schedule:
+    # Cada dos días a las 06:17 UTC. El minuto es raro a propósito:
+    # los cron en punto se agolpan en la cola de GitHub y se
+    # retrasan. La ventana de Supabase es de 7 días, así que cada
+    # dos días deja margen de sobra para tolerar un fallo suelto.
+    - cron: "17 6 */2 * *"
+
+  # Para poder lanzarlo a mano desde la pestaña Actions.
+  workflow_dispatch:
+
+# Sin esto el paso del sello mensual no puede escribir en el repo.
+permissions:
+  contents: write
+
+concurrency:
+  group: supabase-keepalive
+  cancel-in-progress: false
+
+jobs:
+  ping:
+    name: Despertar la base de datos
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar el repositorio
+        uses: actions/checkout@v4
+
+      - name: Comprobar que los secretos están puestos
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "::error::Faltan los secretos SUPABASE_URL o SUPABASE_ANON_KEY."
+            echo "Ponlos en Settings → Secrets and variables → Actions."
+            exit 1
+          fi
+
+      - name: Llamar a la función ping()
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          set -euo pipefail
+
+          # Tres intentos con espera creciente. Un corte de red de un
+          # minuto no debe contar como ping perdido.
+          for intento in 1 2 3; do
+            echo "Intento $intento…"
+
+            codigo=$(curl -sS -o respuesta.txt -w "%{http_code}" \
+              -X POST "${SUPABASE_URL}/rest/v1/rpc/ping" \
+              -H "apikey: ${SUPABASE_ANON_KEY}" \
+              -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
+              -H "Content-Type: application/json" \
+              --max-time 30 \
+              -d '{}') || codigo="000"
+
+            if [ "$codigo" = "200" ]; then
+              echo "Base de datos despierta. Respuesta: $(cat respuesta.txt)"
+              exit 0
+            fi
+
+            echo "Respondió $codigo: $(cat respuesta.txt 2>/dev/null || echo 'sin cuerpo')"
+            [ "$intento" -lt 3 ] && sleep $((intento * 15))
+          done
+
+          echo "::error::El ping falló tres veces. Si el proyecto ya está pausado, hay que reactivarlo a mano desde el panel de Supabase; el ping por sí solo no lo despierta."
+          exit 1
+
+      # -----------------------------------------------------------
+      #  SELLO MENSUAL
+      # -----------------------------------------------------------
+      #  Segundo problema, más silencioso que el primero: GitHub
+      #  desactiva los workflows programados en repositorios sin
+      #  actividad durante 60 días. Avisa por correo, pero es fácil
+      #  que ese aviso se pierda — y entonces el ping deja de correr
+      #  justo cuando más falta hace.
+      #
+      #  Un commit al mes en un archivo de una línea mantiene el
+      #  repositorio "activo" y el cron encendido. Se escribe solo el
+      #  año y el mes para que haya exactamente un commit mensual y
+      #  no uno cada dos días.
+      # -----------------------------------------------------------
+      - name: Sellar el mes para que GitHub no apague el cron
+        run: |
+          set -euo pipefail
+          mes=$(date -u +"%Y-%m")
+          archivo=".github/keepalive-stamp"
+
+          if [ -f "$archivo" ] && [ "$(cat "$archivo")" = "$mes" ]; then
+            echo "El sello de $mes ya está puesto. No hace falta commit."
+            exit 0
+          fi
+
+          echo "$mes" > "$archivo"
+
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$archivo"
+          git commit -m "chore: sello de actividad $mes (mantiene vivo el cron del keepalive)"
+          git push
