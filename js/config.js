@@ -290,11 +290,15 @@ const SITE_CONFIG = {
 
   // ---------------------------------------------------------
   // 8. NOTIFICACIONES DE RESERVAS
-  // OJO: datos DE PRUEBA. Cambiar antes de entregar.
   // ---------------------------------------------------------
+  // Solo se usan en el modo de respaldo, cuando Supabase no esta
+  // configurado y el formulario abre un borrador de correo. Con el
+  // backend conectado —que es el caso— quien manda los avisos es la
+  // Edge Function, y las direcciones viven en los secretos de
+  // Supabase, no aqui.
   notifications: {
-    email: "869thesignstudio@gmail.com",   // PRUEBA
-    whatsappNumber: "18697629440"           // PRUEBA
+    email: "rad.dg.center@gmail.com",
+    whatsappNumber: "18696657171"
   },
 
   // ---------------------------------------------------------
