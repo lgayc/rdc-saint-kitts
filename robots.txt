@@ -1,0 +1,13 @@
+# =====================================================================
+#  robots.txt  ·  radiologydiagnosticcenterskn.com
+# =====================================================================
+User-agent: *
+Allow: /
+
+# El panel del personal no tiene por que salir en Google. No es una
+# medida de seguridad —quien protege los datos es Row Level Security
+# en la base, no esta linea— pero no hay ninguna razon para que la
+# pagina de acceso aparezca en los resultados de busqueda.
+Disallow: /admin.html
+
+Sitemap: https://radiologydiagnosticcenterskn.com/sitemap.xml

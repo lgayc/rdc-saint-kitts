@@ -1,0 +1,62 @@
+# =====================================================================
+#  CABECERAS HTTP  ·  Cloudflare Pages
+# =====================================================================
+#  Este archivo solo lo lee Cloudflare Pages (y Netlify). En GitHub
+#  Pages se ignora sin dar error, asi que no molesta si algun dia se
+#  sirve desde alli.
+#
+#  Hace dos cosas que el HTML NO puede hacer por si solo:
+#
+#    1. frame-ancestors. La CSP que va en un <meta> no admite esa
+#       directiva; solo funciona como cabecera. Sin ella, cualquiera
+#       puede meter el sitio de la clinica dentro de un iframe suyo
+#       y presentarlo como propio.
+#
+#    2. Control de cache de verdad. Hasta ahora el unico freno era
+#       poner ?v=3 a mano en los <script> cada vez que algo cambiaba.
+#       Con estas reglas el navegador deja de servir codigo viejo por
+#       su cuenta, que fue exactamente lo que nos costo dos tardes.
+# =====================================================================
+
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), microphone=(), camera=(), payment=()
+  Content-Security-Policy: frame-ancestors 'none'
+
+# ---------------------------------------------------------------------
+#  HTML: no cachear nunca.
+# ---------------------------------------------------------------------
+#  El HTML es el indice: dice que version de cada .js hay que pedir.
+#  Si el navegador se guarda un index.html viejo, seguira pidiendo el
+#  codigo viejo aunque el nuevo lleve horas publicado. Es barato
+#  (18 KB) y es lo que mantiene todo lo demas sincronizado.
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+/
+  Cache-Control: public, max-age=0, must-revalidate
+
+# ---------------------------------------------------------------------
+#  CSS y JS: una hora, y revalidar.
+# ---------------------------------------------------------------------
+#  No se ponen los tipicos 365 dias porque estos archivos NO llevan
+#  huella en el nombre: se llaman siempre main.js. Con un año de
+#  cache, un arreglo urgente tardaria un año en llegarle a quien ya
+#  visito el sitio. Una hora es el equilibrio: rapido para quien
+#  navega, y al dia para todos al poco de publicar.
+/*.js
+  Cache-Control: public, max-age=3600, must-revalidate
+
+/*.css
+  Cache-Control: public, max-age=3600, must-revalidate
+
+# ---------------------------------------------------------------------
+#  Imagenes y fuentes: un año.
+# ---------------------------------------------------------------------
+#  Estas si se pueden cachear a lo bestia. Cuando una foto cambia,
+#  cambia tambien su nombre de archivo, asi que no hay riesgo de
+#  servir una version vieja.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
