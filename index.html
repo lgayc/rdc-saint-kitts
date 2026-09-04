@@ -94,19 +94,36 @@
      dos canales que usa la clinica.
 
      og:image tiene que ser una URL ABSOLUTA — las rutas relativas
-     no funcionan aqui. Si algun dia se pasa a dominio propio, hay
-     que cambiar las tres lineas de abajo.
+     no funcionan aqui. El dominio esta escrito a mano en tres
+     sitios de este bloque; si cambia, hay que cambiarlo aqui,
+     en el <link rel="canonical">, en robots.txt y en sitemap.xml.
      ============================================================ -->
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="RDC Saint Kitts">
 <meta property="og:title" content="RDC Saint Kitts — Radiology Diagnostic Center">
 <meta property="og:description" content="Advanced diagnostic imaging in St. Kitts & Nevis: X-Ray, Ultrasound, CT, MRI and Mammography. Book your appointment online.">
-<meta property="og:url" content="https://lgayc.github.io/rdc-saint-kitts/">
-<meta property="og:image" content="https://lgayc.github.io/rdc-saint-kitts/assets/og-image.jpg">
+<meta property="og:url" content="https://radiologydiagnosticcenterskn.com/">
+<meta property="og:image" content="https://radiologydiagnosticcenterskn.com/assets/og-image.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Radiology Diagnostic Center — St. Kitts & Nevis">
 <meta name="twitter:card" content="summary_large_image">
+
+<link rel="canonical" href="https://radiologydiagnosticcenterskn.com/">
+
+<!-- ============================================================
+     UN SOLO IDIOMA POR URL, NO
+     ============================================================
+     Este sitio sirve ingles y español en la MISMA direccion: el
+     texto lo cambia JavaScript sin recargar. Por eso NO se ponen
+     etiquetas hreflang: hreflang sirve para decirle a Google que
+     hay una URL distinta por idioma, y aqui no las hay.
+
+     Consecuencia real: Google indexara la version en ingles, que
+     es la que ve al entrar sin preferencia guardada. Si algun dia
+     importa posicionar en español, hay que servir /es/ como una
+     direccion aparte — y eso es otro trabajo, no una etiqueta.
+     ============================================================ -->
 
 <link rel="stylesheet" href="css/styles.css">
 </head>
