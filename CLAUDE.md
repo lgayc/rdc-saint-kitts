@@ -131,16 +131,28 @@ normalmente no falla, solo se comporta mal en silencio.
 | Google Calendar responde **404** | Un calendario no compartido da 404, no 403. "ID mal escrito" y "no compartido" son indistinguibles desde fuera; por eso existe `diagnosticarCalendario()`. **El calendario funciona desde el 17 de agosto: no toques `GOOGLE_CALENDAR_ID`.** |
 | `www` da error 522 | Un CNAME proxeado hacia un ápice servido por un Worker no tiene origen al que llegar. Lo que hace funcionar `www` es la Redirect Rule, no el CNAME. |
 | `frame-ancestors` ignorado | Solo funciona como cabecera HTTP. En `<meta>` no hace nada. Está en `_headers`. |
+| El dominio sirve una versión vieja con GitHub al día | La autorización de GitHub en Cloudflare se había caído. En Settings → Builds el repositorio seguía ahí, con su rama y sus ajustes, así que **parecía** conectado; lo único que lo delataba era un aviso azul: *"This project is disconnected from your Git account"*. Sin esa autorización GitHub no avisa a Cloudflare, no se compila nada, y el sitio se queda congelado en silencio. Se arregla con **Manage** (reautorizar), no con Disconnect. |
 
 ---
 
 ## Despliegue
 
-- **El sitio**: se publica desde Cloudflare. Subir a GitHub no publica
-  por sí solo si el Worker no está enganchado al repo — hay que darle
-  Deploy. Comprueba siempre contra el dominio real, no contra la copia
-  local. Un `?v=` que no aparece en el HTML servido es la señal de que
-  lo que hay publicado es viejo.
+- **El sitio**: lo sirve el Worker `rdc-saint-kitts` de Cloudflare,
+  con los archivos estáticos tomados de la raíz del repositorio y el
+  dominio enganchado como Custom Domain. Está conectado a GitHub: rama
+  de producción `RDC-SKN-GUY`, sin comando de compilación (este sitio
+  no se compila) y `npx wrangler deploy` como comando de despliegue.
+  Con la conexión sana, cada push publica solo en un par de minutos.
+
+  Comprueba siempre contra el dominio real, no contra la copia local.
+  Un `?v=` que no coincide con el del repositorio es la señal de que lo
+  publicado es viejo. Cuando pase, el orden es: **Deployments** (¿hay
+  una compilación posterior al último commit?) y **Settings → Builds**
+  (¿hay aviso de desconexión?).
+
+  Ojo: no hay `wrangler.toml` ni `wrangler.jsonc` en el repositorio,
+  aunque el despliegue use `npx wrangler deploy`. Ha funcionado así,
+  pero si una compilación falla, es el primer sitio donde mirar.
 - **Las Edge Functions**: `supabase functions deploy book` y
   `supabase functions deploy booking-status`. `verify_jwt` y demás está
   en `supabase/config.toml`.
@@ -167,8 +179,10 @@ anti-pausa de GitHub Actions.
 3. Supabase Auth → URL Configuration: Site URL y redirects al dominio
    real. Desactivar el registro público. Activar la protección de
    contraseñas filtradas.
-4. Hacer una reserva de prueba desde el dominio real y solo entonces
-   apagar el interruptor de Production en `workers.dev`.
+4. Hacer una reserva de prueba desde el dominio real. El interruptor
+   de Production en `workers.dev` **ya está apagado** (visto en el
+   panel el 5 de septiembre); quedó apagado antes de la prueba, así
+   que la prueba sigue pendiente.
 5. Que la clínica escriba el texto real de "Quiénes somos": desde
    cuándo existe el centro, quién lo dirige y con qué titulación, qué
    equipos hay, en cuánto se entregan los resultados de verdad, con qué
@@ -182,6 +196,12 @@ anti-pausa de GitHub Actions.
 - Limitar el tamaño de imagen al subir desde el panel. Hay un PNG de
   1.904 kB en Storage; bórralo si no se usa.
 - Subir `MAX_BOOKINGS_PER_IP` de 10 a ~40 antes de cualquier campaña.
+- Comprobar qué se sirve de más. El despliegue toma la raíz del
+  repositorio y no hay ningún archivo de exclusión, así que
+  `CLAUDE.md`, `Codigo.gs` o `supabase/migrations/` podrían abrirse
+  desde el dominio. Se comprueba pidiendo `/CLAUDE.md`: si carga en
+  vez de dar 404, hace falta un `.assetsignore`. No hay contraseñas
+  ahí dentro, pero son notas de trabajo, no material publicado.
 - Limpieza: `Codigo.gs` está duplicado en la raíz y en `backend/`, y
   `notify.pb.js` + `backend/POCKETBASE.md` son de la vía PocketBase que
   se descartó. Son historia, no código vivo.
