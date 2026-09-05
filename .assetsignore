@@ -1,0 +1,37 @@
+# =====================================================================
+#  QUE NO SE PUBLICA  ·  Cloudflare Workers (assets estaticos)
+# =====================================================================
+#  El despliegue toma la RAIZ del repositorio como carpeta de archivos
+#  publicos. Sin este archivo, todo lo que hay aqui se sirve desde el
+#  dominio: se comprobo pidiendo /CLAUDE.md y cargaba entero.
+#
+#  No habia contraseñas dentro —las credenciales viven en los secretos
+#  de las Edge Functions, nunca en el repositorio— pero son notas de
+#  trabajo y codigo de vias descartadas. Nada de eso es material
+#  publicado por la clinica.
+#
+#  Se comprueba pidiendo /CLAUDE.md al dominio: tiene que dar 404.
+#
+#  Ojo: `_headers` NO va en esta lista. Cloudflare lo lee para aplicar
+#  las cabeceras y no lo sirve como pagina; si se excluyera, se
+#  perderian las cabeceras de seguridad.
+# =====================================================================
+
+# Notas de trabajo y documentacion interna
+CLAUDE.md
+GUIA-RAPIDA.md
+README.md
+
+# Configuracion de herramientas, no del sitio
+.mcp.json
+.gitignore
+.assetsignore
+.github/
+
+# Backend: se despliega a Supabase, no se sirve al navegador
+supabase/
+backend/
+
+# Historia: la via de Google Apps Script y la de PocketBase, descartadas
+Codigo.gs
+notify.pb.js
