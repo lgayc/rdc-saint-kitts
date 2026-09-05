@@ -135,6 +135,23 @@ normalmente no falla, solo se comporta mal en silencio.
 
 ---
 
+## Conexión con Supabase desde Claude Code
+
+`.mcp.json` (en la raíz) conecta a Claude Code con el servidor MCP
+alojado de Supabase, ya apuntando al proyecto `tittyvorxepzjoffqado`.
+Sirve para leer el esquema, consultar la base, mirar los logs y revisar
+las Edge Functions sin salir del editor.
+
+**No contiene ningún secreto**: solo la referencia del proyecto, que ya
+está escrita en este mismo archivo. La autorización la hace cada
+persona con su propia cuenta de Supabase al conectarse; por eso el
+archivo puede estar en el repositorio.
+
+Si Claude Code no ve el servidor, es que hay que aprobarlo: los
+`.mcp.json` de un repositorio se piden a mano la primera vez.
+
+---
+
 ## Despliegue
 
 - **El sitio**: lo sirve el Worker `rdc-saint-kitts` de Cloudflare,
