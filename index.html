@@ -65,6 +65,7 @@
   object-src 'none';
   base-uri 'self';
   form-action 'self';
+  frame-src https://www.google.com;
 ">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -125,7 +126,7 @@
      direccion aparte — y eso es otro trabajo, no una etiqueta.
      ============================================================ -->
 
-<link rel="stylesheet" href="css/styles.css?v=4">
+<link rel="stylesheet" href="css/styles.css?v=5">
 </head>
 <body>
 
@@ -400,6 +401,26 @@
 
         <div class="social-links" id="socialLinks"></div>
       </div>
+
+      <!--
+        Mapa de la clinica. El src lo pone js/main.js desde
+        SITE_CONFIG.contact.map: las coordenadas viven en un solo
+        sitio para que el mapa y el boton de indicaciones no puedan
+        acabar apuntando a puntos distintos.
+
+        No se pide la ubicacion del visitante a proposito. El boton
+        abre la app de mapas de su movil, que ya sabe donde esta y
+        sabe dar indicaciones habladas; pedir el permiso aqui seria
+        mas intrusivo y serviria para menos.
+      -->
+      <div class="contact-map reveal">
+        <iframe id="contactMap" loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+                data-i18n-aria="contact.mapLabel"
+                aria-label="Map showing the clinic location"></iframe>
+        <a id="directionsLink" class="btn btn-ghost" target="_blank"
+           rel="noopener" data-i18n="contact.directions">Get directions</a>
+      </div>
     </div>
   </section>
 
@@ -436,12 +457,12 @@
 -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.3/dist/umd/supabase.js"></script>
 
-<script src="js/config.js?v=4"></script>
-<script src="js/i18n.js?v=4"></script>
-<script src="js/supabase-api.js?v=4"></script>
-<script src="js/icons.js?v=4"></script>
-<script src="js/main.js?v=4"></script>
-<script src="js/booking.js?v=4"></script>
-<script src="js/studies.js?v=4"></script>
+<script src="js/config.js?v=5"></script>
+<script src="js/i18n.js?v=5"></script>
+<script src="js/supabase-api.js?v=5"></script>
+<script src="js/icons.js?v=5"></script>
+<script src="js/main.js?v=5"></script>
+<script src="js/booking.js?v=5"></script>
+<script src="js/studies.js?v=5"></script>
 </body>
 </html>

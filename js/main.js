@@ -193,6 +193,23 @@ function populateContent() {
   setHref("contactEmail", `mailto:${cfg.contact.email}`);
   setHref("whatsappLink", cfg.social.whatsapp);
 
+  // --- Mapa y como llegar -------------------------------------
+  const mapa = cfg.contact.map;
+  if (mapa) {
+    const punto = `${mapa.lat},${mapa.lng}`;
+    const marco = document.getElementById("contactMap");
+    // Solo la primera vez. Esta funcion vuelve a correr en cada
+    // cambio de idioma, y reponer el src recargaria el mapa entero
+    // para cambiar unicamente el idioma de sus botones.
+    if (marco && !marco.getAttribute("src")) {
+      marco.setAttribute("src",
+        "https://www.google.com/maps?q=" + encodeURIComponent(punto) +
+        "&z=17&hl=" + encodeURIComponent(RDC_I18N.current()) + "&output=embed");
+    }
+    setHref("directionsLink",
+      "https://www.google.com/maps/dir/?api=1&destination=" + encodeURIComponent(punto));
+  }
+
   // --- Horarios -----------------------------------------------
   const hoursList = document.getElementById("hoursList");
   if (hoursList) {

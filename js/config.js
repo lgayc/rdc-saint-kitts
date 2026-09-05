@@ -90,7 +90,15 @@ const SITE_CONFIG = {
     phone: "+1 869-665-7171",
     phoneDisplay: "(869) 665-7171",
     email: "rad.dg.center@gmail.com",
-    address: { en: "Basseterre, St. Kitts & Nevis", es: "Basseterre, San Cristóbal y Nieves" }, // PLACEHOLDER - falta direccion exacta
+    address: {
+      en: "Lime Kiln Commercial Development, Antioch Baptist Church Multi-Purpose Facility, Basseterre, St. Kitts & Nevis",
+      es: "Lime Kiln Commercial Development, Antioch Baptist Church Multi-Purpose Facility, Basseterre, San Cristóbal y Nieves"
+    },
+
+    // Coordenadas de la ficha de Google de la clinica. De aqui salen
+    // el mapa incrustado y el boton de "como llegar": si algun dia se
+    // mudan, se cambia solo este punto y las dos cosas se mueven.
+    map: { lat: 17.2950417, lng: -62.7397749 },
     hours: [
       { days: { en: "Monday - Friday", es: "Lunes a viernes" }, time: "8:00 AM - 5:00 PM" }, // PLACEHOLDER
       { days: { en: "Saturday", es: "Sábado" }, time: "9:00 AM - 1:00 PM" },        // PLACEHOLDER

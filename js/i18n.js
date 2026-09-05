@@ -140,6 +140,8 @@ const RDC_I18N = (function () {
 
       "contact.eyebrow": "Visit or Reach Us",
       "contact.heading": "Get in Touch",
+      "contact.directions": "Get directions",
+      "contact.mapLabel": "Map showing the clinic location",
 
       "footer.rights": "All rights reserved.",
     },
@@ -225,6 +227,8 @@ const RDC_I18N = (function () {
 
       "contact.eyebrow": "Visítenos o escríbanos",
       "contact.heading": "Cómo contactarnos",
+      "contact.directions": "Cómo llegar",
+      "contact.mapLabel": "Mapa con la ubicación de la clínica",
 
       "footer.rights": "Todos los derechos reservados.",
     },

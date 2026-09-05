@@ -844,7 +844,34 @@ textarea.has-error {
    11. CONTACT / FOOTER
    --------------------------------------------------------------- */
 .contact { padding-bottom: 4rem; }
+
+/* Dos columnas: los datos a la izquierda, el mapa a la derecha. El
+   minmax(0,...) evita que el iframe, que no encoge solo, desborde la
+   rejilla y saque una barra horizontal en pantallas medianas. */
+.contact-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 3rem;
+  align-items: start;
+}
+
 .contact-block { max-width: 560px; }
+
+.contact-map { display: flex; flex-direction: column; gap: 1rem; align-items: flex-start; }
+.contact-map iframe {
+  width: 100%;
+  height: 360px;
+  display: block;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+/* Debajo de 900 px el mapa pasa a ocupar el ancho completo, y baja de
+   altura porque en un movil un mapa alto empuja el pie fuera de vista. */
+@media (max-width: 900px) {
+  .contact-inner { grid-template-columns: 1fr; gap: 2.5rem; }
+  .contact-map iframe { height: 280px; }
+}
 .contact-list { display: flex; flex-direction: column; gap: 0.9rem; margin: 1.5rem 0; }
 .contact-list li { display: flex; align-items: center; gap: 0.7rem; color: var(--ink-dim); }
 .contact-list .icon { color: var(--teal-dim); }
