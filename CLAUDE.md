@@ -185,40 +185,51 @@ configuración y contenido de la base), sección "Quiénes somos", enlace
 del panel renombrado a Admin, iconos de modalidades redibujados,
 tipografía Montserrat, animación del banner restaurada, `safeUrl()`
 contra XSS almacenado, dominio y cabeceras configurados, workflow
-anti-pausa de GitHub Actions.
+anti-pausa de GitHub Actions, dirección real y mapa de la clínica,
+acciones de reseña, y `.assetsignore` para que el dominio no sirva las
+notas internas.
+
+**Hecho fuera del repositorio (5 de septiembre):** App Password de
+Gmail generada, secretos de Supabase actualizados, Edge Functions
+desplegadas, y la conexión de Cloudflare con GitHub reautorizada — el
+sitio vuelve a publicarse solo con cada push.
+
+**Sobre las reseñas de Google.** Se decidió **no mostrarlas dentro de
+la web**: Google no deja copiarlas ni incrustarlas, y traerlas obliga
+a la API de Places con clave y cuenta de facturación. Lo que sí hay
+son las dos acciones —escribir una reseña y verlas en la ficha—, que
+es lo que hace que crezcan. Si algún día se muestran, la clave va a
+los secretos de una Edge Function, **nunca al navegador**.
 
 **Pendiente, y depende de Luis:**
 
-1. Generar la App Password de `rad.dg.center@gmail.com`.
-2. Secretos de Supabase: añadir `ALLOWED_ORIGINS`; editar `SMTP_USER`,
-   `SMTP_PASS` y `NOTIFY_EMAIL_TO` (los tres juntos). **`GOOGLE_CALENDAR_ID`
-   no se toca.**
-3. Supabase Auth → URL Configuration: Site URL y redirects al dominio
+1. Supabase Auth → URL Configuration: Site URL y redirects al dominio
    real. Desactivar el registro público. Activar la protección de
    contraseñas filtradas.
-4. Hacer una reserva de prueba desde el dominio real. El interruptor
-   de Production en `workers.dev` **ya está apagado** (visto en el
-   panel el 5 de septiembre); quedó apagado antes de la prueba, así
-   que la prueba sigue pendiente.
-5. Que la clínica escriba el texto real de "Quiénes somos": desde
-   cuándo existe el centro, quién lo dirige y con qué titulación, qué
-   equipos hay, en cuánto se entregan los resultados de verdad, con qué
-   seguros trabajan, y una foto real.
+2. Hacer una reserva de prueba desde el dominio real. El interruptor
+   de Production en `workers.dev` ya está apagado; quedó apagado antes
+   de la prueba, así que la prueba sigue pendiente.
+3. Que la clínica confirme lo que sigue marcado `PLACEHOLDER` y ya
+   está publicado: el texto de "Quiénes somos" (desde cuándo existe el
+   centro, quién lo dirige y con qué titulación, qué equipos hay, en
+   cuánto se entregan los resultados, con qué seguros trabajan, y una
+   foto real), **el horario** y **el Instagram** — el enlace que hay
+   es inventado; el de Facebook sí es real.
+4. El enlace corto de reseñas del perfil de Google Business
+   (`g.page/r/.../review`). Va en `contact.google.reviewUrl` de
+   `js/config.js` y hace que el botón abra el cuadro de escribir
+   reseña de una vez, en vez de dejar al visitante en la ficha.
 
 **Pendiente, técnico:**
 
-- Desplegar `book` y `booking-status` (traen los correos en español y
-  el diagnóstico del calendario). Escritas y probadas, sin desplegar.
+- `booking-status` **no existe en el repositorio**, aunque estas notas
+  dijeran que estaba escrita. En `supabase/functions/` solo está
+  `book`. Y de migraciones hay una sola, `0001_init.sql`, no tres.
+  Averiguar si falta código o solo sobraba la nota.
 - DNS anti-suplantación: MX nulo, `v=spf1 -all`, DMARC `p=reject`.
 - Limitar el tamaño de imagen al subir desde el panel. Hay un PNG de
   1.904 kB en Storage; bórralo si no se usa.
 - Subir `MAX_BOOKINGS_PER_IP` de 10 a ~40 antes de cualquier campaña.
-- Comprobar qué se sirve de más. El despliegue toma la raíz del
-  repositorio y no hay ningún archivo de exclusión, así que
-  `CLAUDE.md`, `Codigo.gs` o `supabase/migrations/` podrían abrirse
-  desde el dominio. Se comprueba pidiendo `/CLAUDE.md`: si carga en
-  vez de dar 404, hace falta un `.assetsignore`. No hay contraseñas
-  ahí dentro, pero son notas de trabajo, no material publicado.
 - Limpieza: `Codigo.gs` está duplicado en la raíz y en `backend/`, y
   `notify.pb.js` + `backend/POCKETBASE.md` son de la vía PocketBase que
   se descartó. Son historia, no código vivo.
