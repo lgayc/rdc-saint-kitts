@@ -8,6 +8,7 @@
      4. Barra de promocion
      5. Navbar + logo
      6. Hero (carrusel + entrada del titulo)
+    6b. Quienes somos
      7. Modalities (carrusel horizontal + tarjetas)
      8. About strip / stats  (sin uso: la franja se quito del HTML)
      9. Booking form
@@ -445,6 +446,75 @@ body.has-promo .navbar { top: 38px; }
   50% { transform: scaleY(1); transform-origin: top; opacity: 1; }
   51% { transform-origin: bottom; }
   100% { transform: scaleY(0); transform-origin: bottom; opacity: 0; }
+}
+
+
+/* ---------------------------------------------------------------
+   6b. QUIENES SOMOS
+   ---------------------------------------------------------------
+   Texto a la izquierda y foto a la derecha, con el texto algo mas
+   ancho: es lo que se lee, y la foto acompaña.
+
+   La foto lleva aspect-ratio fijo. Sin eso, mientras carga, el
+   navegador no sabe cuanto alto reservar y toda la seccion salta
+   hacia abajo cuando la imagen aparece — justo cuando alguien
+   puede estar a punto de tocar un enlace.
+   --------------------------------------------------------------- */
+.about-inner {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+.about-text h2 {
+  font-size: clamp(1.9rem, 3.4vw, 2.6rem);
+  letter-spacing: -0.02em;
+  margin-bottom: 1.25rem;
+}
+
+.about-text p {
+  color: var(--ink-dim);
+  margin-bottom: 1rem;
+  max-width: 52ch;
+}
+
+/* Los tres apoyos. Cada uno es un titulo corto y una linea que lo
+   explica; el titulo en color para que se lea de un barrido sin
+   tener que leer las tres frases enteras. */
+.about-pillars {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  margin-top: 2rem;
+  padding-top: 1.75rem;
+  border-top: 1px solid var(--border);
+}
+
+.about-pillars li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.about-pillars strong {
+  font-family: var(--font-head);
+  font-size: 0.97rem;
+  color: var(--teal-dim);
+}
+
+.about-pillars span {
+  color: var(--ink-dim);
+  font-size: 0.93rem;
+  line-height: 1.5;
+}
+
+.about-media img {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lift);
 }
 
 /* ---------------------------------------------------------------
@@ -973,6 +1043,13 @@ body.modal-open { overflow: hidden; }
    13. RESPONSIVE
    --------------------------------------------------------------- */
 @media (max-width: 900px) {
+  /* Apilado. La foto va ARRIBA y no debajo del texto: en un movil,
+     dos parrafos seguidos de tres apoyos son mucha pared de letra
+     antes de ver nada. */
+  .about-inner { grid-template-columns: 1fr; gap: 2.25rem; }
+  .about-media { order: -1; }
+  .about-media img { aspect-ratio: 16 / 10; }
+
   .booking-inner { grid-template-columns: 1fr; }
 }
 
