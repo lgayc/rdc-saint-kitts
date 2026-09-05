@@ -125,7 +125,7 @@
      direccion aparte — y eso es otro trabajo, no una etiqueta.
      ============================================================ -->
 
-<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/styles.css?v=4">
 </head>
 <body>
 
@@ -147,6 +147,7 @@
     </a>
 
     <nav class="nav-links" id="navLinks" aria-label="Primary">
+      <a href="#about" data-i18n="nav.about">Who We Are</a>
       <a href="#modalities" data-i18n="nav.modalities">Modalities</a>
       <a href="#studies" data-i18n="nav.studies">Studies &amp; Work</a>
       <a href="#contact" data-i18n="nav.contact">Contact</a>
@@ -212,6 +213,35 @@
     <div class="scroll-hint" aria-hidden="true">
       <span data-i18n="hero.scroll">Scroll</span>
       <div class="scroll-hint-line"></div>
+    </div>
+  </section>
+
+  <!-- ==========================================================
+       QUIENES SOMOS
+       ==========================================================
+       Va ANTES de los estudios a proposito. Quien entra en la web
+       de un centro medico trae dos preguntas, y en este orden:
+       "¿quienes son estos?" y solo despues "¿que hacen?". Poner el
+       catalogo primero responde la segunda a alguien que todavia
+       no se ha decidido sobre la primera.
+
+       El texto sale de SITE_CONFIG.about y esta MARCADO COMO
+       PLACEHOLDER: es un armazon correcto pero generico, y la
+       clinica tiene que reemplazarlo por lo suyo.
+       ========================================================== -->
+  <section class="section about" id="about">
+    <div class="about-inner">
+      <div class="about-text reveal">
+        <p class="eyebrow" data-i18n="about.eyebrow">Who We Are</p>
+        <h2 id="aboutHeading">Imaging you can trust, close to home.</h2>
+        <div id="aboutBody"></div>
+
+        <ul class="about-pillars" id="aboutPillars"></ul>
+      </div>
+
+      <div class="about-media reveal">
+        <img id="aboutImage" src="" alt="" loading="lazy">
+      </div>
     </div>
   </section>
 
@@ -406,12 +436,12 @@
 -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.3/dist/umd/supabase.js"></script>
 
-<script src="js/config.js?v=3"></script>
-<script src="js/i18n.js"></script>
-<script src="js/supabase-api.js?v=3"></script>
-<script src="js/icons.js?v=3"></script>
-<script src="js/main.js?v=3"></script>
-<script src="js/booking.js?v=3"></script>
-<script src="js/studies.js?v=3"></script>
+<script src="js/config.js?v=4"></script>
+<script src="js/i18n.js?v=4"></script>
+<script src="js/supabase-api.js?v=4"></script>
+<script src="js/icons.js?v=4"></script>
+<script src="js/main.js?v=4"></script>
+<script src="js/booking.js?v=4"></script>
+<script src="js/studies.js?v=4"></script>
 </body>
 </html>
