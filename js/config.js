@@ -106,9 +106,8 @@ const SITE_CONFIG = {
       placeUrl: "https://www.google.com/maps?cid=2980805071733559535",
 
       // Enlace corto del perfil de Google Business: abre el cuadro de
-      // escribir resena de una vez. Mientras este vacio se usa
-      // placeUrl, que deja el boton de resenar a un toque.
-      reviewUrl: "" // PLACEHOLDER - falta el enlace g.page/r/.../review
+      // escribir resena de una vez, sin pasar por la ficha.
+      reviewUrl: "https://g.page/r/Ce-QXHVr8l0pEAE/review"
     },
     hours: [
       { days: { en: "Monday - Friday", es: "Lunes a viernes" }, time: "8:00 AM - 5:00 PM" }, // PLACEHOLDER
