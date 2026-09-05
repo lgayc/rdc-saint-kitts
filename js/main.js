@@ -244,7 +244,10 @@ function populateContent() {
   }
 
   // --- Quienes somos ------------------------------------------
-  renderAbout(cfg.about);
+  // Manda lo que escribio la clinica desde el panel; config.js queda
+  // de red por si la base no responde o el campo esta vacio.
+  renderAbout(aboutEfectivo(cfg.about));
+  renderTeam((window.__RDC_CONTENT_RAW__ || {}).team);
 
   // --- Tarjetas de servicios ----------------------------------
   // Cada tarjeta es un <button> a proposito: se puede activar con
@@ -479,7 +482,7 @@ function renderAbout(about) {
   const cuerpo = document.getElementById("aboutBody");
   if (cuerpo) {
     cuerpo.innerHTML = "";
-    (RDC_I18N.pick(about.body) || []).forEach((parrafo) => {
+    enLista(RDC_I18N.pick(about.body), /\n\s*\n/).forEach((parrafo) => {
       const p = document.createElement("p");
       p.textContent = parrafo;
       cuerpo.appendChild(p);
@@ -490,7 +493,7 @@ function renderAbout(about) {
   // configuracion. Van emparejados por posicion.
   const lista = document.getElementById("aboutPillars");
   if (lista) {
-    const textos = RDC_I18N.pick(about.pillars) || [];
+    const textos = enLista(RDC_I18N.pick(about.pillars), /\n/);
     lista.innerHTML = "";
     textos.forEach((texto, i) => {
       const li = document.createElement("li");
@@ -516,6 +519,119 @@ function renderAbout(about) {
       img.remove();
     }
   }
+}
+
+/**
+ * El texto de "Quienes somos" puede venir de dos sitios y con dos
+ * formas: de config.js como lista de parrafos, o del panel como un
+ * solo texto que la clinica escribio en un cuadro. Esto los iguala.
+ *
+ * Se parte aqui y no en la base a proposito: quien escribe usa una
+ * linea en blanco entre parrafos, como en cualquier procesador de
+ * textos. Pedirle JSON seria pedirle que no se equivoque en una coma
+ * para que su web no se rompa.
+ */
+function enLista(valor, separador) {
+  if (Array.isArray(valor)) return valor.filter(Boolean);
+  return String(valor || "").split(separador).map((s) => s.trim()).filter(Boolean);
+}
+
+/**
+ * Mezcla el texto del panel con el de config.js, campo a campo.
+ *
+ * Campo a campo y no bloque entero porque la clinica puede haber
+ * escrito solo el titular: en ese caso el cuerpo tiene que seguir
+ * siendo el de config.js, no desaparecer.
+ */
+function aboutEfectivo(base) {
+  const remoto = (window.__RDC_CONTENT_RAW__ || {}).about;
+  if (!remoto) return base;
+
+  return {
+    heading: completarPar(remoto.heading, base && base.heading),
+    body: completarPar(remoto.body, base && base.body),
+    pillars: completarPar(remoto.pillars, base && base.pillars),
+    image: (base && base.image) || "",
+  };
+}
+
+/**
+ * Rellena el idioma que falta con el que hay, y si no hay ninguno
+ * devuelve el respaldo.
+ *
+ * Hace falta porque de la base los dos idiomas llegan SIEMPRE con
+ * valor —la columna vacia se lee como cadena vacia, no como
+ * ausente— y pick() solo cae al otro idioma cuando la clave no
+ * existe. Sin esto, escribir solo el ingles dejaria la seccion en
+ * blanco en español: exactamente lo que pasara, porque la clinica
+ * va a escribir primero en un idioma y traducir despues.
+ */
+function completarPar(par, respaldo) {
+  const p = par || {};
+  const en = p.en || p.es || "";
+  const es = p.es || p.en || "";
+  if (!en && !es) return respaldo;
+  return { en, es };
+}
+
+/**
+ * Fotos del equipo, en circulo.
+ *
+ * Si no hay ninguna la tira entera se esconde: media docena de
+ * huecos grises dice mucho peor de la clinica que no enseñar nada.
+ *
+ * Se construye con textContent y no con innerHTML porque el nombre y
+ * el cargo los escribe una persona desde el panel, y ese texto no se
+ * inserta nunca como HTML.
+ */
+function renderTeam(personas) {
+  const tira = document.getElementById("teamStrip");
+  if (!tira) return;
+
+  const lista = (personas || []).filter((p) => safeUrl(p.image));
+  tira.innerHTML = "";
+
+  if (!lista.length) {
+    tira.hidden = true;
+    return;
+  }
+  tira.hidden = false;
+
+  lista.forEach((persona) => {
+    const figura = document.createElement("figure");
+    figura.className = "team-member reveal";
+
+    const foto = document.createElement("img");
+    foto.className = "team-photo";
+    foto.src = safeUrl(persona.image);
+    foto.loading = "lazy";
+    // El nombre ya va escrito debajo: repetirlo en el alt hace que un
+    // lector de pantalla lo lea dos veces seguidas.
+    foto.alt = "";
+    figura.appendChild(foto);
+
+    const pie = document.createElement("figcaption");
+    if (persona.name) {
+      const nombre = document.createElement("strong");
+      nombre.textContent = persona.name;
+      pie.appendChild(nombre);
+    }
+      // Mismo criterio que el texto de la seccion: si el cargo solo
+    // esta escrito en un idioma, se enseña ese.
+    const cargo = RDC_I18N.pick(completarPar(persona.role, null));
+    if (cargo) {
+      const span = document.createElement("span");
+      span.textContent = cargo;
+      pie.appendChild(span);
+    }
+    if (pie.childNodes.length) figura.appendChild(pie);
+
+    tira.appendChild(figura);
+  });
+
+  // Las tarjetas nacen con opacity 0 y el observador solo vigila lo
+  // que existia cuando se creo. Sin esto se quedan invisibles.
+  engancharReveal(tira);
 }
 
 function fillSelect(id, options) {
@@ -600,6 +716,9 @@ function applyEditableContent(content) {
   if (subtitulo) setText("heroSub", subtitulo);
 
   renderPromoBar(RDC_I18N.pick(content.promoText));
+
+  renderAbout(aboutEfectivo(SITE_CONFIG.about));
+  renderTeam(content.team);
 
   const slides = (content.slides && content.slides.length)
     ? content.slides

@@ -126,7 +126,7 @@
      direccion aparte — y eso es otro trabajo, no una etiqueta.
      ============================================================ -->
 
-<link rel="stylesheet" href="css/styles.css?v=7">
+<link rel="stylesheet" href="css/styles.css?v=8">
 </head>
 <body>
 
@@ -244,6 +244,15 @@
         <img id="aboutImage" src="" alt="" loading="lazy">
       </div>
     </div>
+
+      <!--
+        Equipo. Lo llena js/main.js desde la tabla `team` de Supabase.
+        Empieza oculto: sin fotos subidas no se enseña nada, porque
+        media docena de huecos grises dice peor de la clinica que no
+        tener la seccion.
+      -->
+      <div class="team-strip" id="teamStrip" hidden></div>
+
   </section>
 
   <!-- ==========================================================
@@ -475,12 +484,12 @@
 -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.3/dist/umd/supabase.js"></script>
 
-<script src="js/config.js?v=7"></script>
-<script src="js/i18n.js?v=7"></script>
-<script src="js/supabase-api.js?v=7"></script>
-<script src="js/icons.js?v=7"></script>
-<script src="js/main.js?v=7"></script>
-<script src="js/booking.js?v=7"></script>
-<script src="js/studies.js?v=7"></script>
+<script src="js/config.js?v=8"></script>
+<script src="js/i18n.js?v=8"></script>
+<script src="js/supabase-api.js?v=8"></script>
+<script src="js/icons.js?v=8"></script>
+<script src="js/main.js?v=8"></script>
+<script src="js/booking.js?v=8"></script>
+<script src="js/studies.js?v=8"></script>
 </body>
 </html>

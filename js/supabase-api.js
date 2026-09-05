@@ -110,15 +110,20 @@ const RDC_API = (function () {
     const d = db();
     if (!d) return null;
 
-    const [contentRes, bannersRes, postsRes] = await Promise.allSettled([
+    const [contentRes, bannersRes, postsRes, teamRes] = await Promise.allSettled([
       d.from("site_content").select("*").eq("id", 1).maybeSingle(),
       d.from("banners").select("*").eq("active", true).order("sort", { ascending: true }),
       d.from("posts").select("*").eq("published", true).order("date", { ascending: false }),
+      d.from("team").select("*").eq("active", true).order("sort", { ascending: true }),
     ]);
 
     const content = contentRes.status === "fulfilled" ? contentRes.value.data : null;
     const banners = bannersRes.status === "fulfilled" ? bannersRes.value.data || [] : [];
     const posts = postsRes.status === "fulfilled" ? postsRes.value.data || [] : [];
+    // allSettled y no all: si la tabla del equipo todavia no existe
+    // —la migracion 0002 sin aplicar— el resto del contenido tiene
+    // que seguir cargando. Una seccion de menos, no una portada rota.
+    const team = teamRes.status === "fulfilled" ? teamRes.value.data || [] : [];
 
     /* Cada texto sale como { en, es } y NO resuelto a un idioma.
        Es la decision que hace que cambiar de idioma sea instantaneo:
@@ -172,6 +177,23 @@ const RDC_API = (function () {
       heroTitle: par(content?.hero_title, content?.hero_title_es),
       heroSubtitle: par(content?.hero_subtitle, content?.hero_subtitle_es),
       promoText: par(content?.promo_text, content?.promo_text_es),
+
+      /* "Quienes somos". El cuerpo y los apoyos llegan como un solo
+         texto por idioma; partirlos en parrafos y en lineas es cosa
+         de quien pinta, en js/main.js. Aqui solo se emparejan los
+         idiomas, igual que todo lo demas. */
+      about: {
+        heading: par(content?.about_heading, content?.about_heading_es),
+        body: par(content?.about_body, content?.about_body_es),
+        pillars: par(content?.about_pillars, content?.about_pillars_es),
+      },
+
+      team: team.map((m) => ({
+        _id: m.id,
+        name: m.name || "",
+        role: par(m.role, m.role_es),
+        image: imageOf(m, "team"),
+      })).filter((m) => m.image),
 
       slides: banners.map((b) => ({
         _id: b.id,
@@ -431,6 +453,12 @@ const RDC_API = (function () {
           hero_subtitle_es: es(content.heroSubtitle),
           promo_text: en(content.promoText),
           promo_text_es: es(content.promoText),
+          about_heading: en(content.about && content.about.heading),
+          about_heading_es: es(content.about && content.about.heading),
+          about_body: en(content.about && content.about.body),
+          about_body_es: es(content.about && content.about.body),
+          about_pillars: en(content.about && content.about.pillars),
+          about_pillars_es: es(content.about && content.about.pillars),
         }).eq("id", 1);
 
         await syncTable(d, "banners", content.slides || [], (slide, i) => ({
@@ -452,6 +480,15 @@ const RDC_API = (function () {
           accent_color: post.color || "#2dd4bf",
           sort: i,
           published: true,
+        }));
+
+        await syncTable(d, "team", content.team || [], (persona, i) => ({
+          name: persona.name || "",
+          role: en(persona.role),
+          role_es: es(persona.role),
+          image_url: persona.image || null,
+          sort: i,
+          active: true,
         }));
 
         return { ok: true, content: await getPublicContent() };

@@ -88,7 +88,7 @@
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <meta name="theme-color" content="#02b2e4">
 
-<link rel="stylesheet" href="css/styles.css?v=7">
+<link rel="stylesheet" href="css/styles.css?v=8">
 <link rel="stylesheet" href="css/admin.css">
 </head>
 <body class="admin-body">
@@ -156,6 +156,7 @@
     </button>
     <button class="admin-tab" data-tab="banner" role="tab">Banner Photos</button>
     <button class="admin-tab" data-tab="promo" role="tab">Promo &amp; Text</button>
+    <button class="admin-tab" data-tab="about" role="tab">About &amp; Team</button>
     <button class="admin-tab" data-tab="posts" role="tab">Posts</button>
   </nav>
 
@@ -290,6 +291,92 @@
     </section>
 
     <!-- ======================================================
+         PESTANA: QUIENES SOMOS Y EQUIPO
+         ======================================================
+         Este texto lo tiene que poder corregir la clinica sin
+         pedirselo a nadie: es donde dicen quien las dirige, que
+         equipos tienen y en cuanto entregan los resultados. Antes
+         vivia en el codigo, o sea que cambiar una palabra era
+         publicar una version nueva del sitio.
+         ====================================================== -->
+    <section class="admin-panel" id="panel-about">
+      <div class="panel-head">
+        <div>
+          <h2>About &amp; Team</h2>
+          <p class="panel-sub">The "Who We Are" section of the homepage, and the team photos below it.</p>
+        </div>
+      </div>
+
+      <div class="help-box">
+        <strong>Please keep this accurate.</strong> Anything written here is
+        read by patients as a statement from the clinic. If something is not
+        confirmed &mdash; equipment, qualifications, turnaround times &mdash;
+        leave it out rather than guess.
+      </div>
+
+      <div class="form-row">
+        <label for="aboutHeading">Heading</label>
+        <div class="lang-pair">
+          <div>
+            <span class="lang-tag">EN</span>
+            <input type="text" id="aboutHeading" placeholder="Imaging you can trust, close to home.">
+          </div>
+          <div>
+            <span class="lang-tag">ES</span>
+            <input type="text" id="aboutHeadingEs" placeholder="Diagnóstico por imagen en el que confiar, cerca de casa.">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <label for="aboutBody">Description</label>
+        <div class="lang-pair">
+          <div>
+            <span class="lang-tag">EN</span>
+            <textarea id="aboutBody" rows="7" placeholder="What the centre is, and how it works."></textarea>
+          </div>
+          <div>
+            <span class="lang-tag">ES</span>
+            <textarea id="aboutBodyEs" rows="7" placeholder="Qué es el centro y cómo trabaja."></textarea>
+          </div>
+        </div>
+        <p class="field-hint">Leave a blank line between paragraphs. Two or three short paragraphs read best.</p>
+      </div>
+
+      <div class="form-row">
+        <label for="aboutPillars">Three short points</label>
+        <div class="lang-pair">
+          <div>
+            <span class="lang-tag">EN</span>
+            <textarea id="aboutPillars" rows="4" placeholder="One per line"></textarea>
+          </div>
+          <div>
+            <span class="lang-tag">ES</span>
+            <textarea id="aboutPillarsEs" rows="4" placeholder="Uno por línea"></textarea>
+          </div>
+        </div>
+        <p class="field-hint">One per line. They appear beside the fixed labels (equipment, team, results).</p>
+      </div>
+
+      <h3 class="subhead">Team photos</h3>
+      <div class="help-box">
+        <strong>Tip:</strong> photos are shown as circles, so a head-and-shoulders
+        shot with the face centred works best. Square photos crop cleanly.
+        Leave the list empty to hide this row from the site.
+        A person without a photo is not saved.
+      </div>
+
+      <div id="teamList" class="editor-list"></div>
+
+      <button type="button" class="btn btn-ghost btn-sm" id="addMember">+ Add Person</button>
+
+      <div class="save-row">
+        <button type="button" class="btn btn-primary" id="saveAbout">Save About &amp; Team</button>
+        <span class="save-status" id="aboutStatus"></span>
+      </div>
+    </section>
+
+    <!-- ======================================================
          PESTANA: PUBLICACIONES
          ====================================================== -->
     <section class="admin-panel" id="panel-posts">
@@ -316,8 +403,8 @@
 <!-- Misma version que en index.html. Si se cambia una, cambiar la otra. -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.3/dist/umd/supabase.js"></script>
 
-<script src="js/config.js?v=7"></script>
-<script src="js/supabase-api.js?v=7"></script>
-<script src="js/admin.js?v=7"></script>
+<script src="js/config.js?v=8"></script>
+<script src="js/supabase-api.js?v=8"></script>
+<script src="js/admin.js?v=8"></script>
 </body>
 </html>

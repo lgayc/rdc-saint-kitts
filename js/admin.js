@@ -47,7 +47,13 @@ const state = {
     heroSubtitle: { en: "", es: "" },
     promoText: { en: "", es: "" },
     slides: [],
-    studies: []
+    studies: [],
+    about: {
+      heading: { en: "", es: "" },
+      body: { en: "", es: "" },
+      pillars: { en: "", es: "" }
+    },
+    team: []
   }
 };
 
@@ -94,6 +100,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupBookingsUI();
   setupBannerUI();
   setupPromoUI();
+  setupAboutUI();
   setupPostsUI();
 
   restoreSession();
@@ -603,6 +610,8 @@ async function loadContent() {
 
     renderSlides();
     renderPromoFields();
+    renderAboutFields();
+    renderTeamRows();
     renderPosts();
   } catch (err) {
     console.error("No se pudo cargar el contenido:", err);
@@ -805,7 +814,9 @@ async function uploadInto(zone, file) {
     // que la miniatura y el campo de enlace queden a la vez con el
     // valor nuevo.
     state.content[list][index].image = url;
-    list === "slides" ? renderSlides() : renderPosts();
+    if (list === "slides") renderSlides();
+    else if (list === "team") renderTeamRows();
+    else renderPosts();
   } catch (err) {
     zone.classList.remove("uploading");
     if (hint) hint.textContent = "Upload failed";
@@ -892,6 +903,116 @@ function escribirPar(id, valor) {
 /* ----------------------------------------------------------------
    9. PUBLICACIONES
    ---------------------------------------------------------------- */
+
+/* ----------------------------------------------------------------
+   8b. QUIENES SOMOS Y EQUIPO
+   ---------------------------------------------------------------- */
+
+function setupAboutUI() {
+  document.getElementById("addMember").addEventListener("click", () => {
+    state.content.team.push({ name: "", role: { en: "", es: "" }, image: "" });
+    renderTeamRows();
+  });
+
+  document.getElementById("saveAbout").addEventListener("click", () => {
+    state.content.about = {
+      heading: leerPar("aboutHeading"),
+      body: leerPar("aboutBody"),
+      pillars: leerPar("aboutPillars"),
+    };
+
+    // Sin foto no hay nada que enseñar: la ficha se descarta antes de
+    // guardar en vez de dejar un circulo vacio en la portada.
+    state.content.team = state.content.team.filter(p => p.image && p.image.trim());
+    renderTeamRows();
+
+    saveContent(document.getElementById("aboutStatus"), "About & team");
+  });
+}
+
+function renderAboutFields() {
+  const about = state.content.about || {};
+  escribirPar("aboutHeading", about.heading);
+  escribirPar("aboutBody", about.body);
+  escribirPar("aboutPillars", about.pillars);
+}
+
+function renderTeamRows() {
+  const container = document.getElementById("teamList");
+  if (!container) return;
+
+  if (!state.content.team.length) {
+    container.innerHTML = `<p class="empty-box">No team photos yet. Click "Add Person" to start.</p>`;
+    return;
+  }
+
+  container.innerHTML = state.content.team.map((persona, i) => `
+    <div class="editor-item">
+      <div class="editor-preview is-round dropzone" data-drop="team" data-index="${i}" data-list="team"
+           style="background-image:url('${escapeAttr(safeUrl(persona.image))}')"
+           tabindex="0" role="button"
+           aria-label="Drop a photo here or click to choose one">
+        <span class="dropzone-hint">${persona.image ? "Replace" : "Drop photo<br>or click"}</span>
+      </div>
+
+      <div class="editor-fields">
+        <div class="form-row">
+          <label>Name</label>
+          <input type="text" data-member="${i}" data-field="name"
+                 value="${escapeAttr(persona.name || "")}"
+                 placeholder="e.g. Dr. Jane Smith">
+        </div>
+        <div class="form-row">
+          <label>Role (optional)</label>
+          <div class="lang-pair">
+            <div>
+              <span class="lang-tag">EN</span>
+              <input type="text" data-member="${i}" data-field="role" data-lang="en"
+                     value="${escapeAttr(normalizarPar(persona.role).en)}"
+                     placeholder="e.g. Radiologist">
+            </div>
+            <div>
+              <span class="lang-tag">ES</span>
+              <input type="text" data-member="${i}" data-field="role" data-lang="es"
+                     value="${escapeAttr(normalizarPar(persona.role).es)}"
+                     placeholder="ej. Radióloga">
+            </div>
+          </div>
+        </div>
+        <div class="form-row">
+          <label>Photo link <span class="label-hint">(fills in on its own when you drop a photo)</span></label>
+          <input type="url" data-member="${i}" data-field="image"
+                 value="${escapeAttr(persona.image || "")}"
+                 placeholder="https://...">
+        </div>
+      </div>
+
+      <button type="button" class="btn-remove" data-remove-member="${i}" aria-label="Remove">&times;</button>
+    </div>
+  `).join("");
+
+  container.querySelectorAll("[data-member]").forEach(input => {
+    input.addEventListener("input", () => {
+      const index = Number(input.dataset.member);
+      guardarCampo(state.content.team[index], input);
+
+      if (input.dataset.field === "image") {
+        const preview = input.closest(".editor-item").querySelector(".editor-preview");
+        preview.style.backgroundImage = `url('${safeUrl(input.value).replace(/['\\]/g, "")}')`;
+      }
+    });
+  });
+
+  container.querySelectorAll("[data-remove-member]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      state.content.team.splice(Number(btn.dataset.removeMember), 1);
+      renderTeamRows();
+    });
+  });
+
+  setupDropzones(container);
+}
+
 
 function setupPostsUI() {
   document.getElementById("addPost").addEventListener("click", () => {

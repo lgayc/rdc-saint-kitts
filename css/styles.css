@@ -517,6 +517,47 @@ body.has-promo .navbar { top: 38px; }
   box-shadow: var(--shadow-lift);
 }
 
+/* Fotos del equipo. El circulo es object-fit: cover y no un recorte
+   previo: la clinica sube la foto que tenga, del tamano que sea, y
+   sale centrada sin deformar la cara. */
+.team-strip {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2.2rem;
+  margin-top: 3.5rem;
+}
+
+.team-member {
+  margin: 0;
+  width: 150px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  text-align: center;
+}
+
+.team-photo {
+  width: 120px;
+  height: 120px;
+  display: block;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--bg-panel);
+  box-shadow: var(--shadow-card);
+}
+
+.team-member figcaption { display: flex; flex-direction: column; gap: 0.15rem; }
+.team-member figcaption strong { font-size: 0.92rem; }
+.team-member figcaption span { color: var(--ink-dim); font-size: 0.84rem; line-height: 1.4; }
+
+@media (max-width: 720px) {
+  .team-strip { gap: 1.6rem; margin-top: 2.5rem; }
+  .team-member { width: 120px; }
+  .team-photo { width: 96px; height: 96px; }
+}
+
 /* ---------------------------------------------------------------
    7. MODALITIES — el scroll vertical mueve las tarjetas de lado
    ---------------------------------------------------------------

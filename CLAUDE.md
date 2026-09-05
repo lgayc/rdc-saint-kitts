@@ -99,7 +99,16 @@ clínico lo revisa el radiólogo antes de publicarse.
 2. **Texto de configuración** → pares `{en, es}` en `js/config.js`,
    leídos con `RDC_I18N.pick()`.
 3. **Texto que escribe la clínica** → columnas `_es` en las tablas de
-   Supabase (`site_content`, `banners`, `posts`).
+   Supabase (`site_content`, `banners`, `posts`, `team`). Incluye el
+   texto de "Quiénes somos", que vive en `site_content.about_*` desde
+   la migración 0002; `js/config.js` se queda de respaldo por si la
+   base no responde o el campo está vacío.
+
+   Ojo con una trampa de este apartado: de la base los dos idiomas
+   llegan **siempre** con valor, porque una columna vacía se lee como
+   cadena vacía. `pick()` solo cae al otro idioma cuando la clave no
+   existe, así que un texto escrito solo en inglés saldría en blanco
+   en español. Para eso está `completarPar()` en `js/main.js`.
 
 El cambio de idioma **no recarga la página**; dispara el evento
 `rdc:lang-changed`. Si añades algo que se dibuja con JavaScript, tiene
@@ -221,6 +230,13 @@ los secretos de una Edge Function, **nunca al navegador**.
    reseña de una vez, en vez de dejar al visitante en la ficha.
 
 **Pendiente, técnico:**
+
+- **Aplicar la migración `0002_quienes_somos_y_equipo.sql`**
+  (`supabase db push`). Añade las columnas de "Quiénes somos" a
+  `site_content`, la tabla `team` y el bucket `team` de Storage.
+  Hasta que se aplique, la pestaña del panel se ve pero al guardar
+  da error, y la web sigue sacando el texto de `js/config.js`. Está
+  escrita con `if not exists`: no borra nada y se puede repetir.
 
 - `booking-status` **no existe en el repositorio**, aunque estas notas
   dijeran que estaba escrita. En `supabase/functions/` solo está
