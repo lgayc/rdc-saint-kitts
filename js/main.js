@@ -210,6 +210,16 @@ function populateContent() {
       "https://www.google.com/maps/dir/?api=1&destination=" + encodeURIComponent(punto));
   }
 
+  // --- Resenas ------------------------------------------------
+  const google = cfg.contact.google;
+  if (google) {
+    const ficha = safeUrl(google.placeUrl);
+    // Sin enlace corto de Google Business, escribir y leer llevan al
+    // mismo sitio: la ficha, con el boton de resenar a la vista.
+    setHref("reviewWriteLink", safeUrl(google.reviewUrl) || ficha);
+    setHref("reviewReadLink", ficha);
+  }
+
   // --- Horarios -----------------------------------------------
   const hoursList = document.getElementById("hoursList");
   if (hoursList) {

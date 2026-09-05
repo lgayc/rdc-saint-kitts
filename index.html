@@ -126,7 +126,7 @@
      direccion aparte — y eso es otro trabajo, no una etiqueta.
      ============================================================ -->
 
-<link rel="stylesheet" href="css/styles.css?v=5">
+<link rel="stylesheet" href="css/styles.css?v=6">
 </head>
 <body>
 
@@ -421,6 +421,24 @@
         <a id="directionsLink" class="btn btn-ghost" target="_blank"
            rel="noopener" data-i18n="contact.directions">Get directions</a>
       </div>
+
+      <!--
+        Resenas. De momento solo las dos acciones, que van a la ficha
+        de Google. Mostrar las resenas DENTRO de la web es otra cosa:
+        necesita la API de Places con clave y facturacion, no se
+        resuelve con un enlace. Ver CLAUDE.md.
+      -->
+      <div class="contact-reviews reveal">
+        <p class="eyebrow" data-i18n="reviews.eyebrow">What our patients say</p>
+        <h3 data-i18n="reviews.heading">Reviews on Google</h3>
+        <p class="reviews-sub" data-i18n="reviews.sub">If we have cared for you, a review helps other patients on the island find us.</p>
+        <div class="reviews-actions">
+          <a id="reviewWriteLink" class="btn btn-primary" target="_blank"
+             rel="noopener" data-i18n="reviews.write">Write a review</a>
+          <a id="reviewReadLink" class="btn btn-ghost" target="_blank"
+             rel="noopener" data-i18n="reviews.read">Read reviews on Google</a>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -457,12 +475,12 @@
 -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.3/dist/umd/supabase.js"></script>
 
-<script src="js/config.js?v=5"></script>
-<script src="js/i18n.js?v=5"></script>
-<script src="js/supabase-api.js?v=5"></script>
-<script src="js/icons.js?v=5"></script>
-<script src="js/main.js?v=5"></script>
-<script src="js/booking.js?v=5"></script>
-<script src="js/studies.js?v=5"></script>
+<script src="js/config.js?v=6"></script>
+<script src="js/i18n.js?v=6"></script>
+<script src="js/supabase-api.js?v=6"></script>
+<script src="js/icons.js?v=6"></script>
+<script src="js/main.js?v=6"></script>
+<script src="js/booking.js?v=6"></script>
+<script src="js/studies.js?v=6"></script>
 </body>
 </html>

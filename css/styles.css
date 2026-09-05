@@ -866,6 +866,17 @@ textarea.has-error {
   border-radius: var(--radius);
 }
 
+/* Ocupa las dos columnas: va debajo de los datos y del mapa, no al
+   lado de ninguno de los dos. */
+.contact-reviews {
+  grid-column: 1 / -1;
+  margin-top: 1rem;
+  padding-top: 2.5rem;
+  border-top: 1px solid var(--border);
+}
+.reviews-sub { color: var(--ink-dim); max-width: 52ch; margin: 0.6rem 0 1.6rem; }
+.reviews-actions { display: flex; flex-wrap: wrap; gap: 1rem; }
+
 /* Debajo de 900 px el mapa pasa a ocupar el ancho completo, y baja de
    altura porque en un movil un mapa alto empuja el pie fuera de vista. */
 @media (max-width: 900px) {

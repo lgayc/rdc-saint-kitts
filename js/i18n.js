@@ -141,6 +141,12 @@ const RDC_I18N = (function () {
       "contact.eyebrow": "Visit or Reach Us",
       "contact.heading": "Get in Touch",
       "contact.directions": "Get directions",
+
+      "reviews.eyebrow": "What our patients say",
+      "reviews.heading": "Reviews on Google",
+      "reviews.sub": "If we have cared for you, a review helps other patients on the island find us.",
+      "reviews.write": "Write a review",
+      "reviews.read": "Read reviews on Google",
       "contact.mapLabel": "Map showing the clinic location",
 
       "footer.rights": "All rights reserved.",
@@ -228,6 +234,12 @@ const RDC_I18N = (function () {
       "contact.eyebrow": "Visítenos o escríbanos",
       "contact.heading": "Cómo contactarnos",
       "contact.directions": "Cómo llegar",
+
+      "reviews.eyebrow": "Lo que dicen nuestros pacientes",
+      "reviews.heading": "Reseñas en Google",
+      "reviews.sub": "Si le hemos atendido, una reseña ayuda a que otros pacientes de la isla nos encuentren.",
+      "reviews.write": "Escribir una reseña",
+      "reviews.read": "Ver reseñas en Google",
       "contact.mapLabel": "Mapa con la ubicación de la clínica",
 
       "footer.rights": "Todos los derechos reservados.",

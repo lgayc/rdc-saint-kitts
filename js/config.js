@@ -99,6 +99,17 @@ const SITE_CONFIG = {
     // el mapa incrustado y el boton de "como llegar": si algun dia se
     // mudan, se cambia solo este punto y las dos cosas se mueven.
     map: { lat: 17.2950417, lng: -62.7397749 },
+
+    // Ficha de la clinica en Google.
+    google: {
+      // Lleva a la ficha, donde estan las resenas publicadas.
+      placeUrl: "https://www.google.com/maps?cid=2980805071733559535",
+
+      // Enlace corto del perfil de Google Business: abre el cuadro de
+      // escribir resena de una vez. Mientras este vacio se usa
+      // placeUrl, que deja el boton de resenar a un toque.
+      reviewUrl: "" // PLACEHOLDER - falta el enlace g.page/r/.../review
+    },
     hours: [
       { days: { en: "Monday - Friday", es: "Lunes a viernes" }, time: "8:00 AM - 5:00 PM" }, // PLACEHOLDER
       { days: { en: "Saturday", es: "Sábado" }, time: "9:00 AM - 1:00 PM" },        // PLACEHOLDER
