@@ -63,10 +63,16 @@ const RDC_I18N = (function () {
       "lang.switch": "Español",
       "lang.switchAria": "Ver este sitio en español",
 
+      "nav.about": "Who We Are",
+
+      "about.eyebrow": "Who We Are",
+      "about.pillar1": "Modern equipment",
+      "about.pillar2": "Qualified team",
+      "about.pillar3": "Results without the wait",
       "nav.modalities": "Modalities",
       "nav.studies": "Studies & Work",
       "nav.contact": "Contact",
-      "nav.staff": "Staff",
+      "nav.staff": "Admin",
       "nav.book": "Book Appointment",
       "nav.toggle": "Toggle menu",
 
@@ -142,10 +148,16 @@ const RDC_I18N = (function () {
       "lang.switch": "English",
       "lang.switchAria": "View this site in English",
 
+      "nav.about": "Quiénes somos",
+
+      "about.eyebrow": "Quiénes somos",
+      "about.pillar1": "Equipos modernos",
+      "about.pillar2": "Equipo cualificado",
+      "about.pillar3": "Resultados sin esperas",
       "nav.modalities": "Estudios",
       "nav.studies": "Novedades",
       "nav.contact": "Contacto",
-      "nav.staff": "Personal",
+      "nav.staff": "Admin",
       "nav.book": "Pedir cita",
       "nav.toggle": "Abrir el menú",
 

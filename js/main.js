@@ -216,6 +216,9 @@ function populateContent() {
       .join("");
   }
 
+  // --- Quienes somos ------------------------------------------
+  renderAbout(cfg.about);
+
   // --- Tarjetas de servicios ----------------------------------
   // Cada tarjeta es un <button> a proposito: se puede activar con
   // el teclado (Tab + Enter) igual que con el mouse, y los lectores
@@ -421,6 +424,71 @@ function setText(id, value) {
 function setHref(id, value) {
   const el = document.getElementById(id);
   if (el && value) el.href = value;
+}
+
+/**
+ * Dibuja la seccion "quienes somos".
+ *
+ * Todo el texto sale de SITE_CONFIG.about y pasa por pick(), asi que
+ * cambia de idioma con el resto del sitio. Si el bloque no existe en
+ * la configuracion, la seccion se esconde entera en vez de quedarse
+ * como un hueco con un titulo suelto.
+ */
+function renderAbout(about) {
+  const seccion = document.getElementById("about");
+  if (!seccion) return;
+
+  if (!about) {
+    seccion.hidden = true;
+    return;
+  }
+  seccion.hidden = false;
+
+  setText("aboutHeading", RDC_I18N.pick(about.heading));
+
+  // Parrafos. Se crean como <p> de uno en uno y con textContent, no
+  // con innerHTML: este texto lo escribe la clinica y algun dia
+  // podria venir de la base de datos.
+  const cuerpo = document.getElementById("aboutBody");
+  if (cuerpo) {
+    cuerpo.innerHTML = "";
+    (RDC_I18N.pick(about.body) || []).forEach((parrafo) => {
+      const p = document.createElement("p");
+      p.textContent = parrafo;
+      cuerpo.appendChild(p);
+    });
+  }
+
+  // Apoyos: la etiqueta viene del diccionario, la explicacion de la
+  // configuracion. Van emparejados por posicion.
+  const lista = document.getElementById("aboutPillars");
+  if (lista) {
+    const textos = RDC_I18N.pick(about.pillars) || [];
+    lista.innerHTML = "";
+    textos.forEach((texto, i) => {
+      const li = document.createElement("li");
+
+      const titulo = document.createElement("strong");
+      titulo.textContent = RDC_I18N.t(`about.pillar${i + 1}`);
+
+      const detalle = document.createElement("span");
+      detalle.textContent = texto;
+
+      li.append(titulo, detalle);
+      lista.appendChild(li);
+    });
+  }
+
+  const img = document.getElementById("aboutImage");
+  if (img) {
+    const src = safeUrl(about.image);
+    if (src) {
+      img.src = src;
+      img.alt = RDC_I18N.pick(about.heading) || "";
+    } else {
+      img.remove();
+    }
+  }
 }
 
 function fillSelect(id, options) {

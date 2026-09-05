@@ -20,6 +20,67 @@ const SITE_CONFIG = {
   tagline: { en: "Advanced Imaging. Compassionate Care.", es: "Imagenología avanzada. Trato humano." },
   subTagline: { en: "Serving St. Kitts & Nevis with modern diagnostic radiology.", es: "Radiología diagnóstica moderna para San Cristóbal y Nieves." },
 
+  // ---------------------------------------------------------
+  // 1b. QUIENES SOMOS
+  // ---------------------------------------------------------
+  // >>> ESTE TEXTO LO TIENE QUE ESCRIBIR LA CLINICA. <<<
+  //
+  // Lo que hay debajo es un armazon: dice cosas que son ciertas
+  // de cualquier centro de imagenologia, y por eso mismo no dice
+  // nada de ESTE. A proposito no invente nada que suene bien y no
+  // pueda comprobarse — ni años de experiencia, ni titulos, ni
+  // numero de pacientes, ni "los primeros en la isla". Un dato
+  // inventado en la seccion "quienes somos" de una clinica es una
+  // mentira con membrete, y encima es la que un paciente citaria
+  // luego.
+  //
+  // Lo que hace falta preguntarles, en concreto:
+  //   - desde cuando existe el centro
+  //   - quien lo dirige y con que titulacion
+  //   - que equipos tienen y de que marca/modelo
+  //   - en cuanto tiempo entregan resultados de verdad
+  //   - con que seguros o medicos derivantes trabajan
+  // ---------------------------------------------------------
+  about: {
+    heading: {
+      en: "Imaging you can trust, close to home.",
+      es: "Diagnóstico por imagen en el que confiar, cerca de casa."
+    },
+
+    // Dos parrafos. El primero dice QUE es el centro; el segundo,
+    // COMO trabaja. Ese orden es el que responde a la pregunta que
+    // el paciente trae encima: "¿me puedo fiar de este sitio?".
+    body: {
+      en: [
+        "Radiology Diagnostic Center is a diagnostic imaging centre serving St. Kitts & Nevis. We perform the studies your doctor orders — X-ray, ultrasound, CT, MRI, mammography and bone densitometry — and send the report back to them.", // PLACEHOLDER
+        "Our team walks you through what each study involves before it starts, so you know what to expect. If your study needs preparation, we tell you when you book, not when you arrive." // PLACEHOLDER
+      ],
+      es: [
+        "Radiology Diagnostic Center es un centro de imagenología diagnóstica en San Cristóbal y Nieves. Hacemos los estudios que le indica su médico —radiografía, ultrasonido, tomografía, resonancia, mamografía y densitometría— y le enviamos el informe a él.", // PLACEHOLDER
+        "Nuestro equipo le explica en qué consiste el estudio antes de empezar, para que sepa qué esperar. Y si su estudio necesita preparación, se lo decimos al pedir la cita, no al llegar." // PLACEHOLDER
+      ]
+    },
+
+    // Tres apoyos cortos. Las etiquetas estan en js/i18n.js; aqui
+    // va solo la linea que las explica.
+    pillars: {
+      en: [
+        "The studies we offer, on equipment maintained to manufacturer schedule.", // PLACEHOLDER - confirmar equipos
+        "Studies performed and read by qualified staff.",                          // PLACEHOLDER - nombres y titulacion
+        "Your report goes to your doctor as soon as it is ready."                  // PLACEHOLDER - plazo real
+      ],
+      es: [
+        "Los estudios que ofrecemos, en equipos con el mantenimiento al día.",     // PLACEHOLDER - confirmar equipos
+        "Estudios realizados e interpretados por personal cualificado.",           // PLACEHOLDER - nombres y titulacion
+        "Su informe llega a su médico en cuanto está listo."                       // PLACEHOLDER - plazo real
+      ]
+    },
+
+    // La foto. Sale del repositorio, no de Supabase: asi no gasta
+    // el egress del plan gratuito en cada visita.
+    image: "assets/banners/control-room.jpg" // PLACEHOLDER - foto real del centro
+  },
+
   logo: "assets/logo.png",
 
   // ---------------------------------------------------------
